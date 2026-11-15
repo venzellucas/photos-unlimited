@@ -1,0 +1,9 @@
+<resources>
+    <color name="primary">#326B54</color><color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#B5F1D1</color><color name="on_primary_container">#002114</color>
+    <color name="surface">#F6FBF5</color><color name="container">#EAF0E9</color>
+    <color name="container_high">#E2E9E1</color><color name="on_surface">#171D19</color>
+    <color name="on_surface_variant">#414943</color><color name="outline">#717973</color>
+    <color name="launcher_background">#B5F1D1</color>
+    <bool name="light_system_bars">true</bool>
+</resources>

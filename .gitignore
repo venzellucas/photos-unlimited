@@ -1,0 +1,14 @@
+.gradle/
+**/build/
+local.properties
+dist/*
+!dist/.gitkeep
+*.jks
+*.keystore
+__pycache__/
+*.p12
+*.pem
+*.key
+.env
+.env.*
+.DS_Store
