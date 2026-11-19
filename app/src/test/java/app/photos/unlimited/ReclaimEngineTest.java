@@ -84,13 +84,25 @@ public class ReclaimEngineTest {
     public void trash(String dedup) {
       assertEquals("dedup-old", dedup);
       trashed.add(dedup);
+      LibraryProtocol.Item o = library.get("old");
+      if (o != null && trashVisible)
+        library.put("old", copy(o, true));
       crash("trash");
     }
 
     public void delete(String dedup) {
       assertTrue("deleted without trashing first", trashed.contains(dedup));
       byHash.values().removeIf(k -> k.equals("old"));
+      library.remove("old");
       crash("delete");
+    }
+
+    boolean trashVisible = true;
+
+    LibraryProtocol.Item copy(LibraryProtocol.Item o, boolean trash) {
+      return new LibraryProtocol.Item(
+          o.key(), o.name(), o.type(), o.size(), o.charged(), o.taken(), trash, o.archived(),
+          o.origin(), o.extra());
     }
 
     public String upload(ReclaimEngine.Job job, File file, PhotosApi.Progress progress)
@@ -132,7 +144,7 @@ public class ReclaimEngineTest {
 
     public LibraryProtocol.Item lookup(String key) {
       calls.add("lookup");
-      return lookupReady ? library.get(key) : null;
+      return lookupReady || !key.startsWith("new") ? library.get(key) : null;
     }
 
     public void setCaption(String dedup, String caption) {
@@ -150,6 +162,8 @@ public class ReclaimEngineTest {
     public void restore(String dedup) {
       calls.add("restore");
       trashed.remove(dedup);
+      LibraryProtocol.Item o = library.get("old");
+      if (o != null) library.put("old", copy(o, false));
     }
   }
 
@@ -175,6 +189,7 @@ public class ReclaimEngineTest {
   File dir;
   ReclaimEngine engine;
   ReclaimEngine.Job job;
+  LibraryProtocol.Item original;
 
   @Before
   public void setUp() throws Exception {
@@ -183,7 +198,7 @@ public class ReclaimEngineTest {
     journal = new Journal();
     dir = Files.createTempDirectory("reclaim").toFile();
     engine = new ReclaimEngine(google, journal, (j, d) -> {}, dir, CLOCK);
-    LibraryProtocol.Item item =
+    original =
         new LibraryProtocol.Item(
             "old",
             "IMG 1.jpg",
@@ -196,8 +211,9 @@ public class ReclaimEngineTest {
             1,
             new LibraryProtocol.Extra(
                 "dedup-old", sha1(ORIGINAL), "Sunset", true, false, true, false, false));
-    assertNull(ReclaimEngine.ineligible(item));
-    job = ReclaimEngine.Job.of("me@example.com", item);
+    assertNull(ReclaimEngine.ineligible(original));
+    google.library.put("old", original);
+    job = ReclaimEngine.Job.of("me@example.com", original);
   }
 
   private void finish() throws IOException {
@@ -246,6 +262,7 @@ public class ReclaimEngineTest {
           }
         };
     google.byHash.put(google.hex(sha1(ORIGINAL)), "old");
+    google.library.put("old", original);
     engine = new ReclaimEngine(google, journal, (j, d) -> {}, dir, CLOCK);
     engine.run(job, Long.MAX_VALUE);
     assertEquals(ReclaimEngine.State.FAILED, job.state);
@@ -327,6 +344,7 @@ public class ReclaimEngineTest {
           }
         };
     google.byHash.put(google.hex(sha1(ORIGINAL)), "old");
+    google.library.put("old", original);
     engine = new ReclaimEngine(google, journal, (j, d) -> {}, dir, CLOCK);
     engine.advance(job);
     assertEquals(ReclaimEngine.State.DOWNLOADED, job.state);
@@ -402,6 +420,17 @@ public class ReclaimEngineTest {
     assertEquals(ReclaimEngine.State.QUEUED, job.state);
   }
 
+  /** Google's record of the original with other reported properties. */
+  LibraryProtocol.Item variant(long size, boolean reduced, boolean motion, byte[] sha1) {
+    LibraryProtocol.Extra x = original.extra();
+    return new LibraryProtocol.Item(
+        "old", original.name(), original.type(), size, original.charged(), original.taken(),
+        false, original.archived(), 1,
+        new LibraryProtocol.Extra(x.dedup(), sha1, x.caption(), x.favorite(), x.edited(),
+            true, false, motion,
+            reduced ? LibraryProtocol.Quality.REDUCED : LibraryProtocol.Quality.ORIGINAL));
+  }
+
   ReclaimEngine engineWithPhone(byte[] phoneFile, boolean reduced) throws Exception {
     google =
         new FakeGoogle() {
@@ -435,7 +464,9 @@ public class ReclaimEngineTest {
           }
         };
     google.byHash.put(google.hex(sha1(ORIGINAL)), "old");
+    google.library.put("old", original);
     job.reduced = reduced;
+    if (reduced) google.library.put("old", variant(ORIGINAL.length, true, false, sha1(ORIGINAL)));
     return new ReclaimEngine(google, journal, (j, d) -> {}, dir, CLOCK);
   }
 
@@ -574,7 +605,8 @@ public class ReclaimEngineTest {
   @Test
   public void livePhotoWithSeparateVideoIsRefusedBeforeAnyChange() throws Exception {
     engine = engineWithPhone(ORIGINAL, false);
-    job.motion = true; // Google shows motion, but ORIGINAL carries no video of its own
+    // Google shows motion, but ORIGINAL carries no video of its own
+    google.library.put("old", variant(ORIGINAL.length, false, true, sha1(ORIGINAL)));
     engine.run(job, Long.MAX_VALUE);
     assertEquals(ReclaimEngine.State.FAILED, job.state);
     assertFalse(google.calls.contains("trash"));
@@ -594,6 +626,7 @@ public class ReclaimEngineTest {
             new FakeGoogle() {
               {
                 byHash.put(hex(sha1(motion)), "old");
+                library.put("old", variant(motion.length, false, true, job.sha1));
               }
 
               @Override
@@ -614,6 +647,49 @@ public class ReclaimEngineTest {
             CLOCK);
     engine.run(job, Long.MAX_VALUE);
     assertEquals(ReclaimEngine.State.DONE, job.state);
+  }
+
+  @Test
+  public void permanentDeleteWaitsForTheTrashToShowAndOtherwiseRestores() throws Exception {
+    google.trashVisible = false; // Google never shows the item as trashed
+    for (int i = 0; i < 20 && !job.state.terminal(); i++) {
+      try {
+        engine.run(job, Long.MAX_VALUE);
+      } catch (ReclaimEngine.Later e) {
+      }
+    }
+    assertEquals(ReclaimEngine.State.FAILED, job.state);
+    assertFalse(google.calls.contains("delete"));
+    assertTrue(google.calls.contains("restore"));
+  }
+
+  @Test
+  public void itemChangedSinceSelectionIsNotTouched() throws Exception {
+    google.library.put("old", google.copy(original, true)); // user trashed it meanwhile
+    engine.run(job, Long.MAX_VALUE);
+    assertEquals(ReclaimEngine.State.FAILED, job.state);
+    assertFalse(google.calls.contains("trash"));
+  }
+
+  @Test
+  public void mismatchedReplacementKeepsTheCopy() throws Exception {
+    google =
+        new FakeGoogle() {
+          @Override
+          public LibraryProtocol.Item lookup(String key) {
+            LibraryProtocol.Item i = super.lookup(key);
+            if (i != null && key.startsWith("new"))
+              return new LibraryProtocol.Item(key, i.name(), 1, i.size() + 1, 0L, 0, false,
+                  false, 1, i.extra());
+            return i;
+          }
+        };
+    google.byHash.put(google.hex(sha1(ORIGINAL)), "old");
+    google.library.put("old", original);
+    engine = new ReclaimEngine(google, journal, (j, d) -> {}, dir, CLOCK);
+    engine.run(job, Long.MAX_VALUE);
+    assertEquals(ReclaimEngine.State.ATTENTION, job.state);
+    assertTrue(new File(job.file).exists());
   }
 
   @Test

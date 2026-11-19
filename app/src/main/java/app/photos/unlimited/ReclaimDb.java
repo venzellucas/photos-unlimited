@@ -134,6 +134,15 @@ public final class ReclaimDb extends SQLiteOpenHelper implements ReclaimEngine.J
     return n;
   }
 
+  /** Items in any account whose original was removed but whose replacement is unconfirmed. */
+  public int unsafeAll() {
+    int n = 0;
+    try (Cursor c = getReadableDatabase().rawQuery("SELECT DISTINCT account FROM jobs", null)) {
+      while (c.moveToNext()) n += unsafe(c.getString(0));
+    }
+    return n;
+  }
+
   /** Cancels jobs that have not touched Google yet. */
   public void cancelQueued(String account) {
     getWritableDatabase()

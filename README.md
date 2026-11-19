@@ -4,11 +4,11 @@ A small, independent Android uploader for a Google Photos library. Choose folder
 back up original photos and videos, and keep using the official Google Photos app
 to browse and edit your library.
 
-**MVP: v0.2.1 · Android 13+ · MIT license**
+**v1.0.0 · Android 13+ · MIT license**
 
 [Website](https://venzellucas.github.io/photos-unlimited/) ·
-[Download APK](https://github.com/venzellucas/photos-unlimited/releases/download/v0.2.1/Photos-Unlimited-0.2.1.apk) ·
-[Release notes](https://github.com/venzellucas/photos-unlimited/releases/tag/v0.2.1)
+[Download APK](https://github.com/venzellucas/photos-unlimited/releases/download/v1.0.0/Photos-Unlimited-1.0.0.apk) ·
+[Release notes](https://github.com/venzellucas/photos-unlimited/releases/tag/v1.0.0)
 
 ## What it does
 
@@ -56,7 +56,7 @@ from account-wide usage. Shared items, alternate versions, omissions, and concur
 changes can affect coverage. Live accounting and profile authorization are not fully
 validated.
 
-## Free up storage (preview on `main`, not in the v0.2.1 APK)
+## Free up storage
 
 Items that already use Google storage can be replaced by a copy uploaded through this
 app: tap an item in **Storage**, or select several (**Select all eligible** works across
@@ -80,8 +80,15 @@ Safety properties:
 - The copy lives in `Pictures/Photos Unlimited/Pending upload/`, not private app
   storage, so uninstalling or clearing the app cannot lose it. File names carry the
   SHA-1 and a short account hash; a new install proves each leftover by its hash and
-  finishes it (never into a different account). A notification warns not to uninstall
-  while anything is only on the phone, and Android's uninstall dialog offers to keep data.
+  finishes it (never into a different account). Only files this app wrote are finished
+  automatically; files left by an earlier installation are listed for your approval first,
+  and files written by other apps are ignored. A staged copy is removed only once Google
+  shows a live, untrashed item with the same checksum. A notification warns not to
+  uninstall while anything is only on the phone, account changes wait until it is finished,
+  and Android's uninstall dialog offers to keep data.
+- Right before deleting, the item is looked up again and must still be eligible, the move to
+  trash must be visible in Google's record, and only one item at a time is between deletion
+  and a confirmed replacement.
 - **Turn off Google Photos backup first.** While its backup is on, Google Photos deletes
   a phone's copy of anything removed from the cloud, on every device of the account
   ([Google Help](https://support.google.com/photos/answer/6128858)). Free up asks for
@@ -99,7 +106,7 @@ still delete their copies. Tested live on a test account (photos, videos, Storag
 items, a Motion Photo, a stopped-mid-run video recovered after the app's data was
 cleared); not yet tested on a large real library.
 
-### Google Photos backup reminder (preview on `main`)
+### Google Photos backup reminder
 
 Two backup apps on one phone race, and Google Photos' copies use storage. Android does
 not let apps read Google Photos' settings, so while automatic backup is on the app asks
@@ -143,8 +150,9 @@ using `blackboxprotobuf` and the pinned GPMC checkout listed below.
 
 ## Validation
 
-The `main` branch passes 54 JVM tests and 20 Android instrumentation tests with lint
-clean; Free up storage was additionally exercised live as described above. The 0.2.1 APK
+Version 1.0.0 passed 57 JVM tests, 20 Android instrumentation tests, debug/release lint
+with no errors, an independent security review (findings fixed before release), live Free
+up runs as described above, and an in-place signed upgrade from 0.2.1. The 0.2.1 APK
 passed 23 JVM tests, 19 Android instrumentation tests, debug/release
 lint with no errors, and an in-place signed upgrade from 0.2.0. Tests cover protocol
 handling, confirmed uploads, interruption, persisted queues, account separation,

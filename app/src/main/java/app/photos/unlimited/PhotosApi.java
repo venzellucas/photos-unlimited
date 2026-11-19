@@ -329,6 +329,13 @@ public final class PhotosApi {
     return text.startsWith("https://") ? text : null;
   }
 
+  /** Hosts Google's download response points at (observed 2026-11-19); the token goes only here. */
+  static boolean firstDownloadHost(String host) {
+    return host != null
+        && (host.matches("lh[0-9]{1,2}\\.googleusercontent\\.com")
+            || host.equals("video-downloads.googleusercontent.com"));
+  }
+
   static boolean downloadHost(String host) {
     return host != null
         && (host.equals("googleusercontent.com") || host.endsWith(".googleusercontent.com"));
@@ -341,7 +348,7 @@ public final class PhotosApi {
   public byte[] download(String url, File target, long limit, Progress progress)
       throws IOException {
     URL parsed = new URL(url);
-    if (!parsed.getProtocol().equals("https") || !downloadHost(parsed.getHost()))
+    if (!parsed.getProtocol().equals("https") || !firstDownloadHost(parsed.getHost()))
       throw new ApiException(
           "Download address is not a Google media host: " + parsed.getHost(), false, true);
     MessageDigest digest = sha1();
@@ -600,7 +607,13 @@ public final class PhotosApi {
           if (code >= 300 && code < 400) {
             String location = connection.getHeaderField("Location");
             if (location == null) throw new IOException("Download redirect without location");
-            current = new URL(url, location).toString();
+            URL next = new URL(url, location);
+            if (!next.getHost().equals(url.getHost())) {
+              // The account token never follows a redirect to another host.
+              headers = new java.util.HashMap<>(headers);
+              headers.remove("Authorization");
+            }
+            current = next.toString();
             continue;
           }
           if (code < 200 || code >= 300)

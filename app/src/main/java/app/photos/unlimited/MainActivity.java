@@ -47,7 +47,15 @@ public final class MainActivity extends ThemedActivity {
       storageStatus,
       storagePage,
       reclaimStatus;
-  private MaterialButton primary, folders, scanButton, previous, next, reclaimButton, cleanupButton;
+  private MaterialButton primary,
+      folders,
+      scanButton,
+      previous,
+      next,
+      reclaimButton,
+      cleanupButton,
+      reviewButton;
+  private List<ReclaimRecovery.Orphan> pendingReview = List.of();
   private LinearProgressIndicator progress, scanProgress;
   private int screen = 1, generation, quotaFilter = 1, mediaFilter, storageOffset;
   private boolean loading, photosPrompted, awaitingPhotosReturn;
@@ -315,7 +323,7 @@ public final class MainActivity extends ThemedActivity {
     progress = scanProgress = null;
     historyRows = storageRows = reclaimRows = reclaimCard = selectionBar = null;
     selectionInfo = null;
-    selectButton = selectAllButton = freeSelectedButton = cleanupButton = null;
+    selectButton = selectAllButton = freeSelectedButton = cleanupButton = reviewButton = null;
     reclaimStatus = null;
     reclaimButton = null;
     renderedReclaim = "";
@@ -439,6 +447,11 @@ public final class MainActivity extends ThemedActivity {
     ui.space(cleanupButton, 8, 0);
     reclaimCard.addView(cleanupButton);
     cleanupButton.setOnClickListener(v -> removeRecoveredCopies());
+    reviewButton = ui.button("Review files from before", 0, false);
+    ui.space(reviewButton, 8, 0);
+    reclaimCard.addView(reviewButton);
+    reviewButton.setOnClickListener(v -> reviewLeftovers());
+    reviewButton.setVisibility(View.GONE);
     reclaimCard.setVisibility(View.GONE);
     LinearLayout filters = ui.card(page, false);
     picker(
@@ -660,6 +673,7 @@ public final class MainActivity extends ThemedActivity {
           List<LibraryProtocol.Item> items = List.of();
           List<ReclaimEngine.Job> jobList = List.of();
           int[] safety = new int[2];
+          List<ReclaimRecovery.Orphan> reviewList = new ArrayList<>();
           try {
             if (view == 3) {
               try (InventoryDb db = new InventoryDb(this)) {
@@ -672,8 +686,13 @@ public final class MainActivity extends ThemedActivity {
               }
               if (!ReclaimService.busy()) {
                 Set<String> cleanup = settings.recoveryCleanup();
-                for (ReclaimRecovery.Orphan o : ReclaimRecovery.orphans(this))
-                  if (!cleanup.contains(o.uri().toString())) safety[1]++;
+                Set<String> approved = settings.recoveryApproved();
+                for (ReclaimRecovery.Orphan o : ReclaimRecovery.orphans(this)) {
+                  String uri = o.uri().toString();
+                  if (cleanup.contains(uri)) continue;
+                  if (o.owned() || approved.contains(uri)) safety[1]++;
+                  else if (!o.partial()) reviewList.add(o);
+                }
               }
             } else
               try (BackupDb db = new BackupDb(this)) {
@@ -685,6 +704,7 @@ public final class MainActivity extends ThemedActivity {
             InventoryDb.Summary result = summary;
             List<LibraryProtocol.Item> rows = items;
             List<ReclaimEngine.Job> jobs = jobList;
+            List<ReclaimRecovery.Orphan> review = reviewList;
             runOnUiThread(
                 () -> {
                   loading = false;
@@ -701,7 +721,7 @@ public final class MainActivity extends ThemedActivity {
                   else if (view == 2) updateActivity(recent);
                   else if (view == 3) {
                     updateStorage(result, rows);
-                    updateReclaim(jobs, safety[0], safety[1]);
+                    updateReclaim(jobs, safety[0], safety[1], review);
                   }
                 });
           } catch (Exception e) {
@@ -1046,12 +1066,25 @@ public final class MainActivity extends ThemedActivity {
     };
   }
 
-  private void updateReclaim(List<ReclaimEngine.Job> jobs, int onlyOnPhone, int leftovers) {
+  private void updateReclaim(
+      List<ReclaimEngine.Job> jobs,
+      int onlyOnPhone,
+      int leftovers,
+      List<ReclaimRecovery.Orphan> review) {
     if (reclaimCard == null) return;
     boolean running = ReclaimService.busy();
     int cleanup = settings.recoveryCleanup().size();
+    int otherAccount = settings.recoveryOtherAccount();
+    pendingReview = review;
     reclaimCard.setVisibility(
-        jobs.isEmpty() && !running && leftovers == 0 && cleanup == 0 ? View.GONE : View.VISIBLE);
+        jobs.isEmpty()
+                && !running
+                && leftovers == 0
+                && cleanup == 0
+                && review.isEmpty()
+                && otherAccount == 0
+            ? View.GONE
+            : View.VISIBLE);
     long freed = 0;
     int active = 0;
     for (ReclaimEngine.Job job : jobs) {
@@ -1079,6 +1112,18 @@ public final class MainActivity extends ThemedActivity {
               + " item(s) from before (for example a previous install) are waiting in"
               + " Pictures/Photos Unlimited/Pending upload. Finish now uploads any that Google"
               + " Photos is missing.";
+    if (!review.isEmpty() && !running)
+      text +=
+          "\n\n"
+              + review.size()
+              + " file(s) in Pictures/Photos Unlimited/Pending upload weren’t saved by this"
+              + " installation. Review them before anything is uploaded.";
+    if (otherAccount > 0)
+      text +=
+          "\n\n"
+              + otherAccount
+              + " waiting file(s) belong to a different Google account. Connect that account to"
+              + " finish them.";
     if (cleanup > 0)
       text +=
           "\n\n"
@@ -1090,6 +1135,7 @@ public final class MainActivity extends ThemedActivity {
         running ? "Pause" : leftovers > 0 && active == 0 ? "Finish now" : "Resume");
     reclaimButton.setVisibility(running || active > 0 || leftovers > 0 ? View.VISIBLE : View.GONE);
     cleanupButton.setVisibility(cleanup > 0 && !running ? View.VISIBLE : View.GONE);
+    reviewButton.setVisibility(!review.isEmpty() && !running ? View.VISIBLE : View.GONE);
     StringBuilder fingerprint = new StringBuilder();
     for (ReclaimEngine.Job job : jobs)
       fingerprint.append(job.key).append(job.state).append(job.message).append('|');
@@ -1324,6 +1370,41 @@ public final class MainActivity extends ThemedActivity {
     refresh();
   }
 
+  /**
+   * Files without an owner are what an earlier installation leaves behind, but any app could have
+   * written them. Upload them only after the user saw exactly which files they are.
+   */
+  private void reviewLeftovers() {
+    List<ReclaimRecovery.Orphan> review = pendingReview;
+    if (review.isEmpty()) return;
+    StringBuilder list = new StringBuilder();
+    for (ReclaimRecovery.Orphan o : review.subList(0, Math.min(30, review.size())))
+      list.append("• ")
+          .append(ReclaimEngine.stagedName(o.name()))
+          .append(" (")
+          .append(bytes(o.size()))
+          .append(")\n");
+    if (review.size() > 30) list.append("…and ").append(review.size() - 30).append(" more\n");
+    new MaterialAlertDialogBuilder(this)
+        .setTitle("Upload these files to Google Photos?")
+        .setMessage(
+            "These files are in Pictures/Photos Unlimited/Pending upload but weren’t saved by this"
+                + " installation, usually because the app was reinstalled during Free up. Upload"
+                + " them only if you recognize them; you can check them in your gallery first."
+                + " Each file is checked against its checksum before uploading.\n\n"
+                + list)
+        .setPositiveButton(
+            "Upload",
+            (d, w) -> {
+              Set<String> approved = settings.recoveryApproved();
+              for (ReclaimRecovery.Orphan o : review) approved.add(o.uri().toString());
+              settings.recoveryApproved(approved);
+              startReclaim();
+            })
+        .setNegativeButton("Not now", null)
+        .show();
+  }
+
   /** Copies written by an earlier install need the user's consent before Android deletes them. */
   private void removeRecoveredCopies() {
     List<Uri> uris = new ArrayList<>();
@@ -1425,7 +1506,29 @@ public final class MainActivity extends ThemedActivity {
       message("Pause backup, the storage scan, and Free up storage before changing accounts.");
       return;
     }
+    if (unfinishedReclaim()) return;
     startActivity(new Intent(this, SignInActivity.class));
+  }
+
+  /**
+   * While an original exists only on this phone, its account must stay connected so the upload
+   * can finish. Returns true (and explains) when account changes must wait.
+   */
+  private boolean unfinishedReclaim() {
+    int unsafe;
+    try (ReclaimDb db = new ReclaimDb(this)) {
+      unsafe = db.unsafeAll();
+    }
+    if (unsafe == 0) return false;
+    new MaterialAlertDialogBuilder(this)
+        .setTitle("Finish Free up first")
+        .setMessage(
+            unsafe
+                + " item(s) were removed from Google Photos and are only on this phone until they’re"
+                + " uploaded again. Open Storage and tap Resume, then change the account.")
+        .setPositiveButton("OK", null)
+        .show();
+    return true;
   }
 
   private void manageAccount() {
@@ -1506,6 +1609,7 @@ public final class MainActivity extends ThemedActivity {
   }
 
   private void disconnect() {
+    if (unfinishedReclaim()) return;
     new MaterialAlertDialogBuilder(this)
         .setTitle("Disconnect account?")
         .setMessage(
@@ -1644,14 +1748,20 @@ public final class MainActivity extends ThemedActivity {
             try (var input = getAssets().open("XOB0T-LICENSE.txt")) {
               license = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             }
+            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
             String text =
-                "Photos Unlimited 0.2.1\n\n"
+                "Photos Unlimited "
+                    + version
+                    + "\n\n"
                     + "Independent Android uploader. Not affiliated with Google.\n\n"
                     + "Turn off backup in the official Google Photos app when this app handles"
                     + " uploads. Original files stay on your phone. Upload acceptance is not proof"
-                    + " of storage exemption. Existing library items keep their accounting.\n\n"
-                    + "Storage scans are read-only previews of Google Photos metadata; Drive and"
-                    + " Gmail are not included. Missing accounting is shown as unknown.\n\n"
+                    + " of storage exemption. Existing library items keep their accounting unless"
+                    + " you replace them with Free up storage.\n\n"
+                    + "Storage scans read Google Photos metadata; Drive and Gmail are not included."
+                    + " Missing accounting is shown as unknown. Free up storage deletes the items"
+                    + " you choose from Google Photos only after a byte-identical copy is saved"
+                    + " on this phone, then uploads that copy again.\n\n"
                     + "Protocol adapted from xob0t’s GPMC and gotohp.\n\n"
                     + license;
             runOnUiThread(

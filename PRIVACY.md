@@ -22,6 +22,7 @@ photo-upload server and includes no advertising or analytics SDK.
   a short one-way hash of the account (not the address) and are removed once Google
   confirms the replacement. A private journal records each step. If another app removes
   a phone photo involved in this, the app writes the verified copy back to its folder.
+  After a reinstall, leftover copies are uploaded only after you approve the listed files.
 - **Profile photo:** an optional profile lookup requests read-only profile and email
   scopes separately from upload authorization. The app checks that the verified
   email matches the connected account, downloads the image from an allowed Google

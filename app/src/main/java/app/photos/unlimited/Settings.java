@@ -123,6 +123,24 @@ public final class Settings {
     prefs.edit().putStringSet("recoveryCleanup", new HashSet<>(uris)).apply();
   }
 
+  /** Ownerless staged files (from an earlier install) the user approved for upload. */
+  public Set<String> recoveryApproved() {
+    return new HashSet<>(prefs.getStringSet("recoveryApproved", Set.of()));
+  }
+
+  public void recoveryApproved(Set<String> uris) {
+    prefs.edit().putStringSet("recoveryApproved", new HashSet<>(uris)).apply();
+  }
+
+  /** Staged files tagged for a different Google account than the connected one. */
+  public int recoveryOtherAccount() {
+    return prefs.getInt("recoveryOther", 0);
+  }
+
+  public void recoveryOtherAccount(int count) {
+    prefs.edit().putInt("recoveryOther", count).apply();
+  }
+
   public long lastRun() {
     return prefs.getLong("lastRun", 0);
   }

@@ -158,14 +158,16 @@ public final class MediaScanner {
   }
 
   /** Whether a media row still exists (it disappears when another app deletes the file). */
-  public boolean exists(String address) {
+  public boolean exists(String address) throws IOException {
     try (Cursor c =
         context
             .getContentResolver()
             .query(Uri.parse(address), new String[] {MediaStore.MediaColumns._ID}, null, null)) {
-      return c != null && c.moveToFirst();
+      if (c == null) throw new IOException("Android's media library is unavailable.");
+      return c.moveToFirst();
     } catch (RuntimeException e) {
-      return false;
+      // Unknown is not "deleted": a later check decides, so no duplicate gets restored.
+      throw new IOException("Couldn’t check the phone copy.");
     }
   }
 

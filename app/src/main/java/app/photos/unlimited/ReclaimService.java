@@ -106,10 +106,13 @@ public final class ReclaimService extends Service {
       if (!pendingConsent.contains(o.uri().toString())) orphans.add(o);
     if (orphans.isEmpty()) return;
     say("Finishing " + orphans.size() + " item(s) left from before…");
-    ReclaimRecovery.Result r = ReclaimRecovery.finish(this, api, account, orphans, stop);
-    java.util.Set<String> cleanup = new Settings(this).recoveryCleanup();
+    Settings settings = new Settings(this);
+    ReclaimRecovery.Result r =
+        ReclaimRecovery.finish(this, api, account, orphans, settings.recoveryApproved(), stop);
+    java.util.Set<String> cleanup = settings.recoveryCleanup();
     for (android.net.Uri uri : r.consent()) cleanup.add(uri.toString());
-    new Settings(this).recoveryCleanup(cleanup);
+    settings.recoveryCleanup(cleanup);
+    settings.recoveryOtherAccount(r.otherAccount());
   }
 
   /**
@@ -120,7 +123,7 @@ public final class ReclaimService extends Service {
     NotificationManager nm = context.getSystemService(NotificationManager.class);
     int unsafe;
     try (ReclaimDb db = new ReclaimDb(context)) {
-      unsafe = account.isEmpty() ? 0 : db.unsafe(account);
+      unsafe = db.unsafeAll(); // every account: switching accounts must not hide this
     }
     if (unsafe == 0) {
       nm.cancel(7403);
@@ -173,7 +176,10 @@ public final class ReclaimService extends Service {
     long deadline = System.currentTimeMillis() + 25 * 60 * 1000L;
     try (ReclaimDb db = new ReclaimDb(this)) {
       if (account.isEmpty()) return;
-      PhotosApi api = new PhotosApi(store.load(), stop);
+      String credential = store.load();
+      // Never act for one account with another account's credential.
+      if (!PhotosApi.email(credential).equalsIgnoreCase(account)) return;
+      PhotosApi api = new PhotosApi(credential, stop);
       long[] lastNotice = {0};
       ReclaimEngine engine =
           new ReclaimEngine(
@@ -203,8 +209,13 @@ public final class ReclaimService extends Service {
         List<ReclaimEngine.Job> pending = db.pending(account);
         if (pending.isEmpty()) break;
         boolean progressed = false, waiting = false;
+        // At most one item may be between "original removed" and "replacement confirmed": a
+        // charged replacement must stop the run before any other original is touched.
+        boolean inFlight = false;
+        for (ReclaimEngine.Job j : pending) if (j.state.remoteChanged()) inFlight = true;
         for (ReclaimEngine.Job job : pending) {
           PhotosApi.checkStopped(stop);
+          if (inFlight && !job.state.remoteChanged()) continue;
           if (!account.equals(store.email())) throw new InterruptedIOException();
           ReclaimEngine.State before = job.state;
           try {

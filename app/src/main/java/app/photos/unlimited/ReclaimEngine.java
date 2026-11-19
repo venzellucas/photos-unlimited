@@ -146,6 +146,15 @@ public final class ReclaimEngine {
   /** Deleting is refused after this many checks that still find the original. */
   static final int MAX_DELETE_CHECKS = 12;
 
+  /** Checks that the trashed original shows as trashed before permanent deletion. */
+  static final int MAX_TRASH_CHECKS = 8;
+
+  /** Waiting for the replacement's storage report gives up (keeping the copy) after this. */
+  static final int MAX_VERIFY_CHECKS = 120;
+
+  /** Free space kept on the phone beyond the copy itself. */
+  static final long SPACE_MARGIN = 64L << 20;
+
   public interface Events {
     void step(Job job, String detail);
 
@@ -253,6 +262,22 @@ public final class ReclaimEngine {
           undo(job);
           return;
         }
+        // Read back before the irreversible step: the item we mean must now be in the trash.
+        LibraryProtocol.Item trashed = remote.lookup(job.key);
+        if (trashed == null
+            || !trashed.trash()
+            || !MessageDigest.isEqual(trashed.extra().sha1(), job.sha1)) {
+          if (job.attempts + 1 >= MAX_TRASH_CHECKS) {
+            undo(job);
+            if (job.state == State.FAILED)
+              save(job, State.FAILED, "Google didn’t confirm the move to trash; the original was"
+                  + " restored and nothing was deleted.");
+            return;
+          }
+          job.attempts++;
+          journal.save(job);
+          throw new Later("Waiting for Google to confirm the original is in the trash.");
+        }
         save(job, State.DELETING, "Deleting the original permanently");
         remote.delete(job.dedup);
         save(job, State.DELETED, "Original deleted; uploading the saved copy");
@@ -286,7 +311,32 @@ public final class ReclaimEngine {
       fail(job, "Another library item has identical bytes; deleting one could remove both.");
       return;
     }
+    // Jobs can wait in the queue: decide again on Google's current record of the item.
+    LibraryProtocol.Item fresh = remote.lookup(job.key);
+    if (fresh == null) {
+      fail(job, "Google no longer reports this item. Refresh the storage scan.");
+      return;
+    }
+    String why = ineligible(fresh);
+    if (why != null) {
+      fail(job, "Not replaced: " + why);
+      return;
+    }
+    if (!MessageDigest.isEqual(fresh.extra().sha1(), job.sha1)) {
+      fail(job, "The item changed since it was selected. Nothing was changed.");
+      return;
+    }
+    job.dedup = fresh.extra().dedup();
+    job.caption = fresh.extra().caption();
+    job.favorite = fresh.extra().favorite();
+    job.archived = fresh.archived();
+    job.motion = fresh.extra().motion();
+    job.reduced = fresh.extra().quality() == LibraryProtocol.Quality.REDUCED;
     if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("No space for the local copy");
+    if (dir.getUsableSpace() < job.size + SPACE_MARGIN) {
+      fail(job, "Not enough free space on this phone for a temporary copy. Nothing was changed.");
+      return;
+    }
     File part = new File(dir, PARTIAL + fileName(job));
     File done = new File(dir, fileName(job));
     // The phone's own copy saves a download, and for Storage saver items it is the only original.
@@ -327,6 +377,7 @@ public final class ReclaimEngine {
       return;
     }
     List<PhotosApi.Link> links = remote.downloadLinks(job.key);
+    if (links.size() > 6) links = links.subList(0, 6);
     int tried = 0;
     for (PhotosApi.Link link : links) {
       tried++;
@@ -410,9 +461,22 @@ public final class ReclaimEngine {
     events.step(job, "Checking the replacement’s storage use");
     LibraryProtocol.Item item = remote.lookup(job.newKey);
     if (item == null || item.charged() == null) {
+      if (job.attempts + 1 >= MAX_VERIFY_CHECKS) {
+        stop(job, "Google hasn’t reported the replacement. The verified copy is kept in"
+            + " Pictures/Photos Unlimited/Pending upload.");
+        return;
+      }
       job.attempts++;
       journal.save(job);
       throw new Later("Waiting for Google to report the replacement’s storage use.");
+    }
+    // The replacement must be exactly our bytes and live before the copy may go.
+    if (item.trash()
+        || !MessageDigest.isEqual(item.extra().sha1(), job.sha1)
+        || (item.size() != null && item.size() != job.size)) {
+      stop(job, "Google’s record of the replacement doesn’t match the saved copy, which is kept"
+          + " in Pictures/Photos Unlimited/Pending upload.");
+      return;
     }
     job.newCharged = item.charged();
     String dedup = item.extra().dedup().isEmpty() ? job.dedup : item.extra().dedup();
@@ -584,7 +648,9 @@ public final class ReclaimEngine {
    */
   static String fileName(Job job) {
     String safe = job.name.replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]", "_");
-    if (safe.length() > 120) safe = safe.substring(safe.length() - 120);
+    // File names are limited to 255 bytes; keep the end (with the extension) within 150.
+    while (safe.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 150)
+      safe = safe.substring(safe.offsetByCodePoints(0, 1));
     // Shared media folders accept files by extension: make sure there is a media one.
     String lower = safe.toLowerCase(java.util.Locale.ROOT);
     boolean video = job.type == 2;

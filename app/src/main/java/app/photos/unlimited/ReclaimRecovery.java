@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,15 +19,39 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Finishes staged copies that no journal entry is responsible for, which happens after the app
  * was uninstalled (or its data cleared) while an item was between deletion and re-upload.
  *
- * <p>A staged file is trusted only when its bytes hash to the SHA-1 in its own name. If Google
- * Photos lacks that content it is uploaded; once Google has it, the staged copy is removed. Files
- * written by an earlier install belong to that install, so Android asks the user before they can
- * be deleted; those are returned for a consent request instead.
+ * <p>Trust: a file name's hash proves integrity, not origin, and any app can write into a shared
+ * folder. So only files this app wrote are finished automatically. Files without an owner (what
+ * an uninstalled earlier install leaves behind) are uploaded only after the user approved those
+ * exact files. Files owned by any other app are ignored.
+ *
+ * <p>A staged copy is removed only once Google's library shows a live (not trashed) item with the
+ * same SHA-1 and size: Google keeps reporting a deleted or trashed original for a while.
  */
 public final class ReclaimRecovery {
-  public record Orphan(Uri uri, String name, long size, long taken, boolean partial, boolean owned) {}
+  public enum Origin {
+    OURS,
+    UNOWNED,
+    FOREIGN
+  }
 
-  public record Result(int uploaded, int removed, int otherAccount, int unverified, List<Uri> consent) {}
+  public record Orphan(
+      Uri uri, String name, long size, long taken, boolean partial, Origin origin, boolean video) {
+    public boolean owned() {
+      return origin == Origin.OURS;
+    }
+  }
+
+  public record Result(
+      int uploaded,
+      int removed,
+      int otherAccount,
+      int unverified,
+      int waiting,
+      int failed,
+      List<Uri> consent) {}
+
+  /** Same per-file limits as backup. */
+  static final long PHOTO_LIMIT = 200L * 1024 * 1024, VIDEO_LIMIT = 10L * 1024 * 1024 * 1024;
 
   private ReclaimRecovery() {}
 
@@ -56,7 +81,7 @@ public final class ReclaimRecovery {
     }
   }
 
-  /** Staged files not referenced by any journal entry. Needs media read access for old files. */
+  /** Staged files not referenced by any journal entry, excluding other apps' files. */
   public static List<Orphan> orphans(Context context) {
     Set<String> referenced = new HashSet<>();
     try (ReclaimDb db = new ReclaimDb(context)) {
@@ -87,6 +112,12 @@ public final class ReclaimRecovery {
         while (c.moveToNext()) {
           String name = c.getString(1);
           if (name == null || referenced.contains(name)) continue;
+          String owner = c.getString(4);
+          Origin origin =
+              owner == null
+                  ? Origin.UNOWNED
+                  : context.getPackageName().equals(owner) ? Origin.OURS : Origin.FOREIGN;
+          if (origin == Origin.FOREIGN) continue; // planted by another app: never ours to act on
           result.add(
               new Orphan(
                   ContentUris.withAppendedId(base, c.getLong(0)),
@@ -94,7 +125,8 @@ public final class ReclaimRecovery {
                   c.getLong(2),
                   c.isNull(3) ? 0 : c.getLong(3),
                   name.startsWith(ReclaimEngine.PARTIAL),
-                  context.getPackageName().equals(c.getString(4))));
+                  origin,
+                  video));
         }
       } catch (RuntimeException e) {
         // Without media access, files from an earlier install are simply not visible.
@@ -103,64 +135,97 @@ public final class ReclaimRecovery {
     return result;
   }
 
+  /**
+   * Finishes orphans: uploads verified copies Google lacks, then removes copies Google provably
+   * holds. Unowned files are touched only if listed in {@code approved}.
+   */
   public static Result finish(
-      Context context, PhotosApi api, String account, List<Orphan> orphans, AtomicBoolean stop)
+      Context context,
+      PhotosApi api,
+      String account,
+      List<Orphan> orphans,
+      Set<String> approved,
+      AtomicBoolean stop)
       throws IOException {
     MediaScanner scanner = new MediaScanner(context);
+    ReclaimRemote library = new ReclaimRemote(context, api, account, stop);
     String tag = ReclaimEngine.accountTag(account);
-    int uploaded = 0, removed = 0, other = 0, unverified = 0;
+    int uploaded = 0, removed = 0, other = 0, unverified = 0, waiting = 0, failed = 0;
     List<Uri> consent = new ArrayList<>();
     for (Orphan orphan : orphans) {
       PhotosApi.checkStopped(stop);
-      if (orphan.partial()) {
-        // An interrupted copy: never complete, safe to drop.
+      if (!orphan.owned() && !approved.contains(orphan.uri().toString())) continue;
+      try {
+        if (orphan.partial()) {
+          // An interrupted copy: never complete, safe to drop.
+          if (remove(context, orphan)) removed++;
+          else consent.add(orphan.uri());
+          continue;
+        }
+        String expected = ReclaimEngine.stagedHash(orphan.name());
+        if (expected == null) continue; // Not a staged copy; leave it alone.
+        if (!tag.equals(ReclaimEngine.stagedAccount(orphan.name()))) {
+          other++;
+          continue;
+        }
+        long limit = orphan.video() ? VIDEO_LIMIT : PHOTO_LIMIT;
+        if (orphan.size() <= 0 || orphan.size() > limit) {
+          unverified++;
+          continue;
+        }
+        MessageDigest digest = PhotosApi.sha1();
+        long size = 0;
+        try (InputStream in = scanner.openOriginal(orphan.uri().toString())) {
+          byte[] buffer = new byte[128 * 1024];
+          int n;
+          while ((n = in.read(buffer)) != -1) {
+            PhotosApi.checkStopped(stop);
+            size += n;
+            if (size > limit) throw new IOException("Too large");
+            digest.update(buffer, 0, n);
+          }
+        }
+        byte[] sha1 = digest.digest();
+        if (size <= 0 || !ReclaimEngine.hex(sha1).equals(expected)) {
+          unverified++; // Changed, truncated or planted: never uploaded, kept for the user.
+          continue;
+        }
+        String key = api.find(sha1);
+        if (key.isEmpty()) {
+          long when =
+              orphan.taken() > 0 ? orphan.taken() / 1000 : System.currentTimeMillis() / 1000;
+          key =
+              api.upload(
+                  () -> scanner.openOriginal(orphan.uri().toString()),
+                  ReclaimEngine.stagedName(orphan.name()),
+                  size,
+                  when,
+                  sha1,
+                  (a, b) -> {});
+          uploaded++;
+        }
+        LibraryProtocol.Item item = library.lookup(key);
+        if (item == null
+            || item.trash()
+            || !MessageDigest.isEqual(item.extra().sha1(), sha1)
+            || (item.size() != null && item.size() != size)) {
+          waiting++; // Not provably safe in Google Photos yet: keep the copy.
+          continue;
+        }
         if (remove(context, orphan)) removed++;
         else consent.add(orphan.uri());
-        continue;
+      } catch (InterruptedIOException e) {
+        throw e;
+      } catch (ReclaimEngine.Later e) {
+        waiting++;
+      } catch (PhotosApi.ApiException e) {
+        if (e.signIn) throw e;
+        failed++;
+      } catch (IOException | RuntimeException e) {
+        failed++; // One bad file must not stop the others or the run.
       }
-      String expected = ReclaimEngine.stagedHash(orphan.name());
-      if (expected == null) continue; // Not ours; leave it alone.
-      if (!tag.equals(ReclaimEngine.stagedAccount(orphan.name()))) {
-        other++;
-        continue;
-      }
-      MessageDigest digest = PhotosApi.sha1();
-      long size = 0;
-      try (InputStream in = scanner.openOriginal(orphan.uri().toString())) {
-        byte[] buffer = new byte[128 * 1024];
-        int n;
-        while ((n = in.read(buffer)) != -1) {
-          PhotosApi.checkStopped(stop);
-          digest.update(buffer, 0, n);
-          size += n;
-        }
-      } catch (IOException e) {
-        if (e instanceof java.io.InterruptedIOException) throw e;
-        unverified++;
-        continue;
-      }
-      byte[] sha1 = digest.digest();
-      if (!ReclaimEngine.hex(sha1).equals(expected)) {
-        unverified++; // Changed or truncated: keep it for the user, never upload it.
-        continue;
-      }
-      if (api.find(sha1).isEmpty()) {
-        long when = orphan.taken() > 0 ? orphan.taken() / 1000 : System.currentTimeMillis() / 1000;
-        String key =
-            api.upload(
-                () -> scanner.openOriginal(orphan.uri().toString()),
-                ReclaimEngine.stagedName(orphan.name()),
-                size,
-                when,
-                sha1,
-                (a, b) -> {});
-        if (key.isEmpty()) throw new IOException("Upload was not confirmed");
-        uploaded++;
-      }
-      if (remove(context, orphan)) removed++;
-      else consent.add(orphan.uri());
     }
-    return new Result(uploaded, removed, other, unverified, consent);
+    return new Result(uploaded, removed, other, unverified, waiting, failed, consent);
   }
 
   private static boolean remove(Context context, Orphan orphan) {
