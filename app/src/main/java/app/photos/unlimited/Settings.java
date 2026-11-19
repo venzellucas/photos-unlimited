@@ -25,7 +25,57 @@ public final class Settings {
   }
 
   public void enabled(boolean value) {
-    prefs.edit().putBoolean("enabled", value).commit();
+    SharedPreferences.Editor edit = prefs.edit().putBoolean("enabled", value);
+    if (value && !enabled()) edit.putLong("enabledSince", System.currentTimeMillis() / 1000);
+    edit.commit();
+  }
+
+  /** Seconds since epoch when automatic backup was last switched on; 0 if unknown. */
+  public long enabledSince() {
+    return prefs.getLong("enabledSince", 0);
+  }
+
+  /** When the user last said Google Photos backup is off (millis); 0 = never. */
+  public long photosBackupOffConfirmed() {
+    return prefs.getLong("photosOff", 0);
+  }
+
+  public void confirmPhotosBackupOff() {
+    prefs.edit().putLong("photosOff", System.currentTimeMillis()).apply();
+  }
+
+  /**
+   * Evidence that another uploader (normally Google Photos backup) is active: a file created after
+   * our backup was enabled was already in the library before we uploaded it.
+   */
+  public void otherUploader(String name) {
+    prefs
+        .edit()
+        .putLong("otherUploaderAt", System.currentTimeMillis())
+        .putInt("otherUploaderCount", prefs.getInt("otherUploaderCount", 0) + 1)
+        .putString("otherUploaderName", name)
+        .apply();
+  }
+
+  public long otherUploaderAt() {
+    return prefs.getLong("otherUploaderAt", 0);
+  }
+
+  public int otherUploaderCount() {
+    return prefs.getInt("otherUploaderCount", 0);
+  }
+
+  public String otherUploaderName() {
+    return prefs.getString("otherUploaderName", "");
+  }
+
+  public void clearOtherUploader() {
+    prefs
+        .edit()
+        .remove("otherUploaderAt")
+        .remove("otherUploaderCount")
+        .remove("otherUploaderName")
+        .apply();
   }
 
   public void wifi(boolean value) {
@@ -62,6 +112,15 @@ public final class Settings {
 
   public void lastRun(long now) {
     prefs.edit().putLong("lastRun", now).apply();
+  }
+
+  /** Staged copies from an earlier install that are safe to remove once the user agrees. */
+  public Set<String> recoveryCleanup() {
+    return new HashSet<>(prefs.getStringSet("recoveryCleanup", Set.of()));
+  }
+
+  public void recoveryCleanup(Set<String> uris) {
+    prefs.edit().putStringSet("recoveryCleanup", new HashSet<>(uris)).apply();
   }
 
   public long lastRun() {

@@ -18,7 +18,7 @@ public final class InventoryDb extends SQLiteOpenHelper {
       long items, long chargedItems, long chargedBytes, long unknown, long zero, Scan scan) {}
 
   public InventoryDb(Context context) {
-    super(context, "inventory.db", null, 1);
+    super(context, "inventory.db", null, 4);
   }
 
   @Override
@@ -30,14 +30,21 @@ public final class InventoryDb extends SQLiteOpenHelper {
     db.execSQL(
         "CREATE TABLE media(account TEXT NOT NULL,media_key TEXT NOT NULL,name TEXT NOT NULL,type"
             + " INTEGER NOT NULL,size INTEGER,charged INTEGER,taken INTEGER NOT NULL,trash INTEGER"
-            + " NOT NULL,archived INTEGER NOT NULL,origin INTEGER NOT NULL,PRIMARY"
+            + " NOT NULL,archived INTEGER NOT NULL,origin INTEGER NOT NULL,dedup TEXT NOT NULL"
+            + " DEFAULT '',sha1 BLOB,caption TEXT NOT NULL DEFAULT '',favorite INTEGER NOT NULL"
+            + " DEFAULT 0,edited INTEGER NOT NULL DEFAULT 0,canonical INTEGER NOT NULL DEFAULT"
+            + " 1,locked INTEGER NOT NULL DEFAULT 0,motion INTEGER NOT NULL DEFAULT 0,quality TEXT NOT NULL DEFAULT 'UNKNOWN',PRIMARY"
             + " KEY(account,media_key))");
     db.execSQL("CREATE INDEX charged_media ON media(account,charged DESC)");
   }
 
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    throw new IllegalStateException("Unknown inventory schema");
+    if (oldVersion < 1 || oldVersion > 3) throw new IllegalStateException("Unknown inventory schema");
+    // Only a metadata cache: older versions lack reclaim fields, so the next scan starts fresh.
+    db.execSQL("DROP TABLE IF EXISTS media");
+    db.execSQL("DROP TABLE IF EXISTS scans");
+    onCreate(db);
   }
 
   public Scan scan(String account) {
@@ -102,6 +109,16 @@ public final class InventoryDb extends SQLiteOpenHelper {
         v.put("trash", item.trash() ? 1 : 0);
         v.put("archived", item.archived() ? 1 : 0);
         v.put("origin", item.origin());
+        LibraryProtocol.Extra x = item.extra();
+        v.put("dedup", x.dedup());
+        v.put("sha1", x.sha1());
+        v.put("caption", x.caption());
+        v.put("favorite", x.favorite() ? 1 : 0);
+        v.put("edited", x.edited() ? 1 : 0);
+        v.put("canonical", x.canonical() ? 1 : 0);
+        v.put("locked", x.locked() ? 1 : 0);
+        v.put("motion", x.motion() ? 1 : 0);
+        v.put("quality", x.quality().name());
         db.insertWithOnConflict("media", null, v, SQLiteDatabase.CONFLICT_REPLACE);
       }
       for (String key : page.deletions())
@@ -148,7 +165,11 @@ public final class InventoryDb extends SQLiteOpenHelper {
   public List<LibraryProtocol.Item> list(String account, int quotaFilter, int type, int offset) {
     String where =
         "account=?"
-            + (quotaFilter == 1 ? " AND charged>0" : quotaFilter == 2 ? " AND charged IS NULL" : "")
+            + (quotaFilter == 1
+                ? " AND charged>0"
+                : quotaFilter == 2
+                    ? " AND charged IS NULL"
+                    : quotaFilter == 3 ? " AND quality='REDUCED'" : "")
             + (type > 0 ? " AND type=" + type : "");
     List<LibraryProtocol.Item> list = new ArrayList<>();
     try (Cursor c =
@@ -162,20 +183,73 @@ public final class InventoryDb extends SQLiteOpenHelper {
                 null,
                 "charged IS NULL ASC, charged DESC, name COLLATE NOCASE ASC, media_key ASC",
                 Math.max(0, offset) + ",51")) {
-      while (c.moveToNext())
-        list.add(
-            new LibraryProtocol.Item(
-                s(c, "media_key"),
-                s(c, "name"),
-                (int) n(c, "type"),
-                optional(c, "size"),
-                optional(c, "charged"),
-                n(c, "taken"),
-                n(c, "trash") == 1,
-                n(c, "archived") == 1,
-                (int) n(c, "origin")));
+      while (c.moveToNext()) list.add(item(c));
     }
     return list;
+  }
+
+  /** One cached record, or null when the latest scan has not seen it (or saw it deleted). */
+  public LibraryProtocol.Item item(String account, String key) {
+    try (Cursor c =
+        getReadableDatabase()
+            .query(
+                "media",
+                null,
+                "account=? AND media_key=?",
+                new String[] {account, key},
+                null,
+                null,
+                null)) {
+      return c.moveToFirst() ? item(c) : null;
+    }
+  }
+
+  /**
+   * Re-opens a finished scan from its stored sync cursor so the next pages are changes only.
+   * Returns false when no completed scan exists; a full scan is needed first.
+   */
+  public boolean beginDelta(String account) {
+    Scan current = scan(account);
+    if (current.generation().isEmpty()
+        || current.cursor().stage() != LibraryProtocol.Stage.DONE
+        || current.cursor().sync().length == 0) return false;
+    byte[] sync = current.cursor().sync();
+    ContentValues v =
+        cursorValues(
+            new LibraryProtocol.Cursor(
+                LibraryProtocol.Stage.SYNC, new byte[0], sync, sync, false));
+    v.put("message", "Checking recent changes…");
+    getWritableDatabase()
+        .update(
+            "scans",
+            v,
+            "account=? AND generation=?",
+            new String[] {account, current.generation()});
+    return true;
+  }
+
+  private static LibraryProtocol.Item item(Cursor c) {
+    int sha = c.getColumnIndexOrThrow("sha1");
+    return new LibraryProtocol.Item(
+        s(c, "media_key"),
+        s(c, "name"),
+        (int) n(c, "type"),
+        optional(c, "size"),
+        optional(c, "charged"),
+        n(c, "taken"),
+        n(c, "trash") == 1,
+        n(c, "archived") == 1,
+        (int) n(c, "origin"),
+        new LibraryProtocol.Extra(
+            s(c, "dedup"),
+            c.isNull(sha) ? null : c.getBlob(sha),
+            s(c, "caption"),
+            n(c, "favorite") == 1,
+            n(c, "edited") == 1,
+            n(c, "canonical") == 1,
+            n(c, "locked") == 1,
+            n(c, "motion") == 1,
+            LibraryProtocol.Quality.valueOf(s(c, "quality"))));
   }
 
   private static ContentValues cursorValues(LibraryProtocol.Cursor cursor) {

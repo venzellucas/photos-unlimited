@@ -1,0 +1,84 @@
+package app.photos.unlimited;
+
+import android.content.Context;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * Read-only library pagination shared by the storage scan and reclaim verification. One run at a
+ * time per process: both writers update the same cached cursor.
+ */
+public final class LibrarySync {
+  private static final AtomicBoolean LOCK = new AtomicBoolean();
+
+  public interface Progress {
+    void page(InventoryDb.Scan scan);
+  }
+
+  private LibrarySync() {}
+
+  public static boolean tryLock() {
+    return LOCK.compareAndSet(false, true);
+  }
+
+  public static void unlock() {
+    LOCK.set(false);
+  }
+
+  public static boolean locked() {
+    return LOCK.get();
+  }
+
+  /** Reads pages from the cached cursor until the scan is done or a limit is reached. */
+  public static InventoryDb.Scan run(
+      Context context,
+      InventoryDb db,
+      PhotosApi api,
+      AccountStore store,
+      String account,
+      AtomicBoolean stop,
+      int maxPages,
+      long deadline,
+      Progress progress)
+      throws IOException {
+    InventoryDb.Scan current = db.scan(account);
+    Set<String> seen = new HashSet<>();
+    int pages = 0;
+    while (current.cursor().stage() != LibraryProtocol.Stage.DONE
+        && pages < maxPages
+        && System.currentTimeMillis() < deadline) {
+      PhotosApi.checkStopped(stop);
+      String position =
+          current.cursor().stage()
+              + ":"
+              + Base64.getEncoder().encodeToString(current.cursor().resume())
+              + ":"
+              + Base64.getEncoder().encodeToString(current.cursor().sync());
+      if (!seen.add(position)) throw new IOException("Library cursor cycle");
+      if (!account.equals(store.email())) throw new InterruptedIOException();
+      String template =
+          switch (current.cursor().stage()) {
+            case INITIAL -> "initial";
+            case DELTA -> "delta";
+            default -> "state";
+          };
+      byte[] base;
+      try (var input = context.getAssets().open("library-" + template + ".bin")) {
+        base = input.readAllBytes();
+      }
+      LibraryProtocol.Page page = api.libraryPage(LibraryProtocol.request(base, current.cursor()));
+      PhotosApi.checkStopped(stop);
+      if (!account.equals(store.email())) throw new InterruptedIOException();
+      LibraryProtocol.Cursor next = LibraryProtocol.advance(current.cursor(), page);
+      if (!db.apply(account, current, page, next)) throw new InterruptedIOException();
+      current = db.scan(account);
+      pages++;
+      if (progress != null) progress.page(current);
+    }
+    return current;
+  }
+}

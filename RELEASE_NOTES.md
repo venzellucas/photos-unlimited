@@ -1,3 +1,16 @@
+# Unreleased (main)
+
+Not in a downloadable APK yet.
+
+- **Free up storage:** replace items that use Google storage with copies uploaded through
+  the app, one at a time or in batches, verified byte-for-byte against Google's hash of
+  the original. Uninstall-safe staging, crash-safe journal, phone-copy protection.
+- Storage saver items upgraded to originals when the original is on the phone.
+- Motion Photos supported; iPhone Live Photos refused to protect their motion.
+- Google Photos backup reminder with a direct link to its Backup page.
+- Storage scan now records Motion Photo, quality, checksum and caption fields; the cached
+  inventory is rebuilt once after updating.
+
 # Photos Unlimited 0.2.1 — MVP
 
 The first public MVP is a small Android app for backing up original photos and

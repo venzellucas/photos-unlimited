@@ -66,6 +66,12 @@ public final class InventoryService extends Service {
     }
     startForeground(7401, notification("Reading storage metadata…"));
     if (!BUSY.compareAndSet(false, true)) return START_NOT_STICKY;
+    if (!LibrarySync.tryLock()) {
+      BUSY.set(false);
+      stopForeground(STOP_FOREGROUND_REMOVE);
+      stopSelf();
+      return START_NOT_STICKY;
+    }
     ownsRun = true;
     scanningAccount = new AccountStore(this).email();
     wake =
@@ -87,42 +93,19 @@ public final class InventoryService extends Service {
         current = db.reset(account);
       generation = current.generation();
       PhotosApi api = new PhotosApi(store.load(), stop);
-      long deadline = System.currentTimeMillis() + 8 * 60 * 1000L;
-      int pages = 0;
-      java.util.Set<String> seen = new java.util.HashSet<>();
-      while (current.cursor().stage() != LibraryProtocol.Stage.DONE
-          && pages < 500
-          && System.currentTimeMillis() < deadline) {
-        PhotosApi.checkStopped(stop);
-        String position =
-            current.cursor().stage()
-                + ":"
-                + java.util.Base64.getEncoder().encodeToString(current.cursor().resume())
-                + ":"
-                + java.util.Base64.getEncoder().encodeToString(current.cursor().sync());
-        if (!seen.add(position)) throw new IOException("Library cursor cycle");
-        if (!account.equals(store.email())) throw new InterruptedIOException();
-        String template =
-            switch (current.cursor().stage()) {
-              case INITIAL -> "initial";
-              case DELTA -> "delta";
-              default -> "state";
-            };
-        byte[] base;
-        try (var input = getAssets().open("library-" + template + ".bin")) {
-          base = input.readAllBytes();
-        }
-        LibraryProtocol.Page page =
-            api.libraryPage(LibraryProtocol.request(base, current.cursor()));
-        PhotosApi.checkStopped(stop);
-        if (!account.equals(store.email())) throw new InterruptedIOException();
-        LibraryProtocol.Cursor next = LibraryProtocol.advance(current.cursor(), page);
-        if (!db.apply(account, current, page, next)) throw new InterruptedIOException();
-        current = db.scan(account);
-        pages++;
-        getSystemService(NotificationManager.class)
-            .notify(7401, notification(current.pages() + " pages checked · Read-only scan"));
-      }
+      current =
+          LibrarySync.run(
+              this,
+              db,
+              api,
+              store,
+              account,
+              stop,
+              500,
+              System.currentTimeMillis() + 8 * 60 * 1000L,
+              scan ->
+                  getSystemService(NotificationManager.class)
+                      .notify(7401, notification(scan.pages() + " pages checked · Read-only scan")));
       if (current.cursor().stage() != LibraryProtocol.Stage.DONE)
         db.message(account, generation, "Scan paused. Continue to read the remaining items.");
     } catch (InterruptedIOException e) {
@@ -147,6 +130,7 @@ public final class InventoryService extends Service {
           account, generation, "The scan stopped. Results are partial. Try continuing the scan.");
     } finally {
       scanningAccount = "";
+      LibrarySync.unlock();
       BUSY.set(false);
       ownsRun = false;
       if (wake != null && wake.isHeld()) wake.release();

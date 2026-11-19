@@ -14,7 +14,14 @@ photo-upload server and includes no advertising or analytics SDK.
 - **Upload history:** a private database tracks local media versions, outcomes,
   retries, and remote identifiers, scoped to the connected account.
 - **Storage inventory:** an optional scan caches library metadata and continuation
-  cursors in a separate private database. It does not download or delete media.
+  cursors in a separate private database. The scan itself does not download or delete media.
+- **Free up storage (only when you start it):** for each item you choose, the app
+  downloads the original from Google (or reads it from the phone), keeps a copy in
+  `Pictures/Photos Unlimited/Pending upload/` on the phone, deletes the original in
+  Google Photos, and uploads the copy again. Copies are named with the file's SHA-1 and
+  a short one-way hash of the account (not the address) and are removed once Google
+  confirms the replacement. A private journal records each step. If another app removes
+  a phone photo involved in this, the app writes the verified copy back to its folder.
 - **Profile photo:** an optional profile lookup requests read-only profile and email
   scopes separately from upload authorization. The app checks that the verified
   email matches the connected account, downloads the image from an allowed Google
@@ -37,7 +44,9 @@ disconnect. Disconnect removes the saved credential, profile cache, and account'
 storage inventory and stops future jobs. An in-flight Google request may have
 completed before cancellation. Google-side session revocation is managed in your
 Google account. The local upload ledger is retained for history; clearing app data
-or uninstalling removes the app's local data.
+or uninstalling removes the app's local data, except unfinished Free up copies in
+`Pictures/Photos Unlimited/Pending upload/`, which stay so no photo is lost and can be
+finished by a later install or removed by you.
 
 ## Website
 

@@ -31,7 +31,11 @@ public final class MainActivity extends ThemedActivity {
   private Settings settings;
   private AccountStore account;
   private Ui ui;
-  private LinearLayout page, historyRows, storageRows;
+  private LinearLayout page, historyRows, storageRows, reclaimCard, reclaimRows, selectionBar;
+  private boolean selecting;
+  private final LinkedHashMap<String, LibraryProtocol.Item> chosen = new LinkedHashMap<>();
+  private TextView selectionInfo;
+  private MaterialButton selectButton, selectAllButton, freeSelectedButton;
   private ScrollView scroll;
   private BottomNavigationView navigation;
   private TextView status,
@@ -41,13 +45,15 @@ public final class MainActivity extends ThemedActivity {
       storageTotal,
       storageSummary,
       storageStatus,
-      storagePage;
-  private MaterialButton primary, folders, scanButton, previous, next;
+      storagePage,
+      reclaimStatus;
+  private MaterialButton primary, folders, scanButton, previous, next, reclaimButton, cleanupButton;
   private LinearProgressIndicator progress, scanProgress;
   private int screen = 1, generation, quotaFilter = 1, mediaFilter, storageOffset;
-  private boolean loading;
+  private boolean loading, photosPrompted, awaitingPhotosReturn;
+  static final String GOOGLE_PHOTOS = "com.google.android.apps.photos";
   private String visibleAccount = "";
-  private String renderedHistory = "", renderedStorage = "";
+  private String renderedHistory = "", renderedStorage = "", renderedReclaim = "";
   private final Runnable ticker =
       new Runnable() {
         public void run() {
@@ -63,7 +69,13 @@ public final class MainActivity extends ThemedActivity {
     settings = new Settings(this);
     account = new AccountStore(this);
     screen = saved == null ? getIntent().getIntExtra("screen", 1) : saved.getInt("screen", 1);
+    if (saved != null) {
+      photosPrompted = saved.getBoolean("photosPrompted");
+      awaitingPhotosReturn = saved.getBoolean("awaitingPhotos");
+    }
     if (screen < 1 || screen > 4) screen = 1;
+    // Make staged copies left by an earlier install visible to the Free up card.
+    io.execute(() -> ReclaimRecovery.index(this));
     if (saved != null) {
       quotaFilter = saved.getInt("quotaFilter", 1);
       mediaFilter = saved.getInt("mediaFilter");
@@ -164,6 +176,86 @@ public final class MainActivity extends ThemedActivity {
     refreshProfile(false);
     handler.removeCallbacks(ticker);
     handler.post(ticker);
+    checkGooglePhotosBackup();
+  }
+
+  /** Google Photos is installed and not disabled. */
+  private boolean googlePhotosActive() {
+    try {
+      return getPackageManager().getApplicationInfo(GOOGLE_PHOTOS, 0).enabled;
+    } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+      return false;
+    }
+  }
+
+  /**
+   * Android does not let other apps read Google Photos' settings. Ask on each app open until the
+   * user confirms its backup is off; afterwards ask again only when backup finds a new photo that
+   * another uploader got to first.
+   */
+  private void checkGooglePhotosBackup() {
+    if (awaitingPhotosReturn) {
+      awaitingPhotosReturn = false;
+      new MaterialAlertDialogBuilder(this)
+          .setTitle("Is Google Photos backup off?")
+          .setMessage("Photos Unlimited should be the only app backing up this phone.")
+          .setPositiveButton(
+              "Yes, it’s off",
+              (d, w) -> {
+                settings.confirmPhotosBackupOff();
+                settings.clearOtherUploader();
+              })
+          .setNegativeButton("Not yet", null)
+          .show();
+      return;
+    }
+    if (photosPrompted || !settings.enabled() || !googlePhotosActive()) return;
+    long confirmed = settings.photosBackupOffConfirmed();
+    boolean evidence = settings.otherUploaderAt() > confirmed;
+    if (confirmed > 0 && !evidence) return;
+    photosPrompted = true;
+    String message =
+        evidence
+            ? "Google Photos still seems to be backing up: "
+                + settings.otherUploaderCount()
+                + " new item(s), most recently “"
+                + settings.otherUploaderName()
+                + "”, were already uploaded by another app before Photos Unlimited got to them."
+                + " Those copies can use your storage.\n\nOpen Google Photos and turn Backup off."
+            : "Photos Unlimited is backing up this phone. If Google Photos backup is also on, it"
+                + " uploads the same photos first, and its copies can use your storage.\n\n"
+                + "Open Google Photos and turn Backup off.";
+    new MaterialAlertDialogBuilder(this)
+        .setTitle("Turn off Google Photos backup")
+        .setMessage(message)
+        .setPositiveButton("Open Google Photos", (d, w) -> openGooglePhotosBackup())
+        .setNegativeButton(
+            "It’s already off",
+            (d, w) -> {
+              settings.confirmPhotosBackupOff();
+              settings.clearOtherUploader();
+            })
+        .setNeutralButton("Later", null)
+        .show();
+  }
+
+  private void openGooglePhotosBackup() {
+    Intent backup =
+        new Intent(Intent.ACTION_VIEW, Uri.parse("https://photos.google.com/link/backup"))
+            .setPackage(GOOGLE_PHOTOS);
+    try {
+      startActivity(backup);
+      awaitingPhotosReturn = true;
+    } catch (ActivityNotFoundException e) {
+      Intent launch = getPackageManager().getLaunchIntentForPackage(GOOGLE_PHOTOS);
+      if (launch == null) {
+        message("Google Photos isn’t available on this phone.");
+        return;
+      }
+      startActivity(launch);
+      awaitingPhotosReturn = true;
+      message("In Google Photos, open your profile picture, then Backup, and turn it off.");
+    }
   }
 
   @Override
@@ -184,6 +276,8 @@ public final class MainActivity extends ThemedActivity {
   @Override
   public void onSaveInstanceState(Bundle saved) {
     saved.putInt("screen", screen);
+    saved.putBoolean("photosPrompted", photosPrompted);
+    saved.putBoolean("awaitingPhotos", awaitingPhotosReturn);
     saved.putInt("quotaFilter", quotaFilter);
     saved.putInt("mediaFilter", mediaFilter);
     saved.putInt("offset", storageOffset);
@@ -219,7 +313,12 @@ public final class MainActivity extends ThemedActivity {
                 progressLabel = storageTotal = storageSummary = storageStatus = storagePage = null;
     primary = folders = scanButton = previous = next = null;
     progress = scanProgress = null;
-    historyRows = storageRows = null;
+    historyRows = storageRows = reclaimRows = reclaimCard = selectionBar = null;
+    selectionInfo = null;
+    selectButton = selectAllButton = freeSelectedButton = cleanupButton = null;
+    reclaimStatus = null;
+    reclaimButton = null;
+    renderedReclaim = "";
     switch (screen) {
       case 2 -> drawActivity();
       case 3 -> drawStorage();
@@ -325,11 +424,27 @@ public final class MainActivity extends ThemedActivity {
                 + " total excludes Drive and Gmail and may differ from your account total.");
     ui.space(note, 0, 12);
     page.addView(note);
+    reclaimCard = ui.card(page, false);
+    reclaimCard.addView(ui.text("Free up storage", 18, true));
+    reclaimStatus = ui.supporting("");
+    ui.space(reclaimStatus, 6, 8);
+    reclaimCard.addView(reclaimStatus);
+    reclaimRows = ui.column();
+    reclaimCard.addView(reclaimRows);
+    reclaimButton = ui.button("Resume", R.drawable.ic_refresh, false);
+    ui.space(reclaimButton, 8, 0);
+    reclaimCard.addView(reclaimButton);
+    reclaimButton.setOnClickListener(v -> toggleReclaim());
+    cleanupButton = ui.button("Remove finished copies", 0, false);
+    ui.space(cleanupButton, 8, 0);
+    reclaimCard.addView(cleanupButton);
+    cleanupButton.setOnClickListener(v -> removeRecoveredCopies());
+    reclaimCard.setVisibility(View.GONE);
     LinearLayout filters = ui.card(page, false);
     picker(
         filters,
         "Storage status",
-        new String[] {"All scanned items", "Using storage", "Storage unknown"},
+        new String[] {"All scanned items", "Using storage", "Storage unknown", "Reduced quality"},
         quotaFilter,
         value -> {
           quotaFilter = value;
@@ -351,6 +466,30 @@ public final class MainActivity extends ThemedActivity {
     ui.row(filters, "Start a fresh scan", R.drawable.ic_refresh, this::restartScan);
     storagePage = ui.supporting("Largest reported storage first");
     page.addView(storagePage);
+    selectButton = ui.button(selecting ? "Done selecting" : "Select items", 0, false);
+    ui.space(selectButton, 8, 4);
+    page.addView(selectButton);
+    selectButton.setOnClickListener(
+        v -> {
+          selecting = !selecting;
+          if (!selecting) chosen.clear();
+          selectButton.setText(selecting ? "Done selecting" : "Select items");
+          updateSelection();
+          renderedStorage = "";
+          refresh();
+        });
+    selectionBar = ui.card(page, true);
+    selectionInfo = ui.text("", 16, true);
+    selectionBar.addView(selectionInfo);
+    selectAllButton = ui.button("Select all eligible", 0, false);
+    ui.space(selectAllButton, 8, 0);
+    selectionBar.addView(selectAllButton);
+    selectAllButton.setOnClickListener(v -> selectAllEligible());
+    freeSelectedButton = ui.button("Free up", R.drawable.ic_storage, true);
+    ui.space(freeSelectedButton, 8, 0);
+    selectionBar.addView(freeSelectedButton);
+    freeSelectedButton.setOnClickListener(v -> beforeReclaim(this::confirmBatch));
+    updateSelection();
     storageRows = ui.column();
     page.addView(storageRows);
     LinearLayout pages = new LinearLayout(this);
@@ -390,6 +529,10 @@ public final class MainActivity extends ThemedActivity {
           }
           settings.enabled(on);
           Scheduler.configure(this);
+          if (on) {
+            photosPrompted = false;
+            checkGooglePhotosBackup();
+          }
           if (on) Scheduler.continuation(this);
           else {
             BackupEngine.cancel();
@@ -412,6 +555,12 @@ public final class MainActivity extends ThemedActivity {
           settings.charging(on);
           Scheduler.configure(this);
         });
+    if (googlePhotosActive())
+      ui.row(
+          backup,
+          "Turn off Google Photos backup\nAvoid two apps uploading the same photos",
+          R.drawable.ic_open,
+          this::openGooglePhotosBackup);
     section("Appearance");
     LinearLayout appearance = ui.card(page, false);
     SharedPreferences prefs = getSharedPreferences("appearance", 0);
@@ -509,11 +658,22 @@ public final class MainActivity extends ThemedActivity {
           List<String> history = List.of();
           InventoryDb.Summary summary = null;
           List<LibraryProtocol.Item> items = List.of();
+          List<ReclaimEngine.Job> jobList = List.of();
+          int[] safety = new int[2];
           try {
             if (view == 3) {
               try (InventoryDb db = new InventoryDb(this)) {
                 summary = db.summary(email);
                 items = db.list(email, q, m, offset);
+              }
+              try (ReclaimDb db = new ReclaimDb(this)) {
+                jobList = db.recent(email, 20);
+                safety[0] = db.unsafe(email);
+              }
+              if (!ReclaimService.busy()) {
+                Set<String> cleanup = settings.recoveryCleanup();
+                for (ReclaimRecovery.Orphan o : ReclaimRecovery.orphans(this))
+                  if (!cleanup.contains(o.uri().toString())) safety[1]++;
               }
             } else
               try (BackupDb db = new BackupDb(this)) {
@@ -524,6 +684,7 @@ public final class MainActivity extends ThemedActivity {
             List<String> recent = history;
             InventoryDb.Summary result = summary;
             List<LibraryProtocol.Item> rows = items;
+            List<ReclaimEngine.Job> jobs = jobList;
             runOnUiThread(
                 () -> {
                   loading = false;
@@ -538,7 +699,10 @@ public final class MainActivity extends ThemedActivity {
                   }
                   if (view == 1) updateBackup(countsResult, selected);
                   else if (view == 2) updateActivity(recent);
-                  else if (view == 3) updateStorage(result, rows);
+                  else if (view == 3) {
+                    updateStorage(result, rows);
+                    updateReclaim(jobs, safety[0], safety[1]);
+                  }
                 });
           } catch (Exception e) {
             runOnUiThread(
@@ -748,7 +912,9 @@ public final class MainActivity extends ThemedActivity {
             + "/"
             + mediaFilter
             + "/"
-            + storageOffset;
+            + storageOffset
+            + "/"
+            + selecting;
     if (fingerprint.equals(renderedStorage)) return;
     renderedStorage = fingerprint;
     storageRows.removeAllViews();
@@ -767,16 +933,49 @@ public final class MainActivity extends ThemedActivity {
     for (int i = 0; i < visible; i++) {
       LibraryProtocol.Item item = rows.get(i);
       LinearLayout card = ui.card(storageRows, false);
-      card.addView(ui.text(item.name(), 16, false));
+      card.setClickable(true);
+      card.setFocusable(true);
+      android.util.TypedValue ripple = new android.util.TypedValue();
+      getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
+      card.setForeground(getDrawable(ripple.resourceId));
+      String why = ReclaimEngine.ineligible(item);
+      LinearLayout body = card;
+      if (selecting) {
+        LinearLayout line = new LinearLayout(this);
+        line.setGravity(Gravity.CENTER_VERTICAL);
+        com.google.android.material.checkbox.MaterialCheckBox box =
+            new com.google.android.material.checkbox.MaterialCheckBox(this);
+        box.setChecked(chosen.containsKey(item.key()));
+        box.setEnabled(why == null);
+        box.setClickable(false);
+        line.addView(box);
+        body = ui.column();
+        line.addView(body, new LinearLayout.LayoutParams(0, -2, 1));
+        card.addView(line);
+        card.setAlpha(why == null ? 1f : 0.6f);
+        card.setOnClickListener(
+            v -> {
+              if (why != null) {
+                message("Can’t select: " + why);
+                return;
+              }
+              if (chosen.remove(item.key()) == null) chosen.put(item.key(), item);
+              box.setChecked(chosen.containsKey(item.key()));
+              updateSelection();
+            });
+      } else card.setOnClickListener(v -> showItem(item));
+      body.addView(ui.text(item.name(), 16, false));
       String type = item.type() == 2 ? "Video" : item.type() == 1 ? "Photo" : "Media";
       String info = type + " · File size " + (item.size() == null ? "unknown" : bytes(item.size()));
       if (item.trash()) info += " · In trash";
       if (item.archived()) info += " · Archived";
       if (item.origin() == 3 || item.origin() == 4) info += " · Shared";
+      if (item.extra().edited()) info += " · Edited";
+      if (item.extra().quality() == LibraryProtocol.Quality.REDUCED) info += " · Reduced quality";
       TextView sub = ui.supporting(info);
       ui.space(sub, 6, 8);
-      card.addView(sub);
-      card.addView(
+      body.addView(sub);
+      body.addView(
           ui.text(
               item.charged() == null
                   ? "Storage usage unknown"
@@ -817,15 +1016,348 @@ public final class MainActivity extends ThemedActivity {
       return;
     }
     if (!ready()) return;
+    boolean wasOn = settings.enabled();
     settings.enabled(true);
     Scheduler.configure(this);
     settings.status("Preparing backup…");
+    if (!wasOn) {
+      photosPrompted = false;
+      checkGooglePhotosBackup();
+    }
     try {
       startForegroundService(new Intent(this, BackupService.class));
     } catch (RuntimeException e) {
       message("Android could not start backup. Reopen the app and try again.");
     }
     refresh();
+  }
+
+  private static String stateLabel(ReclaimEngine.State state) {
+    return switch (state) {
+      case QUEUED -> "Waiting";
+      case DOWNLOADED -> "Original saved";
+      case TRASHING, TRASHED -> "In trash";
+      case DELETING, DELETED -> "Uploading copy";
+      case UPLOADED -> "Verifying";
+      case DONE -> "Freed";
+      case CHARGED -> "Still charged";
+      case FAILED -> "Not changed";
+      case ATTENTION -> "Needs attention";
+    };
+  }
+
+  private void updateReclaim(List<ReclaimEngine.Job> jobs, int onlyOnPhone, int leftovers) {
+    if (reclaimCard == null) return;
+    boolean running = ReclaimService.busy();
+    int cleanup = settings.recoveryCleanup().size();
+    reclaimCard.setVisibility(
+        jobs.isEmpty() && !running && leftovers == 0 && cleanup == 0 ? View.GONE : View.VISIBLE);
+    long freed = 0;
+    int active = 0;
+    for (ReclaimEngine.Job job : jobs) {
+      if (job.state == ReclaimEngine.State.DONE && job.charged != null) freed += job.charged;
+      if (!job.state.terminal()) active++;
+    }
+    String text =
+        (freed > 0 ? bytes(freed) + " freed in recent items. " : "")
+            + (running
+                ? ReclaimService.status()
+                : active > 0
+                    ? active + " item(s) not finished. Resume to continue safely."
+                    : "Idle.");
+    if (onlyOnPhone > 0)
+      text +=
+          "\n\n⚠ "
+              + onlyOnPhone
+              + " item(s) are only on this phone until they’re uploaded again. Don’t uninstall"
+              + " the app or clear its storage until this finishes. Copies are in"
+              + " Pictures/Photos Unlimited/Pending upload.";
+    if (leftovers > 0 && !running)
+      text +=
+          "\n\n"
+              + leftovers
+              + " item(s) from before (for example a previous install) are waiting in"
+              + " Pictures/Photos Unlimited/Pending upload. Finish now uploads any that Google"
+              + " Photos is missing.";
+    if (cleanup > 0)
+      text +=
+          "\n\n"
+              + cleanup
+              + " finished copy(ies) from a previous install are already in Google Photos and can"
+              + " be removed from this phone.";
+    reclaimStatus.setText(text);
+    reclaimButton.setText(
+        running ? "Pause" : leftovers > 0 && active == 0 ? "Finish now" : "Resume");
+    reclaimButton.setVisibility(running || active > 0 || leftovers > 0 ? View.VISIBLE : View.GONE);
+    cleanupButton.setVisibility(cleanup > 0 && !running ? View.VISIBLE : View.GONE);
+    StringBuilder fingerprint = new StringBuilder();
+    for (ReclaimEngine.Job job : jobs)
+      fingerprint.append(job.key).append(job.state).append(job.message).append('|');
+    if (fingerprint.toString().equals(renderedReclaim)) return;
+    renderedReclaim = fingerprint.toString();
+    reclaimRows.removeAllViews();
+    for (ReclaimEngine.Job job : jobs) {
+      TextView title = ui.text(job.name + " · " + stateLabel(job.state), 15, false);
+      ui.space(title, 10, 0);
+      reclaimRows.addView(title);
+      TextView sub =
+          ui.supporting(
+              (job.charged == null ? "" : bytes(job.charged) + " · ") + job.message);
+      reclaimRows.addView(sub);
+    }
+  }
+
+  private void showItem(LibraryProtocol.Item item) {
+    String why = ReclaimEngine.ineligible(item);
+    String type = item.type() == 2 ? "Video" : item.type() == 1 ? "Photo" : "Media";
+    StringBuilder info = new StringBuilder();
+    info.append(type)
+        .append(" · ")
+        .append(item.size() == null ? "size unknown" : bytes(item.size()))
+        .append("\n")
+        .append(
+            item.charged() == null
+                ? "Storage use unknown"
+                : bytes(item.charged()) + " reported storage")
+        .append("\n\n");
+    MaterialAlertDialogBuilder dialog =
+        new MaterialAlertDialogBuilder(this).setTitle(item.name()).setNegativeButton("Close", null);
+    if (why != null) {
+      info.append("Can’t free this item’s storage: ").append(why);
+      dialog.setMessage(info.toString()).show();
+      return;
+    }
+    info.append(
+        "Free up storage replaces it with a copy uploaded through this app: the original file is"
+            + " downloaded and checked against Google’s checksum, deleted from Google Photos,"
+            + " then uploaded again with its embedded metadata (date, location, camera details)"
+            + " intact. Caption, favorite, and archive are restored.");
+    info.append(
+        "\n\nLost: album membership, shared-album copies and comments, people and face"
+            + " groupings, and any date or location changes made inside Google Photos.");
+    if (item.extra().edited())
+      info.append(" This item was edited in Google Photos; only the unedited original is kept.");
+    dialog
+        .setMessage(info.toString())
+        .setPositiveButton(
+            item.extra().quality() == LibraryProtocol.Quality.REDUCED
+                    && (item.charged() == null || item.charged() == 0)
+                ? "Replace with original"
+                : "Free up " + bytes(item.charged() == null ? 0 : item.charged()),
+            (d, w) -> beforeReclaim(() -> confirmReclaim(item)))
+        .show();
+  }
+
+  private void updateSelection() {
+    if (selectionBar == null) return;
+    selectionBar.setVisibility(selecting ? View.VISIBLE : View.GONE);
+    long total = 0;
+    for (LibraryProtocol.Item item : chosen.values())
+      if (item.charged() != null) total += item.charged();
+    selectionInfo.setText(
+        chosen.isEmpty()
+            ? "Tap items to select them"
+            : chosen.size() + " selected · " + bytes(total) + " to free");
+    freeSelectedButton.setEnabled(!chosen.isEmpty());
+    freeSelectedButton.setText(
+        chosen.isEmpty() ? "Free up" : "Free up " + chosen.size() + " item(s)");
+  }
+
+  /** Every eligible item under the current filters, across all pages. */
+  private void selectAllEligible() {
+    String email = account.email();
+    int q = quotaFilter, m = mediaFilter;
+    io.execute(
+        () -> {
+          List<LibraryProtocol.Item> all = new ArrayList<>();
+          try (InventoryDb db = new InventoryDb(this)) {
+            for (int offset = 0; ; offset += 50) {
+              List<LibraryProtocol.Item> page = db.list(email, q, m, offset);
+              all.addAll(page.subList(0, Math.min(50, page.size())));
+              if (page.size() <= 50) break;
+            }
+          }
+          runOnUiThread(
+              () -> {
+                if (!alive() || !email.equals(account.email())) return;
+                int skipped = 0;
+                for (LibraryProtocol.Item item : all)
+                  if (ReclaimEngine.ineligible(item) == null) chosen.put(item.key(), item);
+                  else skipped++;
+                updateSelection();
+                renderedStorage = "";
+                refresh();
+                if (skipped > 0) message(skipped + " item(s) in this view can’t be freed and were skipped.");
+              });
+        });
+  }
+
+  private void confirmBatch() {
+    if (chosen.isEmpty()) return;
+    long total = 0;
+    int reduced = 0, edited = 0;
+    for (LibraryProtocol.Item item : chosen.values()) {
+      if (item.charged() != null) total += item.charged();
+      if (item.extra().quality() == LibraryProtocol.Quality.REDUCED) reduced++;
+      if (item.extra().edited()) edited++;
+    }
+    String detail =
+        "Each item is downloaded (or found on this phone) and checked against Google’s"
+            + " checksum, deleted from Google Photos, and uploaded again. Embedded metadata stays"
+            + " intact; caption, favorite and archive are restored. Albums, shared copies,"
+            + " comments, face groups and edits made inside Google Photos are lost."
+            + (edited > 0 ? "\n\n" + edited + " item(s) were edited in Google Photos; only the"
+                + " original is kept." : "")
+            + (reduced > 0 ? "\n\n" + reduced + " item(s) are reduced-quality copies. They"
+                + " are replaced only if the original is still on this phone." : "")
+            + "\n\nPhotos on this phone are kept; if another app removes one, it’s put back."
+            + " The run stops by itself if a replacement still uses storage. Keep the phone"
+            + " on Wi-Fi until it finishes.";
+    new MaterialAlertDialogBuilder(this)
+        .setTitle("Free up " + bytes(total) + " from " + chosen.size() + " item(s)?")
+        .setMessage(detail)
+        .setPositiveButton(
+            "Delete and re-upload",
+            (d, w) -> {
+              String email = account.email();
+              List<LibraryProtocol.Item> items = new ArrayList<>(chosen.values());
+              io.execute(
+                  () -> {
+                    int added = 0;
+                    try (ReclaimDb db = new ReclaimDb(this)) {
+                      for (LibraryProtocol.Item item : items)
+                        if (db.enqueue(ReclaimEngine.Job.of(email, item))) added++;
+                    }
+                    int queued = added;
+                    runOnUiThread(
+                        () -> {
+                          if (!alive()) return;
+                          chosen.clear();
+                          selecting = false;
+                          if (selectButton != null) selectButton.setText("Select items");
+                          updateSelection();
+                          renderedStorage = "";
+                          message(queued + " item(s) queued.");
+                          startReclaim();
+                        });
+                  });
+            })
+        .setNegativeButton("Cancel", null)
+        .show();
+  }
+
+  /**
+   * Google Photos with backup on deletes the phone copy of anything removed from the cloud. Free
+   * up removes originals from the cloud, so it only starts once that backup is confirmed off.
+   */
+  private void beforeReclaim(Runnable next) {
+    boolean confirmed = settings.photosBackupOffConfirmed() > 0;
+    boolean evidence = settings.otherUploaderAt() > settings.photosBackupOffConfirmed();
+    if (!googlePhotosActive() || (confirmed && !evidence)) {
+      next.run();
+      return;
+    }
+    new MaterialAlertDialogBuilder(this)
+        .setTitle("Turn off Google Photos backup first")
+        .setMessage(
+            "While Google Photos backup is on, Google Photos deletes this phone’s copy of every"
+                + " photo removed from the cloud, including the ones Free up replaces.\n\n"
+                + "Turn its backup off, then come back. Other phones or tablets signed in to this"
+                + " account with Google Photos backup on would delete their copies too.")
+        .setPositiveButton("Open Google Photos", (d, w) -> openGooglePhotosBackup())
+        .setNegativeButton(
+            "It’s off",
+            (d, w) -> {
+              settings.confirmPhotosBackupOff();
+              settings.clearOtherUploader();
+              next.run();
+            })
+        .setNeutralButton("Cancel", null)
+        .show();
+  }
+
+  private void confirmReclaim(LibraryProtocol.Item item) {
+    new MaterialAlertDialogBuilder(this)
+        .setTitle("Delete and re-upload?")
+        .setMessage(
+            "The original is deleted from Google Photos before the copy is uploaded. Keep the"
+                + " phone on Wi-Fi until this item shows Freed. If anything fails after the"
+                + " deletion, the verified copy stays in this app and the upload is retried."
+                + " Photos on this phone are kept; if another app removes one, it’s put back.")
+        .setPositiveButton(
+            "Delete and re-upload",
+            (d, w) -> {
+              String email = account.email();
+              io.execute(
+                  () -> {
+                    boolean added;
+                    try (ReclaimDb db = new ReclaimDb(this)) {
+                      added = db.enqueue(ReclaimEngine.Job.of(email, item));
+                    }
+                    runOnUiThread(
+                        () -> {
+                          if (!alive()) return;
+                          if (!added) message("This item is already being processed.");
+                          startReclaim();
+                        });
+                  });
+            })
+        .setNegativeButton("Cancel", null)
+        .show();
+  }
+
+  private void startReclaim() {
+    if (account.email().isEmpty()) {
+      connect();
+      return;
+    }
+    if (InventoryService.busy()) {
+      message("The storage scan is running. Free up storage starts after you pause it.");
+      return;
+    }
+    try {
+      startForegroundService(new Intent(this, ReclaimService.class));
+    } catch (RuntimeException e) {
+      message("Android could not start the task. Reopen the app and try again.");
+    }
+    renderedReclaim = "";
+    refresh();
+  }
+
+  /** Copies written by an earlier install need the user's consent before Android deletes them. */
+  private void removeRecoveredCopies() {
+    List<Uri> uris = new ArrayList<>();
+    for (String uri : settings.recoveryCleanup()) uris.add(Uri.parse(uri));
+    if (uris.isEmpty()) return;
+    try {
+      startIntentSenderForResult(
+          android.provider.MediaStore.createDeleteRequest(getContentResolver(), uris)
+              .getIntentSender(),
+          42,
+          null,
+          0,
+          0,
+          0);
+    } catch (Exception e) {
+      message("Android could not open the delete request. Remove them from the gallery instead.");
+    }
+  }
+
+  @Override
+  protected void onActivityResult(int request, int result, Intent data) {
+    super.onActivityResult(request, result, data);
+    if (request == 42 && result == RESULT_OK) {
+      settings.recoveryCleanup(Set.of());
+      renderedReclaim = "";
+      refresh();
+    }
+  }
+
+  private void toggleReclaim() {
+    if (ReclaimService.busy()) {
+      startService(new Intent(this, ReclaimService.class).setAction("pause"));
+      refresh();
+    } else startReclaim();
   }
 
   private void startScan() {
@@ -836,6 +1368,10 @@ public final class MainActivity extends ThemedActivity {
     if (InventoryService.busy()) {
       stopService(new Intent(this, InventoryService.class));
       refresh();
+      return;
+    }
+    if (ReclaimService.busy()) {
+      message("Pause Free up storage before scanning.");
       return;
     }
     try {
@@ -849,6 +1385,10 @@ public final class MainActivity extends ThemedActivity {
   private void restartScan() {
     if (InventoryService.busy()) {
       message("Pause the current scan first.");
+      return;
+    }
+    if (ReclaimService.busy()) {
+      message("Pause Free up storage first.");
       return;
     }
     if (account.email().isEmpty()) {
@@ -881,8 +1421,8 @@ public final class MainActivity extends ThemedActivity {
   }
 
   private void connect() {
-    if (BackupEngine.busy() || InventoryService.busy()) {
-      message("Pause backup and the storage scan before changing accounts.");
+    if (BackupEngine.busy() || InventoryService.busy() || ReclaimService.busy()) {
+      message("Pause backup, the storage scan, and Free up storage before changing accounts.");
       return;
     }
     startActivity(new Intent(this, SignInActivity.class));
@@ -980,6 +1520,7 @@ public final class MainActivity extends ThemedActivity {
               Scheduler.configure(this);
               stopService(new Intent(this, BackupService.class));
               stopService(new Intent(this, InventoryService.class));
+              stopService(new Intent(this, ReclaimService.class));
               account.clear();
               showProfile("", null);
               io.execute(

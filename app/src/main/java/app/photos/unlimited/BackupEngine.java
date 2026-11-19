@@ -25,6 +25,15 @@ public final class BackupEngine {
     void status(String text, long sent, long total);
   }
 
+  /** A phone copy restored after Free up is expected to be in the library already. */
+  private static boolean reclaimed(Context context, String email, byte[] digest) {
+    try (ReclaimDb db = new ReclaimDb(context)) {
+      return db.reclaimed(email, digest);
+    } catch (RuntimeException e) {
+      return false;
+    }
+  }
+
   public static boolean busy() {
     return BUSY.get();
   }
@@ -126,6 +135,11 @@ public final class BackupEngine {
           byte[] digest = hash.digest();
           String existing = api.find(digest);
           if (!existing.isEmpty()) {
+            // A file created after our backup was switched on is already in the library:
+            // something else uploaded it first, almost always Google Photos' own backup.
+            long since = settings.enabledSince();
+            if (since > 0 && item.modified() > since && !reclaimed(context, email, digest))
+              settings.otherUploader(item.name());
             db.complete(item, existing, true);
             continue;
           }

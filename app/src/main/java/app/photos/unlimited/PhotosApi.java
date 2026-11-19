@@ -40,7 +40,17 @@ public final class PhotosApi {
         long length,
         AtomicBoolean stop)
         throws IOException;
+
+    /** Streams a GET response into the sink; only media download hosts are allowed. */
+    default void stream(
+        String url, Map<String, String> headers, OutputStream sink, AtomicBoolean stop)
+        throws IOException {
+      throw new IOException("Downloads are not supported by this transport");
+    }
   }
+
+  /** A URL found in the download response, with the protobuf path where it appeared. */
+  public record Link(String path, String url) {}
 
   public record Response(byte[] bytes, Map<String, String> headers) {}
 
@@ -175,6 +185,197 @@ public final class PhotosApi {
                     "x-goog-ext-173412678-bin", "CgcIAhClARgC",
                     "x-goog-ext-174067345-bin", "CgIIAg=="))
             .bytes);
+  }
+
+  static final String MUTATE = RPC + "17490284929287180316";
+  static final String DOWNLOAD =
+      "https://photosdata-pa.googleapis.com/$rpc/social.frontend.photos.preparedownloaddata.v1"
+          + ".PhotosPrepareDownloadDataService/PhotosPrepareDownload";
+  static final Map<String, String> EXT =
+      Map.of(
+          "x-goog-ext-173412678-bin", "CgcIAhClARgC",
+          "x-goog-ext-174067345-bin", "CgIIAg==");
+
+  private static Proto clientInfo() {
+    return new Proto()
+        .number(1, 5)
+        .message(2, new Proto().number(1, 49029607).text(2, "28"));
+  }
+
+  private static Proto mutationMask(boolean full) {
+    Proto mask = new Proto().message(2, new Proto()).message(3, new Proto().message(1, new Proto()));
+    if (full) mask.message(4, new Proto()).message(5, new Proto().message(1, new Proto()));
+    return new Proto().message(4, mask);
+  }
+
+  /** action 1 = move to trash, 2 = delete permanently, 3 = restore from trash. */
+  static byte[] mutationBody(int action, List<String> dedupKeys) {
+    if (dedupKeys.isEmpty()) throw new IllegalArgumentException("No items");
+    Proto body = new Proto().number(2, action);
+    for (String key : dedupKeys) body.text(3, key);
+    body.number(4, action == 1 ? 1 : 2);
+    body.message(8, mutationMask(action != 3));
+    if (action == 2) body.text(9, "");
+    else body.message(9, clientInfo());
+    return body.build();
+  }
+
+  static byte[] downloadBody(String mediaKey) {
+    return new Proto()
+        .message(1, new Proto().message(1, new Proto().text(1, mediaKey)))
+        .message(
+            2,
+            new Proto()
+                .message(1, new Proto().message(7, new Proto().message(2, new Proto())))
+                .message(
+                    5,
+                    new Proto()
+                        .message(2, new Proto())
+                        .message(3, new Proto())
+                        .message(5, new Proto().message(1, new Proto()).number(3, 0))))
+        .build();
+  }
+
+  static byte[] captionBody(String dedupKey, String caption) {
+    return new Proto().text(2, caption).text(3, dedupKey).build();
+  }
+
+  static byte[] favoriteBody(String dedupKey, boolean favorite) {
+    return new Proto()
+        .message(1, new Proto().text(2, dedupKey))
+        .message(2, new Proto().number(1, favorite ? 1 : 2))
+        .message(3, new Proto().message(1, new Proto().message(19, new Proto())))
+        .build();
+  }
+
+  static byte[] archiveBody(List<String> dedupKeys, boolean archived) {
+    Proto body = new Proto();
+    for (String key : dedupKeys)
+      body.message(
+          1, new Proto().text(1, key).message(2, new Proto().number(1, archived ? 1 : 2)));
+    return body.number(3, 1).build();
+  }
+
+  public byte[] moveToTrash(List<String> dedupKeys) throws IOException {
+    return post(MUTATE, mutationBody(1, dedupKeys), Map.of()).bytes;
+  }
+
+  public byte[] deletePermanently(List<String> dedupKeys) throws IOException {
+    return post(MUTATE, mutationBody(2, dedupKeys), Map.of()).bytes;
+  }
+
+  public byte[] restoreFromTrash(List<String> dedupKeys) throws IOException {
+    return post(MUTATE, mutationBody(3, dedupKeys), EXT).bytes;
+  }
+
+  public void setCaption(String dedupKey, String caption) throws IOException {
+    post(RPC + "1552790390512470739", captionBody(dedupKey, caption), EXT);
+  }
+
+  public void setFavorite(String dedupKey, boolean favorite) throws IOException {
+    post(RPC + "5144645502632292153", favoriteBody(dedupKey, favorite), EXT);
+  }
+
+  public void setArchived(List<String> dedupKeys, boolean archived) throws IOException {
+    post(RPC + "6715446385130606868", archiveBody(dedupKeys, archived), EXT);
+  }
+
+  /** Raw PrepareDownload response; see {@link #links(byte[])}. */
+  public byte[] prepareDownload(String mediaKey) throws IOException {
+    return post(DOWNLOAD, downloadBody(mediaKey), EXT).bytes;
+  }
+
+  /**
+   * Every https URL in a response, ordered so the documented original-photo field comes first,
+   * then video fields, then everything else. The caller proves which one is the original by its
+   * SHA-1; order only saves bandwidth.
+   */
+  public static List<Link> links(byte[] response) {
+    List<Link> found = new ArrayList<>();
+    collect(response, "", 0, found);
+    List<Link> ordered = new ArrayList<>();
+    for (String prefix : List.of("1.5.2.6", "1.5.3.", "1.5."))
+      for (Link link : found)
+        if ((link.path().equals(prefix) || link.path().startsWith(prefix))
+            && !ordered.contains(link)
+            && !link.path().equals("1.5.2.5")) ordered.add(link);
+    for (Link link : found)
+      if (!ordered.contains(link) && !link.path().equals("1.5.2.5")) ordered.add(link);
+    for (Link link : found) if (!ordered.contains(link)) ordered.add(link);
+    return ordered;
+  }
+
+  private static void collect(byte[] data, String path, int depth, List<Link> out) {
+    if (depth > 10) return;
+    List<Proto.Value> values;
+    try {
+      values = Proto.values(data);
+    } catch (IOException e) {
+      return;
+    }
+    for (Proto.Value v : values) {
+      if (v.wire() != 2) continue;
+      String here = path.isEmpty() ? Integer.toString(v.field()) : path + "." + v.field();
+      String text = asciiUrl(v.bytes());
+      if (text != null) out.add(new Link(here, text));
+      else collect(v.bytes(), here, depth + 1, out);
+    }
+  }
+
+  private static String asciiUrl(byte[] bytes) {
+    if (bytes.length < 12 || bytes.length > 8192) return null;
+    for (byte b : bytes) if (b < 0x21 || b > 0x7e) return null;
+    String text = new String(bytes, StandardCharsets.US_ASCII);
+    return text.startsWith("https://") ? text : null;
+  }
+
+  static boolean downloadHost(String host) {
+    return host != null
+        && (host.equals("googleusercontent.com") || host.endsWith(".googleusercontent.com"));
+  }
+
+  /**
+   * Streams one URL into {@code target}, returning its SHA-1. The caller compares the digest with
+   * the library's recorded original hash; nothing here decides that a file is the original.
+   */
+  public byte[] download(String url, File target, long limit, Progress progress)
+      throws IOException {
+    URL parsed = new URL(url);
+    if (!parsed.getProtocol().equals("https") || !downloadHost(parsed.getHost()))
+      throw new ApiException(
+          "Download address is not a Google media host: " + parsed.getHost(), false, true);
+    MessageDigest digest = sha1();
+    long[] count = {0};
+    Map<String, String> headers = headers();
+    headers.remove("Content-Type");
+    try (OutputStream file = new FileOutputStream(target)) {
+      OutputStream sink =
+          new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+              write(new byte[] {(byte) b}, 0, 1);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+              checkStopped(stop);
+              count[0] += len;
+              if (count[0] > limit) throw new IOException("Download is larger than expected");
+              digest.update(b, off, len);
+              file.write(b, off, len);
+              progress.update(count[0], limit);
+            }
+          };
+      transport.stream(url, headers, sink, stop);
+      file.flush();
+      if (file instanceof FileOutputStream f) f.getFD().sync();
+    }
+    return digest.digest();
+  }
+
+  /** Unparsed library response, for diagnostics only. */
+  public byte[] libraryPageRaw(byte[] request) throws IOException {
+    return post(RPC + "18047484249733410717", request, EXT).bytes;
   }
 
   public String find(byte[] hash) throws IOException {
@@ -378,6 +579,52 @@ public final class PhotosApi {
   }
 
   public static final class Network implements Transport {
+    @Override
+    public void stream(
+        String address, Map<String, String> headers, OutputStream sink, AtomicBoolean stop)
+        throws IOException {
+      String current = address;
+      for (int hop = 0; hop < 6; hop++) {
+        checkStopped(stop);
+        URL url = new URL(current);
+        if (!url.getProtocol().equals("https") || !downloadHost(url.getHost()))
+          throw new IOException("Download redirected to an unrecognized host");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        try {
+          connection.setInstanceFollowRedirects(false);
+          connection.setConnectTimeout(30000);
+          connection.setReadTimeout(60000);
+          connection.setRequestProperty("Accept-Encoding", "identity");
+          headers.forEach(connection::setRequestProperty);
+          int code = connection.getResponseCode();
+          if (code >= 300 && code < 400) {
+            String location = connection.getHeaderField("Location");
+            if (location == null) throw new IOException("Download redirect without location");
+            current = new URL(url, location).toString();
+            continue;
+          }
+          if (code < 200 || code >= 300)
+            throw new ApiException(
+                "Google returned HTTP " + code + " for the download.",
+                code == 401,
+                code == 404 || code == 410,
+                code);
+          try (InputStream in = connection.getInputStream()) {
+            byte[] b = new byte[128 * 1024];
+            int n;
+            while ((n = in.read(b)) != -1) {
+              checkStopped(stop);
+              sink.write(b, 0, n);
+            }
+          }
+          return;
+        } finally {
+          connection.disconnect();
+        }
+      }
+      throw new IOException("Too many download redirects");
+    }
+
     public Response call(
         String address,
         String method,

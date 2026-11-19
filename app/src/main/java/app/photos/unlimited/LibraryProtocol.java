@@ -16,7 +16,62 @@ public final class LibraryProtocol {
       long taken,
       boolean trash,
       boolean archived,
-      int origin) {}
+      int origin,
+      Extra extra) {
+    public Item(
+        String key,
+        String name,
+        int type,
+        Long size,
+        Long charged,
+        long taken,
+        boolean trash,
+        boolean archived,
+        int origin) {
+      this(key, name, type, size, charged, taken, trash, archived, origin, Extra.NONE);
+    }
+  }
+
+  /** How Google stores the bytes: the original, a reduced copy (Storage saver), or unreported. */
+  public enum Quality {
+    UNKNOWN,
+    ORIGINAL,
+    REDUCED
+  }
+
+  /**
+   * Fields needed to reclaim storage. Every value is optional: an unexpected shape leaves the
+   * value empty and makes the item ineligible instead of failing the whole scan.
+   */
+  public record Extra(
+      String dedup,
+      byte[] sha1,
+      String caption,
+      boolean favorite,
+      boolean edited,
+      boolean canonical,
+      boolean locked,
+      boolean motion,
+      Quality quality) {
+    public static final Extra NONE =
+        new Extra("", null, "", false, false, true, false, false, Quality.UNKNOWN);
+
+    public Extra(
+        String dedup,
+        byte[] sha1,
+        String caption,
+        boolean favorite,
+        boolean edited,
+        boolean canonical,
+        boolean locked,
+        boolean motion) {
+      this(dedup, sha1, caption, favorite, edited, canonical, locked, motion, Quality.UNKNOWN);
+    }
+
+    public boolean hashKnown() {
+      return sha1 != null && sha1.length == 20;
+    }
+  }
 
   public record Page(
       List<Item> items, List<String> deletions, byte[] resume, byte[] sync, boolean more) {}
@@ -89,7 +144,8 @@ public final class LibraryProtocol {
               number(details, 7, 0),
               number(Proto.message(details, 16), 3, 0) > 0,
               number(Proto.message(details, 29), 1, 0) == 1,
-              (int) number(Proto.message(details, 30), 1, 0)));
+              (int) number(Proto.message(details, 30), 1, 0),
+              extra(details, kind)));
     }
     List<String> deleted = new ArrayList<>();
     for (byte[] deletion : Proto.fields(root, 9)) {
@@ -106,6 +162,100 @@ public final class LibraryProtocol {
         Proto.message(root, 1),
         Proto.message(root, 6),
         number(root, 7, 0) == 2);
+  }
+
+  static Extra extra(byte[] details, byte[] kind) {
+    byte[] sha1 = null;
+    try {
+      byte[] h = Proto.message(Proto.message(details, 13), 1);
+      if (h.length == 20) sha1 = h;
+    } catch (IOException ignored) {
+    }
+    String dedup = lenientText(details, 21, 1);
+    if (!dedup.matches("[A-Za-z0-9_-]{8,200}")) dedup = "";
+    if (dedup.isEmpty() && sha1 != null)
+      dedup =
+          java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(sha1);
+    boolean canonical = true;
+    try {
+      for (byte[] prop : Proto.fields(details, 5)) {
+        Long kindValue = Proto.integer(prop, 1);
+        if (kindValue != null && kindValue == 27) canonical = false;
+      }
+    } catch (IOException e) {
+      canonical = false;
+    }
+    return new Extra(
+        dedup,
+        sha1,
+        cleanCaption(lenientText(details, 3)),
+        lenientFlag(details, 31),
+        lenientPresent(kind, 2, 4),
+        canonical,
+        lenientFlag(details, 39),
+        // Motion/Live Photos carry a field-5 envelope for their video (live-verified
+        // 2026-11-19); upstream GPMC's 5.5.2.4 sub-path is not sent by the server.
+        lenientPresent(kind, 5),
+        quality(details));
+  }
+
+  static Quality quality(byte[] details) {
+    try {
+      Long value = Proto.integer(Proto.message(details, 35), 3);
+      if (value == null) return Quality.UNKNOWN;
+      return value == 2 ? Quality.ORIGINAL : Quality.REDUCED;
+    } catch (IOException e) {
+      return Quality.UNKNOWN;
+    }
+  }
+
+  private static String lenientText(byte[] data, int... path) {
+    try {
+      byte[] value = data;
+      for (int field : path) value = Proto.message(value, field);
+      if (value.length == 0 || value.length > 16384) return "";
+      return StandardCharsets.UTF_8
+          .newDecoder()
+          .decode(java.nio.ByteBuffer.wrap(value))
+          .toString();
+    } catch (Exception e) {
+      return "";
+    }
+  }
+
+  /** A nested message misread as text would contain control bytes; never restore that. */
+  static String cleanCaption(String text) {
+    for (int i = 0; i < text.length(); i++) {
+      char c = text.charAt(i);
+      if (c < 0x20 && c != '\n' && c != '\t') return "";
+      if (c == 0xfffd) return "";
+    }
+    return text.length() > 4096 ? "" : text;
+  }
+
+  private static boolean lenientFlag(byte[] data, int field) {
+    try {
+      Long value = Proto.integer(Proto.message(data, field), 1);
+      return value != null && value == 1;
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
+  private static boolean lenientPresent(byte[] data, int... path) {
+    try {
+      byte[] value = data;
+      for (int field : path) {
+        boolean found = false;
+        for (Proto.Value v : Proto.values(value))
+          if (v.field() == field && v.wire() == 2) found = true;
+        if (!found) return false;
+        value = Proto.message(value, field);
+      }
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
   }
 
   /**
