@@ -143,6 +143,11 @@ public final class ReclaimDb extends SQLiteOpenHelper implements ReclaimEngine.J
     return n;
   }
 
+  @androidx.annotation.VisibleForTesting
+  void deleteForTest(String mediaKey) {
+    getWritableDatabase().delete("jobs", "media_key=?", new String[] {mediaKey});
+  }
+
   /** Cancels jobs that have not touched Google yet. */
   public void cancelQueued(String account) {
     getWritableDatabase()

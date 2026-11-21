@@ -76,6 +76,9 @@ public final class LibraryProtocol {
   public record Page(
       List<Item> items, List<String> deletions, byte[] resume, byte[] sync, boolean more) {}
 
+  /** A page with no items, deletions or cursors: what a delta page with no known fields means. */
+  static final Page EMPTY = new Page(List.of(), List.of(), new byte[0], new byte[0], false);
+
   public enum Stage {
     NEW,
     INITIAL,
@@ -92,7 +95,7 @@ public final class LibraryProtocol {
 
   static String text(byte[] data, int field) throws IOException {
     byte[] bytes = Proto.message(data, field);
-    if (bytes.length > 16384) throw new IOException("Library text is too long");
+    if (bytes.length > 16384) throw new ScanFailure("SCAN_ITEM_TEXT_LONG", "Library text is too long");
     return StandardCharsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(bytes)).toString();
   }
 
@@ -106,63 +109,179 @@ public final class LibraryProtocol {
     return value == null ? fallback : value;
   }
 
+  /** Any decoding error that is not already labelled is a page-level format problem. */
   public static Page parse(byte[] response) throws IOException {
-    byte[] root = Proto.message(response, 1);
-    if (root.length == 0) throw new IOException("Unrecognized library response");
+    try {
+      return parsePage(response);
+    } catch (ScanFailure e) {
+      throw e;
+    } catch (java.io.InterruptedIOException e) {
+      throw e;
+    } catch (IOException e) {
+      throw new ScanFailure("SCAN_FORMAT_PAGE", e.getMessage());
+    }
+  }
+
+  /**
+   * A page-level label: SCAN_FORMAT_PAGE_<STEP>_<REASON>[_F<field>][_W<wire>]. ENV decodes the
+   * whole outer response, so its field numbers are fields of that response, not of the root.
+   * ROOT decodes the root, SHAPE checks its field types, END reads the cursor fields.
+   */
+  private static ScanFailure page(String step, IOException e) {
+    if (e instanceof ScanFailure failure) return failure;
+    if (!(e instanceof Proto.Malformed m)) return new ScanFailure("SCAN_FORMAT_PAGE", e.getMessage());
+    String label = "SCAN_FORMAT_PAGE_" + step + "_" + m.reason;
+    if (m.field > 0) label += "_F" + m.field;
+    if ("WIRE".equals(m.reason) && m.wire >= 0) label += "_W" + m.wire;
+    return new ScanFailure(label, m.getMessage());
+  }
+
+  /** Adds the scan stage's first letter to a page-level label; other failures are unchanged. */
+  static ScanFailure withStage(ScanFailure e, Stage stage) {
+    if (!e.label().startsWith("SCAN_FORMAT_PAGE")) return e;
+    ScanFailure staged = new ScanFailure(e.label() + "_" + stage.name().charAt(0), e.getMessage());
+    staged.initCause(e);
+    return staged;
+  }
+
+  /*
+   * Strictness is deliberate. The page structure, item envelopes, item keys and deletions stay
+   * strict: a lost deletion or key could make reclaim trust a cloud copy that is gone. Any other
+   * field of an item body in an unexpected shape (including its file name) only makes that item
+   * "unknown" (no storage value, no hash), which ReclaimEngine.ineligible always refuses. The one
+   * exception is an item with no details at all, which is still SCAN_ITEM_INVALID.
+   */
+  private static Page parsePage(byte[] response) throws IOException {
+    byte[] root;
+    try {
+      root = Proto.message(response, 1);
+    } catch (IOException e) {
+      throw page("ENV", e);
+    }
+    if (root.length == 0)
+      throw new ScanFailure("SCAN_FORMAT_PAGE_ENV_NONE", "Unrecognized library response");
+    List<Proto.Value> top;
+    List<byte[]> mediaList;
+    List<byte[]> deletions;
+    try {
+      top = Proto.values(root);
+      mediaList = Proto.fields(root, 2);
+      deletions = Proto.fields(root, 9);
+    } catch (IOException e) {
+      throw page("ROOT", e);
+    }
     boolean recognized = false;
-    for (Proto.Value v : Proto.values(root)) {
+    int lowest = 0;
+    for (Proto.Value v : top) {
+      if (lowest == 0 || v.field() < lowest) lowest = v.field();
       if (v.field() == 1 || v.field() == 2 || v.field() == 6 || v.field() == 7 || v.field() == 9) {
         recognized = true;
         if (v.wire() != (v.field() == 7 ? 0 : 2))
-          throw new IOException("Unexpected library field type");
+          throw new ScanFailure(
+              "SCAN_FORMAT_PAGE_SHAPE_WIRE_F" + v.field() + "_W" + v.wire(),
+              "Unexpected library field type");
       }
     }
-    if (!recognized) throw new IOException("Unrecognized library response");
+    if (!recognized)
+      // Names the root's lowest field (always 1 or more here: the root isn't empty and
+      // Proto.values rejects field 0). LibrarySync reads this as an empty page in DELTA only.
+      throw new ScanFailure(
+          "SCAN_FORMAT_PAGE_SHAPE_NONE_F" + lowest, "Unrecognized library response");
     List<Item> items = new ArrayList<>();
-    for (byte[] media : Proto.fields(root, 2)) {
-      String key = text(media, 1);
-      if (key.isBlank()) throw new IOException("Library item has no identifier");
-      byte[] details = Proto.message(media, 2);
-      if (details.length == 0) throw new IOException("Library item has no details");
-      String name = text(details, 4);
-      if (name.isBlank()) name = "Unnamed media";
-      byte[] kind = Proto.message(media, 5);
-      int type = (int) number(kind, 1, 0);
-      // Use media envelopes as the fallback if the type enum is absent.
-      if (type == 0) {
-        if (Proto.message(kind, 3).length > 0) type = 2;
-        else if (Proto.message(kind, 2).length > 0) type = 1;
+    for (byte[] media : mediaList) {
+      try {
+        Proto.values(media);
+      } catch (IOException e) {
+        // Without a decodable envelope there is no trustworthy key, so this stays strict.
+        throw new ScanFailure("SCAN_FORMAT_ITEM", e.getMessage());
       }
-      Long charged = nonnegative(Proto.message(details, 35), 2);
-      items.add(
-          new Item(
-              key,
-              name,
-              type,
-              nonnegative(details, 10),
-              charged,
-              number(details, 7, 0),
-              number(Proto.message(details, 16), 3, 0) > 0,
-              number(Proto.message(details, 29), 1, 0) == 1,
-              (int) number(Proto.message(details, 30), 1, 0),
-              extra(details, kind)));
+      String key;
+      try {
+        key = text(media, 1);
+      } catch (ScanFailure e) {
+        throw e;
+      } catch (IOException e) {
+        throw new ScanFailure("SCAN_FORMAT_KEY", e.getMessage());
+      }
+      if (key.isBlank()) throw new ScanFailure("SCAN_ITEM_INVALID", "Library item has no identifier");
+      Item item;
+      try {
+        item = item(key, media);
+      } catch (ScanFailure e) {
+        // An item with no details at all is malformed, not merely unusual.
+        if ("SCAN_ITEM_INVALID".equals(e.label())) throw e;
+        item = unknown(key);
+      } catch (java.io.InterruptedIOException e) {
+        throw e;
+      } catch (IOException e) {
+        item = unknown(key);
+      }
+      items.add(item);
     }
     List<String> deleted = new ArrayList<>();
-    for (byte[] deletion : Proto.fields(root, 9)) {
-      byte[] d = Proto.message(deletion, 1);
-      if (number(d, 1, 0) == 1) {
-        String key = text(Proto.message(d, 2), 1);
-        if (key.isBlank()) throw new IOException("Invalid library deletion");
-        deleted.add(key);
+    for (byte[] deletion : deletions) {
+      String key;
+      try {
+        byte[] d = Proto.message(deletion, 1);
+        if (number(d, 1, 0) != 1) continue;
+        key = text(Proto.message(d, 2), 1);
+      } catch (ScanFailure e) {
+        throw e;
+      } catch (IOException e) {
+        throw new ScanFailure("SCAN_FORMAT_DELETION", e.getMessage());
       }
+      if (key.isBlank()) throw new ScanFailure("SCAN_ITEM_INVALID", "Invalid library deletion");
+      deleted.add(key);
     }
-    return new Page(
-        List.copyOf(items),
-        List.copyOf(deleted),
-        Proto.message(root, 1),
-        Proto.message(root, 6),
-        number(root, 7, 0) == 2);
+    byte[] resume;
+    byte[] sync;
+    boolean more;
+    try {
+      resume = Proto.message(root, 1);
+      sync = Proto.message(root, 6);
+      more = number(root, 7, 0) == 2;
+    } catch (IOException e) {
+      throw page("END", e);
+    }
+    return new Page(List.copyOf(items), List.copyOf(deleted), resume, sync, more);
   }
+
+  /**
+   * Reads one item's body. A decoding error here makes the item unknown, not the page; only
+   * missing details throw SCAN_ITEM_INVALID, which the caller rethrows.
+   */
+  private static Item item(String key, byte[] media) throws IOException {
+    byte[] details = Proto.message(media, 2);
+    if (details.length == 0) throw new ScanFailure("SCAN_ITEM_INVALID", "Library item has no details");
+    // Strict: the name is also the re-upload name, so a damaged one must never be freed.
+    String name = text(details, 4);
+    if (name.isBlank()) name = "Unnamed media";
+    byte[] kind = Proto.message(media, 5);
+    int type = (int) number(kind, 1, 0);
+    // Use media envelopes as the fallback if the type enum is absent.
+    if (type == 0) {
+      if (Proto.message(kind, 3).length > 0) type = 2;
+      else if (Proto.message(kind, 2).length > 0) type = 1;
+    }
+    Long charged = nonnegative(Proto.message(details, 35), 2);
+    return new Item(
+        key,
+        name,
+        type,
+        nonnegative(details, 10),
+        charged,
+        number(details, 7, 0),
+        number(Proto.message(details, 16), 3, 0) > 0,
+        number(Proto.message(details, 29), 1, 0) == 1,
+        (int) number(Proto.message(details, 30), 1, 0),
+        extra(details, kind));
+  }
+
+  /** An item whose body could not be read: kept so the key stays known, but never eligible. */
+  static Item unknown(String key) {
+    return new Item(key, "Unnamed media", 0, null, null, 0, false, false, 0, Extra.NONE);
+  }
+
 
   static Extra extra(byte[] details, byte[] kind) {
     byte[] sha1 = null;
@@ -262,13 +381,13 @@ public final class LibraryProtocol {
    * Advance only after a whole page has been parsed; the database commits page and cursor together.
    */
   public static Cursor advance(Cursor before, Page page) throws IOException {
-    if (before.stage == Stage.DONE) throw new IOException("Scan is already complete");
+    if (before.stage == Stage.DONE) throw new ScanFailure("SCAN_CURSOR", "Scan is already complete");
     if (page.resume.length > 0 && java.util.Arrays.equals(page.resume, before.resume))
-      throw new IOException("Library pagination did not advance");
+      throw new ScanFailure("SCAN_CURSOR", "Library pagination did not advance");
     byte[] nextSync = page.sync.length > 0 ? page.sync : before.nextSync;
     return switch (before.stage) {
       case NEW -> {
-        if (page.sync.length == 0) throw new IOException("Library sync cursor is missing");
+        if (page.sync.length == 0) throw new ScanFailure("SCAN_CURSOR", "Library sync cursor is missing");
         yield new Cursor(
             page.resume.length > 0 ? Stage.INITIAL : Stage.SYNC,
             page.resume,
@@ -284,11 +403,11 @@ public final class LibraryProtocol {
               before.nextSync,
               false);
       case SYNC -> {
-        if (page.sync.length == 0) throw new IOException("Library sync cursor is missing");
+        if (page.sync.length == 0) throw new ScanFailure("SCAN_CURSOR", "Library sync cursor is missing");
         if (page.resume.length > 0)
           yield new Cursor(Stage.DELTA, page.resume, before.sync, page.sync, page.more);
         if (page.more && java.util.Arrays.equals(page.sync, before.sync))
-          throw new IOException("Library sync did not advance");
+          throw new ScanFailure("SCAN_CURSOR", "Library sync did not advance");
         yield new Cursor(
             page.more ? Stage.SYNC : Stage.DONE, page.resume, page.sync, page.sync, page.more);
       }
@@ -297,10 +416,10 @@ public final class LibraryProtocol {
         if (page.resume.length > 0)
           yield new Cursor(Stage.DELTA, page.resume, before.sync, nextSync, more);
         if (more && java.util.Arrays.equals(nextSync, before.sync))
-          throw new IOException("Library sync did not advance");
+          throw new ScanFailure("SCAN_CURSOR", "Library sync did not advance");
         yield new Cursor(more ? Stage.SYNC : Stage.DONE, page.resume, nextSync, nextSync, more);
       }
-      case DONE -> throw new IOException("Scan is already complete");
+      case DONE -> throw new ScanFailure("SCAN_CURSOR", "Scan is already complete");
     };
   }
 

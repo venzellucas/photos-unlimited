@@ -6,7 +6,6 @@ import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import java.io.*;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Small account-scoped cache. A missing picture must never block backup or trigger sign-in. */
@@ -58,16 +57,11 @@ final class ProfileStore {
       prefs()
           .edit()
           .putString("account", email)
-          .putLong("retryAfter", now + 60 * 60 * 1000L)
+          .putLong("retryAfter", now + 24 * 60 * 60 * 1000L)
           .commit();
     }
-    ProfileApi.Network transport = new ProfileApi.Network();
-    ProfileApi.Profile profile = ProfileApi.fetch(credential, transport, stop);
-    Bitmap bitmap = null;
-    if (!profile.picture().isEmpty()) {
-      byte[] data = transport.call(profile.picture(), "GET", Map.of(), null, 0, stop).bytes();
-      bitmap = decode(data);
-    }
+    ProfileApi.Fetched profile = ProfileApi.fetch(credential, new ProfileApi.Network(), stop);
+    Bitmap bitmap = profile.image() == null ? null : decode(profile.image());
     PhotosApi.checkStopped(stop);
     synchronized (LOCK) {
       if (!email.equals(new AccountStore(context).email()) || stop.get()) return;
@@ -83,13 +77,13 @@ final class ProfileStore {
     if (bounds.outWidth <= 0
         || bounds.outHeight <= 0
         || bounds.outWidth > 4096
-        || bounds.outHeight > 4096) throw new IOException("Invalid profile image dimensions");
+        || bounds.outHeight > 4096) throw new ProfileApi.Failure("IMAGE_DECODE");
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inSampleSize = 1;
     while (Math.max(bounds.outWidth, bounds.outHeight) / options.inSampleSize > 512)
       options.inSampleSize *= 2;
     Bitmap decoded = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-    if (decoded == null) throw new IOException("Invalid profile image");
+    if (decoded == null) throw new ProfileApi.Failure("IMAGE_DECODE");
     int edge = Math.min(decoded.getWidth(), decoded.getHeight());
     Bitmap square =
         Bitmap.createBitmap(
@@ -109,9 +103,9 @@ final class ProfileStore {
           if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, out))
             throw new IOException("Could not cache profile image");
           target.finishWrite(out);
-        } catch (IOException e) {
-          target.failWrite(out);
-          throw e;
+        } catch (IOException | RuntimeException e) {
+          if (out != null) target.failWrite(out);
+          throw new ProfileApi.Failure("CACHE_WRITE");
         }
       }
       prefs().edit().putString("account", email).putString("name", name).commit();

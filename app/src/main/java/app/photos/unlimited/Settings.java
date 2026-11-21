@@ -144,4 +144,66 @@ public final class Settings {
   public long lastRun() {
     return prefs.getLong("lastRun", 0);
   }
+
+  /** The daily update check; on unless the user turned it off (also after an upgrade). */
+  public boolean updateCheck() {
+    return prefs.getBoolean("updateCheck", true);
+  }
+
+  /** Orders a finishing check's writes against the user turning the check off. */
+  private static final Object UPDATE_LOCK = new Object();
+
+  /** Turning it off forgets what the check found, so the card disappears at once. */
+  public void updateCheck(boolean value) {
+    synchronized (UPDATE_LOCK) {
+      prefs.edit().putBoolean("updateCheck", value).commit();
+      if (!value) clearUpdate();
+    }
+  }
+
+  /** A check's result, dropped if the user turned the check off while it ran. */
+  public void storeUpdate(String latest, String etag) {
+    synchronized (UPDATE_LOCK) {
+      if (!updateCheck()) return;
+      prefs.edit().putString("updateLatest", latest).putString("updateEtag", etag).apply();
+    }
+  }
+
+  public long updateLastAttempt() {
+    return prefs.getLong("updateLastAttempt", 0);
+  }
+
+  public void updateLastAttempt(long value) {
+    prefs.edit().putLong("updateLastAttempt", value).commit();
+  }
+
+  /** The newest release's version (X.Y.Z); empty when unknown. */
+  public String updateLatest() {
+    return prefs.getString("updateLatest", "");
+  }
+
+
+  public String updateEtag() {
+    return prefs.getString("updateEtag", "");
+  }
+
+
+  /** The version the user said "Not now" to; the card returns only for a newer one. */
+  public String updateDismissed() {
+    return prefs.getString("updateDismissed", "");
+  }
+
+  public void updateDismissed(String value) {
+    prefs.edit().putString("updateDismissed", value).apply();
+  }
+
+  public void clearUpdate() {
+    prefs
+        .edit()
+        .remove("updateLastAttempt")
+        .remove("updateLatest")
+        .remove("updateEtag")
+        .remove("updateDismissed")
+        .commit();
+  }
 }

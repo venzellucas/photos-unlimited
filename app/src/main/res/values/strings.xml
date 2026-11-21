@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Profile lookup failure. %1$s is a fixed diagnostic label such as AUTH_HTTP_403. -->
+    <string name="profile_failed">Couldn\'t load your Google profile photo (%1$s). Backups are not affected.</string>
+    <!-- Update card on the Backup screen. %1$s is a version such as 1.1.0. -->
+    <string name="update_title">Version %1$s is available</string>
+    <string name="update_body">Install it over this app. Don\'t uninstall Photos Unlimited first. If Android doesn\'t allow the install, keep using this version.</string>
+    <string name="update_blocked_body">Finish Free up before updating. Some photos are only on this phone until Free up uploads them again.</string>
+    <string name="update_download">Download latest version</string>
+    <string name="update_whats_new">What\'s new</string>
+    <string name="update_not_now">Not now</string>
+    <string name="update_open_free_up">Open Free up</string>
+    <!-- Settings toggle for the daily update check. -->
+    <string name="update_setting">Check for updates</string>
+    <string name="update_setting_summary">Once a day while the app is open, asks GitHub for the newest version. GitHub sees your IP address.</string>
+    <string name="no_browser">No browser found</string>
+</resources>

@@ -107,7 +107,15 @@ public final class InventoryService extends Service {
                   getSystemService(NotificationManager.class)
                       .notify(7401, notification(scan.pages() + " pages checked · Read-only scan")));
       if (current.cursor().stage() != LibraryProtocol.Stage.DONE)
-        db.message(account, generation, "Scan paused. Continue to read the remaining items.");
+        db.message(
+            account,
+            generation,
+            "Scan paused. Continue to read the remaining items. (SCAN_PAUSED_LIMIT)");
+    } catch (java.net.SocketTimeoutException e) {
+      setMessage(
+          account,
+          generation,
+          "The scan timed out. Results are partial. Continue or start over. (SCAN_TIMEOUT)");
     } catch (InterruptedIOException e) {
       setMessage(account, generation, "Scan paused. Continue when you’re ready.");
     } catch (PhotosApi.ApiException e) {
@@ -115,19 +123,23 @@ public final class InventoryService extends Service {
           account,
           generation,
           e.signIn
-              ? "Reconnect your Google account to continue the scan."
-              : "Google Photos could not complete the scan (HTTP "
-                  + e.httpStatus
-                  + "). You can continue or start over.");
+              ? "Reconnect your Google account to continue the scan. (" + label(e) + ")"
+              : "Google Photos could not complete the scan. You can continue or start over. ("
+                  + label(e)
+                  + ")");
     } catch (IOException e) {
       setMessage(
           account,
           generation,
           "Scan interrupted or metadata format unavailable. Results are partial. Continue or start"
-              + " over.");
+              + " over. ("
+              + label(e)
+              + ")");
     } catch (Exception e) {
       setMessage(
-          account, generation, "The scan stopped. Results are partial. Try continuing the scan.");
+          account,
+          generation,
+          "The scan stopped. Results are partial. Try continuing the scan. (" + label(e) + ")");
     } finally {
       scanningAccount = "";
       LibrarySync.unlock();
@@ -137,6 +149,27 @@ public final class InventoryService extends Service {
       stopForeground(STOP_FOREGROUND_REMOVE);
       stopSelf();
     }
+  }
+
+  /**
+   * A fixed, secret-free label naming why a scan stopped; null for a stop the user asked for.
+   * The order matters: a timeout is also an InterruptedIOException.
+   */
+  static String label(Throwable e) {
+    if (e instanceof java.net.SocketTimeoutException) return "SCAN_TIMEOUT";
+    if (e instanceof InterruptedIOException) return null;
+    if (e instanceof PhotosApi.ApiException api)
+      return api.signIn ? "SCAN_SIGN_IN" : "SCAN_HTTP_" + Math.max(0, Math.min(api.httpStatus, 999));
+    if (e instanceof ScanFailure scan) return scan.label();
+    if (e instanceof IOException)
+      return "Service response is too large".equals(e.getMessage())
+          ? "SCAN_RESPONSE_TOO_LARGE"
+          : "SCAN_NETWORK";
+    String name =
+        e.getClass().getSimpleName().replaceAll("[^A-Za-z0-9]", "").toUpperCase(java.util.Locale.ROOT);
+    if (name.isEmpty()) name = "UNKNOWN";
+    if (name.length() > 32) name = name.substring(0, 32);
+    return "SCAN_CRASH_" + name;
   }
 
   private void setMessage(String account, String generation, String message) {

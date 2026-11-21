@@ -42,32 +42,128 @@ public class ProfileInstrumentedTest {
     new AccountStore(context).clear();
   }
 
+  static ProfileApi.Reply ok(String type, byte[] body) {
+    return new ProfileApi.Reply(200, type, null, body);
+  }
+
+  static final byte[] PNG = {(byte) 0x89, 'P', 'N', 'G'};
+
   @Test
   public void profileTokenUsesSeparateScopesAndVerifiedAccount() throws Exception {
     List<String> calls = new ArrayList<>();
-    PhotosApi.Transport transport =
-        (url, method, headers, body, length, stop) -> {
+    ProfileApi.Transport transport =
+        (url, method, headers, body, stop) -> {
           calls.add(url);
           if (url.equals(PhotosApi.AUTH)) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            body.write(out);
-            var form = PhotosApi.parseForm(out.toString(StandardCharsets.UTF_8));
+            var form = PhotosApi.parseForm(new String(body, StandardCharsets.UTF_8));
             assertEquals(ProfileApi.SCOPES, form.get("service"));
             assertEquals("synthetic-only", form.get("Token"));
-            return new PhotosApi.Response(json("Auth=synthetic-profile-bearer\n"), Map.of());
+            assertEquals(ProfileApi.GMS, form.get("app"));
+            assertEquals(ProfileApi.GMS, form.get("callerPkg"));
+            assertEquals(PhotosApi.GMS_SIG, form.get("client_sig"));
+            assertEquals(ProfileApi.GMS, headers.get("app"));
+            return ok("text/plain", json("Auth=synthetic-profile-bearer\n"));
           }
-          assertEquals(ProfileApi.USERINFO, url);
-          assertEquals("GET", method);
-          assertNull(body);
-          assertEquals("Bearer synthetic-profile-bearer", headers.get("Authorization"));
-          return new PhotosApi.Response(json(valid()), Map.of());
+          if (url.equals(ProfileApi.USERINFO)) {
+            assertEquals("GET", method);
+            assertNull(body);
+            assertEquals("Bearer synthetic-profile-bearer", headers.get("Authorization"));
+            return ok("application/json", json(valid()));
+          }
+          assertEquals("https://lh3.googleusercontent.com/a/fixture", url);
+          assertTrue(headers.isEmpty());
+          return ok("image/png", PNG);
         };
     new AccountStore(context).save(CREDENTIAL);
     var profile = ProfileApi.fetch(CREDENTIAL, transport, new AtomicBoolean());
     assertEquals("Avatar Fixture", profile.name());
-    assertEquals(2, calls.size());
+    assertArrayEquals(PNG, profile.image());
+    assertEquals(3, calls.size());
     assertEquals(CREDENTIAL, new AccountStore(context).load());
     assertEquals("original-upload-scope", PhotosApi.parseForm(CREDENTIAL).get("service"));
+  }
+
+  /** Answers the token, userinfo and image steps from the given replies, in order. */
+  static String failure(ProfileApi.Reply auth, ProfileApi.Reply info, ProfileApi.Reply... image)
+      throws Exception {
+    int[] next = {0};
+    ProfileApi.Transport transport =
+        (url, method, headers, body, stop) -> {
+          if (url.equals(PhotosApi.AUTH)) return auth;
+          if (url.equals(ProfileApi.USERINFO)) return info;
+          return image[Math.min(next[0]++, image.length - 1)];
+        };
+    try {
+      var fetched = ProfileApi.fetch(CREDENTIAL, transport, new AtomicBoolean());
+      if (fetched.image() != null) ProfileStore.decode(fetched.image());
+      fail("Expected a profile failure");
+      return null;
+    } catch (ProfileApi.Failure f) {
+      assertTrue(f.label().matches("[A-Z0-9_]+"));
+      assertFalse(f.label().contains("@") || f.label().contains("/") || f.label().contains("="));
+      return f.label();
+    }
+  }
+
+  @Test
+  public void everyProfileFailureNamesItsStep() throws Exception {
+    var token = ok("text/plain", json("Auth=t\n"));
+    var info = ok("application/json", json(valid()));
+    var image = ok("image/png", PNG);
+    assertEquals(
+        "AUTH_ERROR_BADAUTHENTICATION",
+        failure(new ProfileApi.Reply(403, "text/plain", null, json("Error=BadAuthentication\n")), info));
+    assertEquals(
+        "AUTH_HTTP_403", failure(new ProfileApi.Reply(403, "text/plain", null, new byte[0]), info));
+    assertEquals("AUTH_NO_TOKEN", failure(ok("text/plain", json("Foo=bar\n")), info));
+    assertEquals(
+        "AUTH_TOO_LARGE", failure(new ProfileApi.Reply(-1, null, null, new byte[0]), info));
+    assertEquals(
+        "USERINFO_HTTP_401", failure(token, new ProfileApi.Reply(401, null, null, new byte[0])));
+    assertEquals(
+        "PROFILE_FIELDS_MISSING",
+        failure(token, ok("application/json", json(valid().replace("\"email_verified\":true,", "")))));
+    assertEquals(
+        "PROFILE_EMAIL_MISMATCH",
+        failure(token, ok("application/json", json(valid().replace(ACCOUNT, "other@example.com")))));
+    assertEquals(
+        "PICTURE_HOST",
+        failure(
+            token,
+            ok(
+                "application/json",
+                json(valid().replace("https://lh3.googleusercontent.com/a/fixture", "https://example.com/a")))));
+    assertEquals(
+        "IMAGE_REDIRECT_HOST",
+        failure(token, info, new ProfileApi.Reply(302, null, "https://example.com/a.png", new byte[0])));
+    assertEquals(
+        "IMAGE_REDIRECT_HOST", failure(token, info, new ProfileApi.Reply(302, null, null, new byte[0])));
+    assertEquals(
+        "IMAGE_REDIRECTS",
+        failure(
+            token,
+            info,
+            new ProfileApi.Reply(302, null, "https://lh4.googleusercontent.com/a", new byte[0])));
+    assertEquals("IMAGE_TYPE", failure(token, info, ok("text/html", PNG)));
+    assertEquals("IMAGE_DECODE", failure(token, info, ok("image/png", json("abc"))));
+    assertEquals("NO_CREDENTIAL", noCredential());
+  }
+
+  static String noCredential() throws Exception {
+    try {
+      ProfileApi.fetch("Email=&Token=&androidId=", (u, m, h, b, s) -> null, new AtomicBoolean());
+      fail();
+      return null;
+    } catch (ProfileApi.Failure f) {
+      return f.label();
+    }
+  }
+
+  @Test
+  public void googleErrorValuesAreNormalized() {
+    assertEquals("AUTH_ERROR_BADAUTHENTICATION", ProfileApi.errorLabel("BadAuthentication", 403));
+    assertEquals("AUTH_HTTP_403", ProfileApi.errorLabel("--", 403));
+    assertEquals(47, ProfileApi.errorLabel("x".repeat(80), 200).length());
   }
 
   @Test

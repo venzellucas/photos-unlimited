@@ -43,16 +43,46 @@ public final class Proto {
     out.write((int) value);
   }
 
+  /**
+   * A decoding error that also says why (CUT, TAG, WIRE or DUP) and where (field 0 = unknown,
+   * wire -1 = unknown), so a scan failure can name its cause. The message texts are unchanged.
+   */
+  public static final class Malformed extends IOException {
+    final String reason;
+    final int field;
+    final int wire;
+
+    Malformed(String message, String reason, int field, int wire) {
+      super(message);
+      this.reason = reason;
+      this.field = field;
+      this.wire = wire;
+    }
+
+    /** The same failure with the field filled in, unless one is already known. */
+    Malformed at(int field) {
+      return this.field != 0 ? this : new Malformed(getMessage(), reason, field, wire);
+    }
+  }
+
+  /** Field numbers outside protobuf's range are recorded as unknown, never wrapped. */
+  private static int fieldOf(long tag) {
+    long field = tag >>> 3;
+    return field >= 1 && field <= 536870911 ? (int) field : 0;
+  }
+
   private static long read(byte[] data, int[] pos) throws IOException {
     long value = 0;
     for (int shift = 0; shift < 64; shift += 7) {
-      if (pos[0] >= data.length) throw new IOException("Incomplete protocol response");
+      if (pos[0] >= data.length)
+        throw new Malformed("Incomplete protocol response", "CUT", 0, -1);
       int b = data[pos[0]++] & 255;
-      if (shift == 63 && (b & 254) != 0) throw new IOException("Invalid protocol integer");
+      if (shift == 63 && (b & 254) != 0)
+        throw new Malformed("Invalid protocol integer", "TAG", 0, -1);
       value |= (long) (b & 127) << shift;
       if ((b & 128) == 0) return value;
     }
-    throw new IOException("Invalid protocol integer");
+    throw new Malformed("Invalid protocol integer", "TAG", 0, -1);
   }
 
   public static List<byte[]> fields(byte[] data, int wanted) throws IOException {
@@ -60,27 +90,31 @@ public final class Proto {
     int[] p = {0};
     while (p[0] < data.length) {
       long tag = read(data, p);
-      if ((tag >>> 3) == 0) throw new IOException("Invalid protocol field");
-      int wire = (int) (tag & 7);
+      if ((tag >>> 3) == 0) throw new Malformed("Invalid protocol field", "TAG", 0, -1);
+      int wire = (int) (tag & 7), field = fieldOf(tag);
       long count;
-      switch (wire) {
-        case 0:
-          read(data, p);
-          continue;
-        case 1:
-          count = 8;
-          break;
-        case 5:
-          count = 4;
-          break;
-        case 2:
-          count = read(data, p);
-          break;
-        default:
-          throw new IOException("Unsupported protocol field");
+      try {
+        switch (wire) {
+          case 0:
+            read(data, p);
+            continue;
+          case 1:
+            count = 8;
+            break;
+          case 5:
+            count = 4;
+            break;
+          case 2:
+            count = read(data, p);
+            break;
+          default:
+            throw new Malformed("Unsupported protocol field", "WIRE", field, wire);
+        }
+      } catch (Malformed m) {
+        throw m.at(field);
       }
       if (count < 0 || count > data.length - p[0])
-        throw new IOException("Incomplete protocol response");
+        throw new Malformed("Incomplete protocol response", "CUT", field, -1);
       int end = p[0] + (int) count;
       if (wire == 2 && (tag >>> 3) == wanted)
         result.add(java.util.Arrays.copyOfRange(data, p[0], end));
@@ -110,20 +144,26 @@ public final class Proto {
     while (p[0] < data.length) {
       long tag = read(data, p);
       if ((tag >>> 3) == 0 || (tag >>> 3) > 536870911)
-        throw new IOException("Invalid protocol field");
+        throw new Malformed("Invalid protocol field", "TAG", 0, -1);
       int wire = (int) (tag & 7), field = (int) (tag >>> 3);
-      if (wire == 0) {
-        values.add(new Value(field, wire, read(data, p), null));
-        continue;
+      long n;
+      try {
+        if (wire == 0) {
+          values.add(new Value(field, wire, read(data, p), null));
+          continue;
+        }
+        n =
+            switch (wire) {
+              case 1 -> 8;
+              case 5 -> 4;
+              case 2 -> read(data, p);
+              default -> throw new Malformed("Unsupported protocol field", "WIRE", field, wire);
+            };
+      } catch (Malformed m) {
+        throw m.at(field);
       }
-      long n =
-          switch (wire) {
-            case 1 -> 8;
-            case 5 -> 4;
-            case 2 -> read(data, p);
-            default -> throw new IOException("Unsupported protocol field");
-          };
-      if (n < 0 || n > data.length - p[0]) throw new IOException("Incomplete protocol response");
+      if (n < 0 || n > data.length - p[0])
+        throw new Malformed("Incomplete protocol response", "CUT", field, -1);
       values.add(
           new Value(field, wire, null, java.util.Arrays.copyOfRange(data, p[0], p[0] + (int) n)));
       p[0] += (int) n;
@@ -135,7 +175,9 @@ public final class Proto {
     byte[] found = null;
     for (Value v : values(data))
       if (v.field == field) {
-        if (v.wire != 2 || found != null) throw new IOException("Ambiguous protocol message");
+        // The wire check runs first, so a wrong-type duplicate reports WIRE.
+        if (v.wire != 2) throw new Malformed("Ambiguous protocol message", "WIRE", field, v.wire);
+        if (found != null) throw new Malformed("Ambiguous protocol message", "DUP", field, -1);
         found = v.bytes;
       }
     return found == null ? new byte[0] : found;
@@ -145,7 +187,8 @@ public final class Proto {
     Long found = null;
     for (Value v : values(data))
       if (v.field == field) {
-        if (v.wire != 0 || found != null) throw new IOException("Ambiguous protocol integer");
+        if (v.wire != 0) throw new Malformed("Ambiguous protocol integer", "WIRE", field, v.wire);
+        if (found != null) throw new Malformed("Ambiguous protocol integer", "DUP", field, -1);
         found = v.number;
       }
     return found;

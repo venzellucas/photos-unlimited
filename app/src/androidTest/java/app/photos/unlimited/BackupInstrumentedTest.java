@@ -28,10 +28,62 @@ public class BackupInstrumentedTest {
 
   @After
   public void cleanup() {
+    try (ReclaimDb db = new ReclaimDb(context)) {
+      db.deleteForTest("test-boot-warning");
+    }
+    context.getSystemService(android.app.NotificationManager.class).cancel(7403);
     new Settings(context).enabled(false);
     Scheduler.configure(context);
     new AccountStore(context).clear();
     context.deleteDatabase("uploads.db");
+  }
+
+  @Test
+  public void onlyOnPhoneWarningIsPostedAtBoot() throws InterruptedException {
+    InstrumentationRegistry.getInstrumentation()
+        .getUiAutomation()
+        .grantRuntimePermission(
+            context.getPackageName(), android.Manifest.permission.POST_NOTIFICATIONS);
+    android.app.NotificationManager nm =
+        context.getSystemService(android.app.NotificationManager.class);
+    nm.cancel(7403);
+    assertFalse(warningShownWithin(false));
+    // As on a phone where Free up never ran in this install: a post to a missing channel is dropped.
+    nm.deleteNotificationChannel("reclaim");
+    ReclaimEngine.Job job = new ReclaimEngine.Job();
+    job.account = "me@example.com";
+    job.key = "test-boot-warning";
+    job.name = "boot-warning.jpg";
+    job.dedup = "";
+    job.sha1 = new byte[20]; // the column is NOT NULL
+    try (ReclaimDb db = new ReclaimDb(context)) {
+      assertTrue(db.enqueue(job));
+      job.state = ReclaimEngine.State.DELETED; // removed from Google, not uploaded again yet
+      db.save(job);
+      assertEquals(1, db.unsafeAll()); // no other only-on-phone rows on this emulator
+    }
+    BootReceiver.handle(context, Intent.ACTION_BOOT_COMPLETED);
+    assertTrue(warningShownWithin(true));
+
+    try (ReclaimDb db = new ReclaimDb(context)) {
+      db.deleteForTest("test-boot-warning");
+    }
+    BootReceiver.handle(context, Intent.ACTION_BOOT_COMPLETED);
+    assertFalse(warningShownWithin(false));
+  }
+
+  /** Posting and cancelling reach the system asynchronously: waits up to 5 s for {@code want}. */
+  private boolean warningShownWithin(boolean want) throws InterruptedException {
+    boolean shown = false;
+    for (int i = 0; i < 50; i++) {
+      shown = false;
+      for (android.service.notification.StatusBarNotification n :
+          context.getSystemService(android.app.NotificationManager.class).getActiveNotifications())
+        if (n.getId() == 7403) shown = true;
+      if (shown == want) break;
+      Thread.sleep(100);
+    }
+    return shown;
   }
 
   @Test

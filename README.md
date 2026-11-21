@@ -4,11 +4,17 @@ A small, independent Android uploader for a Google Photos library. Choose folder
 back up original photos and videos, and keep using the official Google Photos app
 to browse and edit your library.
 
-**v1.0.0 · Android 13+ · MIT license**
+**Android 13+ · MIT license**
 
 [Website](https://venzellucas.github.io/photos-unlimited/) ·
-[Download APK](https://github.com/venzellucas/photos-unlimited/releases/download/v1.0.0/Photos-Unlimited-1.0.0.apk) ·
-[Release notes](https://github.com/venzellucas/photos-unlimited/releases/tag/v1.0.0)
+[Download APK](https://github.com/venzellucas/photos-unlimited/releases/latest/download/Photos-Unlimited.apk) ·
+[Release notes](https://github.com/venzellucas/photos-unlimited/releases/latest)
+
+**Verify the APK.** Every release is signed with the certificate whose SHA-256
+fingerprint is
+`cbd14272c6aaa0568df8cc8be4ec10be9c6a2ebc0354eb202b5a05d8cda74bce`. Android refuses any
+update not signed with this key. Each release also lists the APK's checksum in
+`SHA256SUMS.txt`. To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ## What it does
 
@@ -36,8 +42,9 @@ No root, custom ROM, microG, API key, or Photos Unlimited server is required.
 5. Turn off automatic backup in the official Google Photos app, then tap **Back up now**.
    This also enables automatic backup in Photos Unlimited.
 
-Updates are manual. If the account button shows an initial, open it and choose
-**Refresh profile photo**. Profile lookup uses a separate optional read-only token;
+The app checks GitHub once a day while it is open and shows a card when a new version
+is out. Turn this off in Settings → **Check for updates**. If the account button shows an initial, open it and choose
+**Refresh profile photo**. Profile lookup uses a separate read-only token, at most once a day;
 its failure does not invalidate the upload credential. The advanced phone-account
 chooser is a diagnostic, not an alternative backup sign-in.
 
@@ -53,8 +60,7 @@ matching library items are skipped and retain their accounting.
 The storage scan covers Google Photos, not Drive or Gmail. Unknown accounting is
 not zero. Its total sums reported charged bytes for scanned records and can differ
 from account-wide usage. Shared items, alternate versions, omissions, and concurrent
-changes can affect coverage. Live accounting and profile authorization are not fully
-validated.
+changes can affect coverage. Live accounting is not fully validated.
 
 ## Free up storage
 
@@ -142,19 +148,21 @@ ANDROID_SERIAL=YOUR_TEST_EMULATOR ./gradlew :app:connectedDebugAndroidTest
 ```
 
 For release builds, supply an external keystore using `PHOTOS_KEYSTORE` and
-`PHOTOS_SIGN_PASSWORD`, then run `tools/build-release.sh`. Never commit these values
-or the keystore. Preserve a release signing key across updates.
+`PHOTOS_SIGN_PASSWORD`, set `ANDROID_HOME`, then run
+`RELEASE_TAG=vX.Y.Z tools/build-release.sh`, where `X.Y.Z` is the `versionName` in
+`app/build.gradle`. The APK and its `SHA256SUMS.txt` are written to `dist/X.Y.Z/`.
+Never commit these values or the keystore. Preserve a release signing key across
+updates.
 
 The library masks can be regenerated with `tools/generate-library-templates.py`
 using `blackboxprotobuf` and the pinned GPMC checkout listed below.
 
 ## Validation
 
-Version 1.0.0 passed 57 JVM tests, 20 Android instrumentation tests, debug/release lint
-with no errors, an independent security review (findings fixed before release), live Free
-up runs as described above, and an in-place signed upgrade from 0.2.1. The 0.2.1 APK
-passed 23 JVM tests, 19 Android instrumentation tests, debug/release
-lint with no errors, and an in-place signed upgrade from 0.2.0. Tests cover protocol
+Each release passes the JVM and Android instrumentation suites, lint with no errors,
+and an in-place signed upgrade from the previous release. Version 1.0.0 also had an
+independent security review (findings fixed before release) and live Free up runs as
+described above. Tests cover protocol
 handling, confirmed uploads, interruption, persisted queues, account separation,
 metadata pagination, appearance, and profile-cache isolation. Test credentials and
 network responses are synthetic. Light/dark and large-text screens were inspected.

@@ -46,7 +46,13 @@ public final class ReclaimService extends Service {
   @Override
   public void onCreate() {
     super.onCreate();
-    getSystemService(NotificationManager.class)
+    ensureChannel(this);
+  }
+
+  /** Creating a channel that already exists does nothing. */
+  static void ensureChannel(Context context) {
+    context
+        .getSystemService(NotificationManager.class)
         .createNotificationChannel(
             new NotificationChannel("reclaim", "Free up storage", NotificationManager.IMPORTANCE_LOW));
   }
@@ -118,8 +124,13 @@ public final class ReclaimService extends Service {
   /**
    * Android gives apps no warning before they are uninstalled, and uninstalling removes nothing
    * from the staging folder. Still, while an original exists only on this phone, say so plainly.
+   * Also runs at boot, after an app update and when the app opens, because a swiped-away or
+   * rebooted notification would otherwise stay gone. {@code account} is unused (every account
+   * counts); new callers pass "". Returns the count of items only on this phone. Synchronized so a
+   * read-then-post from one caller can't land after another caller's newer cancel.
    */
-  static void warnIfOnlyOnPhone(Context context, String account) {
+  static synchronized int warnIfOnlyOnPhone(Context context, String account) {
+    ensureChannel(context); // a boot-time post must work even if Free up never ran in this install
     NotificationManager nm = context.getSystemService(NotificationManager.class);
     int unsafe;
     try (ReclaimDb db = new ReclaimDb(context)) {
@@ -127,7 +138,7 @@ public final class ReclaimService extends Service {
     }
     if (unsafe == 0) {
       nm.cancel(7403);
-      return;
+      return 0;
     }
     PendingIntent open =
         PendingIntent.getActivity(
@@ -149,6 +160,7 @@ public final class ReclaimService extends Service {
             .setContentIntent(open)
             .setOngoing(true)
             .build());
+    return unsafe;
   }
 
   /** Google Photos removed phone copies about 3 s after a cloud deletion in testing. */

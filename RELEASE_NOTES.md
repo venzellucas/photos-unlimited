@@ -1,3 +1,52 @@
+# Photos Unlimited 1.1.0
+
+Fixes for large libraries and the profile photo, plus a way to hear about new versions.
+
+- **Update notice:** once a day while the app is open, it asks GitHub whether a newer
+  version exists and shows a card on the Backup screen when one is out. GitHub sees your
+  IP address, a fixed user agent and the time; no account, photo or device identifiers
+  are sent. It is on by default; turn it off in Settings → **Check for updates**. While
+  Free up has photos that are only on the phone, the card asks you to finish Free up
+  first.
+- **"Don't uninstall yet" comes back:** the warning about photos that are only on the
+  phone is posted again after a reboot, after an app update and when the app opens.
+- **Profile photo now loads.** Google refuses the profile scopes to the Photos client
+  the app uploads as, so the read-only profile token is now requested as Google Play
+  services, separately from the upload sign-in. If you tap **Refresh profile photo** and
+  it fails, the message names the failing step; backup is never affected.
+- **The storage scan finishes on large libraries.** An item whose details can't be fully
+  read no longer stops the scan: it is counted as "unknown" and never freed
+  ([#1](https://github.com/venzellucas/photos-unlimited/issues/1)). A catch-up page with
+  none of the fields the app reads now ends the catch-up pass, as the upstream client
+  does, and the finished message names it
+  ([#2](https://github.com/venzellucas/photos-unlimited/issues/2)). When a scan does
+  stop, the message ends with a short label in brackets, such as
+  `SCAN_FORMAT_PAGE_…`, to quote in a bug report.
+- **New icon:** a filled sage cloud with the arrow cut out, also in themed icons.
+
+## Install
+
+Android 13 or newer. Download `Photos-Unlimited.apk` and install it over 1.0.0 to keep
+your setup. From this release the APK has the same name in every release, so
+`releases/latest/download/Photos-Unlimited.apk` always gets the newest one. Verify it
+with `SHA256SUMS.txt`. The signing certificate's SHA-256 fingerprint is
+`cbd14272c6aaa0568df8cc8be4ec10be9c6a2ebc0354eb202b5a05d8cda74bce`; Android refuses
+any update not signed with this key.
+
+## Known limits
+
+Google's undocumented protocol may change, and an accepted upload is not proof of quota
+exemption. Items the scan can't fully read stay "unknown" (#1).
+Automatic backup runs when Android allows it: on phones with aggressive battery
+managers, use **Back up now** for a large first backup, or allow the app to run
+unrestricted.
+
+## Validation
+
+76 JVM tests and 28 Android instrumentation tests passed; lint had no errors. On a test
+emulator, the update card and the re-posted warning (after a reboot and after an update)
+were checked, and an in-place signed upgrade from 1.0.0 kept the settings.
+
 # Photos Unlimited 1.0.0
 
 The core backup features are verified on a real device. This release adds a way to free

@@ -48,6 +48,7 @@ public final class LibrarySync {
     InventoryDb.Scan current = db.scan(account);
     Set<String> seen = new HashSet<>();
     int pages = 0;
+    String skipped = null; // the label of a delta page read as empty, kept as evidence
     while (current.cursor().stage() != LibraryProtocol.Stage.DONE
         && pages < maxPages
         && System.currentTimeMillis() < deadline) {
@@ -58,7 +59,7 @@ public final class LibrarySync {
               + Base64.getEncoder().encodeToString(current.cursor().resume())
               + ":"
               + Base64.getEncoder().encodeToString(current.cursor().sync());
-      if (!seen.add(position)) throw new IOException("Library cursor cycle");
+      if (!seen.add(position)) throw new ScanFailure("SCAN_CURSOR_CYCLE", "Library cursor cycle");
       if (!account.equals(store.email())) throw new InterruptedIOException();
       String template =
           switch (current.cursor().stage()) {
@@ -70,7 +71,19 @@ public final class LibrarySync {
       try (var input = context.getAssets().open("library-" + template + ".bin")) {
         base = input.readAllBytes();
       }
-      LibraryProtocol.Page page = api.libraryPage(LibraryProtocol.request(base, current.cursor()));
+      LibraryProtocol.Stage stage = current.cursor().stage();
+      LibraryProtocol.Page page;
+      try {
+        page = api.libraryPage(LibraryProtocol.request(base, current.cursor()));
+      } catch (ScanFailure e) {
+        // A delta page with none of the fields the app reads ends the delta pass, as upstream
+        // GPMC does. Every other stage stays strict: an early end there would skip items.
+        if (stage != LibraryProtocol.Stage.DELTA
+            || !e.label().startsWith("SCAN_FORMAT_PAGE_SHAPE_NONE"))
+          throw LibraryProtocol.withStage(e, stage);
+        page = LibraryProtocol.EMPTY;
+        skipped = LibraryProtocol.withStage(e, stage).label();
+      }
       PhotosApi.checkStopped(stop);
       if (!account.equals(store.email())) throw new InterruptedIOException();
       LibraryProtocol.Cursor next = LibraryProtocol.advance(current.cursor(), page);
@@ -78,6 +91,10 @@ public final class LibrarySync {
       current = db.scan(account);
       pages++;
       if (progress != null) progress.page(current);
+    }
+    if (skipped != null && current.cursor().stage() == LibraryProtocol.Stage.DONE) {
+      db.message(account, current.generation(), "Scan finished (" + skipped + " skipped)");
+      current = db.scan(account);
     }
     return current;
   }

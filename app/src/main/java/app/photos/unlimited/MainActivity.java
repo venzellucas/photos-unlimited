@@ -22,6 +22,12 @@ import java.util.concurrent.*;
 /** Native Material screens; the existing credential, upload and scheduler paths are retained. */
 public final class MainActivity extends ThemedActivity {
   private final ExecutorService io = Executors.newSingleThreadExecutor();
+  /** Only the update check runs here, so a slow GitHub answer can't delay the backup counts. */
+  private final ExecutorService updateIo = Executors.newSingleThreadExecutor();
+  private static final int SCREEN_BACKUP = 1;
+  private LinearLayout updateCard;
+  /** Items only on this phone; -1 until read, which keeps the update card hidden. */
+  private volatile int unsafeCount = -1;
   private final ExecutorService profileIo = Executors.newSingleThreadExecutor();
   private final java.util.concurrent.atomic.AtomicBoolean profileStop =
       new java.util.concurrent.atomic.AtomicBoolean();
@@ -185,6 +191,17 @@ public final class MainActivity extends ThemedActivity {
     handler.removeCallbacks(ticker);
     handler.post(ticker);
     checkGooglePhotosBackup();
+    io.execute(
+        () -> {
+          try {
+            unsafeCount = ReclaimService.warnIfOnlyOnPhone(this, ""); // also re-posts the warning
+          } catch (RuntimeException e) {
+            unsafeCount = -1; // the Storage screen still shows the only-on-phone state
+          }
+          runOnUiThread(this::drawUpdateCard);
+        });
+    updateIo.execute(
+        () -> UpdateCheck.runIfDue(this, settings, () -> runOnUiThread(this::drawUpdateCard)));
   }
 
   /** Google Photos is installed and not disabled. */
@@ -276,6 +293,7 @@ public final class MainActivity extends ThemedActivity {
   public void onDestroy() {
     handler.removeCallbacks(ticker);
     io.shutdownNow();
+    updateIo.shutdownNow();
     profileStop.set(true);
     profileIo.shutdownNow();
     super.onDestroy();
@@ -320,6 +338,7 @@ public final class MainActivity extends ThemedActivity {
             counts =
                 progressLabel = storageTotal = storageSummary = storageStatus = storagePage = null;
     primary = folders = scanButton = previous = next = null;
+    updateCard = null;
     progress = scanProgress = null;
     historyRows = storageRows = reclaimRows = reclaimCard = selectionBar = null;
     selectionInfo = null;
@@ -369,6 +388,18 @@ public final class MainActivity extends ThemedActivity {
     counts = ui.supporting("Loading device backup records…");
     ui.space(counts, 4, 20);
     page.addView(counts);
+    updateCard = ui.card(page, false);
+    ((View) updateCard.getParent()).setVisibility(View.GONE);
+    unsafeCount = -1; // every Backup draw reads the count before the card can show Download
+    io.execute(
+        () -> {
+          try (ReclaimDb db = new ReclaimDb(this)) {
+            unsafeCount = db.unsafeAll();
+          } catch (RuntimeException e) {
+            unsafeCount = -1; // unknown stays hidden
+          }
+          runOnUiThread(this::drawUpdateCard);
+        });
     LinearLayout group = ui.card(page, false);
     folders = ui.row(group, "Backup folders", R.drawable.ic_folder, this::chooseFolders);
     ui.row(group, "Recent activity", R.drawable.ic_activity, () -> selectScreen(2));
@@ -378,6 +409,72 @@ public final class MainActivity extends ThemedActivity {
     TextView note = ui.supporting("Original files stay on your phone.");
     ui.space(note, 12, 0);
     page.addView(note);
+  }
+
+  /** The update card: below the main backup action, normal card style, no warning colors. */
+  private void drawUpdateCard() {
+    if (!alive() || updateCard == null || screen != SCREEN_BACKUP) return;
+    String latest = settings.updateLatest();
+    UpdateNotice.State state =
+        UpdateNotice.state(
+            settings.updateCheck(),
+            installedVersionName(),
+            latest,
+            settings.updateDismissed(),
+            unsafeCount,
+            ReclaimService.busy());
+    updateCard.removeAllViews();
+    View frame = (View) updateCard.getParent();
+    if (state == UpdateNotice.State.HIDDEN) {
+      frame.setVisibility(View.GONE);
+      return;
+    }
+    UpdateCheck.Version version = UpdateCheck.Version.parse(latest);
+    updateCard.addView(ui.text(getString(R.string.update_title, latest), 18, true));
+    boolean blocked = state == UpdateNotice.State.BLOCKED;
+    TextView body =
+        ui.supporting(getString(blocked ? R.string.update_blocked_body : R.string.update_body));
+    ui.space(body, 4, 12);
+    updateCard.addView(body);
+    MaterialButton main =
+        blocked
+            ? ui.button(getString(R.string.update_open_free_up), R.drawable.ic_storage, true)
+            : ui.button(getString(R.string.update_download), R.drawable.ic_open, true);
+    main.setOnClickListener(
+        v -> {
+          if (blocked) selectScreen(3);
+          else openUrl(UpdateNotice.downloadUrl());
+        });
+    updateCard.addView(main);
+    MaterialButton whatsNew = ui.button(getString(R.string.update_whats_new), 0, false);
+    whatsNew.setOnClickListener(v -> openUrl(UpdateNotice.releaseUrl(version)));
+    updateCard.addView(whatsNew);
+    if (!blocked) {
+      MaterialButton notNow = ui.button(getString(R.string.update_not_now), 0, false);
+      notNow.setOnClickListener(
+          v -> {
+            settings.updateDismissed(latest);
+            drawUpdateCard();
+          });
+      updateCard.addView(notNow);
+    }
+    frame.setVisibility(View.VISIBLE);
+  }
+
+  private String installedVersionName() {
+    try {
+      return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+    } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+      return "";
+    }
+  }
+
+  private void openUrl(String url) {
+    try {
+      startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+    } catch (ActivityNotFoundException e) {
+      message(getString(R.string.no_browser));
+    }
   }
 
   private void drawActivity() {
@@ -604,6 +701,12 @@ public final class MainActivity extends ThemedActivity {
         R.drawable.ic_account,
         this::manageAccount);
     ui.row(app, "Photo and video permissions", R.drawable.ic_photo, this::permissions);
+    ui.toggle(
+        app,
+        getString(R.string.update_setting),
+        settings.updateCheck(),
+        (b, on) -> settings.updateCheck(on));
+    app.addView(ui.supporting(getString(R.string.update_setting_summary)));
     ui.row(app, "About and open-source credits", R.drawable.ic_info, this::about);
     ui.row(
         app,
@@ -1581,15 +1684,22 @@ public final class MainActivity extends ThemedActivity {
               () -> {
                 if (alive() && email.equals(account.email())) showProfile(email, cached);
               });
-          boolean success = false;
+          // Profile access never changes the working backup sign-in. A failure keeps a fixed,
+          // secret-free label so a refused lookup can be diagnosed; null means the user stopped it.
+          String failure = null;
           try {
             store.refresh(email, account.load(), profileStop, force);
-            success = true;
-          } catch (Exception ignored) {
-            /* Profile access never changes the working backup sign-in. */
+          } catch (ProfileApi.Failure f) {
+            failure = f.label();
+          } catch (java.net.SocketTimeoutException e) {
+            failure = "TIMEOUT";
+          } catch (java.io.InterruptedIOException e) {
+            failure = "";
+          } catch (Exception e) {
+            failure = "NETWORK";
           }
           var bitmap = store.cached(email);
-          boolean loaded = success;
+          String label = failure;
           runOnUiThread(
               () -> {
                 profileLoading = false;
@@ -1599,11 +1709,9 @@ public final class MainActivity extends ThemedActivity {
                   return;
                 }
                 showProfile(email, bitmap);
-                if (force)
-                  message(
-                      loaded
-                          ? "Profile refreshed."
-                          : "Google profile photo is unavailable. Backup sign-in is unchanged.");
+                if (force && label == null) message("Profile refreshed.");
+                else if (force && !label.isEmpty())
+                  message(getString(R.string.profile_failed, label));
               });
         });
   }
@@ -1748,7 +1856,7 @@ public final class MainActivity extends ThemedActivity {
             try (var input = getAssets().open("XOB0T-LICENSE.txt")) {
               license = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             }
-            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            String version = installedVersionName();
             String text =
                 "Photos Unlimited "
                     + version

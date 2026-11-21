@@ -1,7 +1,9 @@
 # Privacy notes
 
 Photos Unlimited is an independent Android app. It has no project-owned account or
-photo-upload server and includes no advertising or analytics SDK.
+photo-upload server and includes no advertising or analytics SDK. Besides Google, it
+contacts GitHub (api.github.com) once a day while the app is open to check for a newer
+version, unless you turn this off in Settings.
 
 ## Data used by the app
 
@@ -23,8 +25,11 @@ photo-upload server and includes no advertising or analytics SDK.
   confirms the replacement. A private journal records each step. If another app removes
   a phone photo involved in this, the app writes the verified copy back to its folder.
   After a reinstall, leftover copies are uploaded only after you approve the listed files.
-- **Profile photo:** an optional profile lookup requests read-only profile and email
-  scopes separately from upload authorization. The app checks that the verified
+- **Profile photo:** at most once a day when the app opens, or when you tap **Refresh
+  profile photo**, the app requests a separate read-only token for profile and email
+  scopes, apart from upload authorization. There is no setting to turn this off. Google refuses those scopes to the
+  Photos client the app uploads as, so this token is requested as Google Play services
+  instead. It is used only for the profile lookup. The app checks that the verified
   email matches the connected account, downloads the image from an allowed Google
   image host, and caches a small copy in private storage. A failed lookup does not
   trigger a new login or prevent backup.
@@ -32,6 +37,15 @@ photo-upload server and includes no advertising or analytics SDK.
 Google receives requests, account identifiers, uploaded content, and ordinary
 connection information under its own policies. Profile images are downloaded
 without forwarding the account's authorization token to the image host.
+
+## GitHub
+
+Once a day while the app is open, it asks `api.github.com` for the newest release of
+Photos Unlimited, so it can show a card when a new version is out. GitHub sees your IP
+address, the fixed user agent `PhotosUnlimited-UpdateCheck` and the time of the request,
+under its own policies. No account, photo or device identifiers are sent, and nothing
+from the answer is opened automatically. Turn this off in Settings → **Check for
+updates**; that also forgets the last answer.
 
 ## Sign-in and controls
 
