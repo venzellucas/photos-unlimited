@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Profile lookup failure. %1$s is a fixed diagnostic label such as AUTH_HTTP_403. -->
+    <string name="profile_failed">Google プロフィール写真を読み込めませんでした（%1$s）。バックアップには影響しません。</string>
+    <!-- Update card on the Backup screen. %1$s is a version such as 1.1.0. -->
+    <string name="update_title">バージョン %1$s を利用できます</string>
+    <string name="update_body">このアプリに上書きしてインストールしてください。先に Photos Unlimited をアンインストールしないでください。Android でインストールが許可されない場合は、このバージョンを引き続きご利用ください。</string>
+    <string name="update_blocked_body">アップデートする前に「空き容量を増やす」を完了してください。「空き容量を増やす」が写真を再アップロードするまで、一部の写真はこのスマートフォンにしかありません。</string>
+    <string name="update_download">最新バージョンをダウンロード</string>
+    <string name="update_whats_new">新機能</string>
+    <string name="update_not_now">後で</string>
+    <string name="update_open_free_up">「空き容量を増やす」を開く</string>
+    <!-- Settings toggle for the daily update check. -->
+    <string name="update_setting">アップデートを確認</string>
+    <string name="update_setting_summary">アプリを開いている間、1 日に 1 回、GitHub に最新バージョンを問い合わせます。GitHub にはお客様の IP アドレスが表示されます。</string>
+    <string name="no_browser">ブラウザが見つかりません</string>
+    <!-- Backup status line, shown on the Backup screen. -->
+    <string name="backup_status_connect">バックアップを開始するには、Google アカウントを接続してください。</string>
+    <string name="backup_status_choose_folders">バックアップするフォルダを 1 つ以上選択してください。</string>
+    <string name="backup_status_waiting_conditions">選択したネットワークと充電の条件を待機しています。</string>
+    <string name="backup_status_allow_location">元のファイルを完全にアップロードするには、メディアの位置情報へのアクセスを許可してください。</string>
+    <string name="backup_status_checking_folders">選択したフォルダを確認しています…</string>
+    <string name="backup_too_large">ファイルが Google の 1 ファイルあたりのアップロード サイズ上限を超えています。</string>
+    <!-- %1$s is a file name. -->
+    <string name="backup_checking_file">%1$s を確認しています</string>
+    <string name="backup_file_changed">ファイルが変更されました。安定したコピーを待機しています。</string>
+    <!-- %1$s is a file name. -->
+    <string name="backup_uploading_file">%1$s をアップロードしています</string>
+    <string name="backup_status_sign_in_expired">ログインの有効期限が切れました。Google アカウントを再接続してから、バックアップを再開してください。</string>
+    <string name="backup_local_missing">ローカル ファイルは利用できなくなりました。</string>
+    <string name="backup_status_media_changed">メディアへのアクセスが変更されました。再開する前に権限を確認してください。</string>
+    <string name="backup_status_paused_queue">バックアップを一時停止しました。保留中のファイルはキューに保持されます。</string>
+    <plurals name="backup_status_attention">
+        <item quantity="other">%1$d 件に対応が必要です。最近のアクティビティをご確認ください。</item>
+    </plurals>
+    <string name="backup_status_more_queued">他のファイルがキューに入っています。バックアップは自動的に続行されます。</string>
+    <string name="backup_status_up_to_date">選択したフォルダは最新の状態です。</string>
+    <string name="backup_status_paused_resume">バックアップを一時停止しました。条件が整うと再開されます。</string>
+    <string name="backup_status_stopped">バックアップが予期せず停止しました。アプリを開き直して、もう一度お試しください。</string>
+    <string name="backup_error_timeout">接続がタイムアウトしました。自動的に再試行します。</string>
+    <string name="backup_error_offline">接続できません。自動的に再試行します。</string>
+    <string name="backup_error_tls">Google へのセキュアな接続を確立できませんでした。</string>
+    <string name="backup_error_unconfirmed">アップロードを確認できませんでした。自動的に再試行します。</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_backup">バックアップの進行状況</string>
+    <string name="backup_notification_preparing">バックアップを準備しています…</string>
+    <!-- Notification button. -->
+    <string name="action_pause">一時停止</string>
+    <!-- Activity list: state of one file. -->
+    <string name="history_uploaded">アップロード済み</string>
+    <string name="history_existing">Google フォトに保存済み</string>
+    <string name="history_uploading">アップロード中</string>
+    <string name="history_waiting">待機中</string>
+    <string name="backup_status_initial">アカウントと、バックアップするフォルダを選択してください。</string>
+    <string name="account_saved_unavailable">保存されたログイン情報を利用できません。Google アカウントを再接続してください。</string>
+    <string name="account_save_failed">アカウントを安全に保存できませんでした。</string>
+    <string name="media_need_full_access">フォルダを検出してバックアップするには、すべての写真と動画へのアクセスを許可してください。</string>
+    <string name="media_library_unavailable">Android のメディア ライブラリを利用できません。</string>
+    <string name="media_permission_changed">メディアの権限が変更されました。すべての写真と動画へのアクセスを許可してください。</string>
+    <string name="media_phone_copy_check_failed">スマートフォン上のコピーを確認できませんでした。</string>
+    <string name="media_restore_failed">Android はスマートフォン上のコピーを復元できませんでした。</string>
+    <string name="media_need_location">元のファイルを完全な状態で保持するには、メディアの位置情報へのアクセスを許可してください。</string>
+    <string name="media_original_unavailable">元のメディアを利用できません。写真とメディアの位置情報の権限を確認してください。</string>
+    <string name="api_no_credentials">Google から使用可能なアカウント認証情報が返されませんでした。</string>
+    <string name="api_file_empty">ファイルが空です。</string>
+    <string name="api_no_session">Google がアップロード セッションを作成しませんでした。</string>
+    <string name="api_file_changed">アップロード中にファイルが変更されました。もう一度確認されます。</string>
+    <string name="api_bad_receipt">Google から無効なアップロード受領情報が返されました。</string>
+    <string name="api_unconfirmed">アップロードを確認できませんでした。次回の試行で重複を確認します。</string>
+    <string name="api_renew_sign_in">Google へのログインの更新が必要です。</string>
+    <string name="api_needs_browser">Google への新たなログインが必要です。アカウントを再接続してください。</string>
+    <string name="api_droidguard">Google にデバイス確認が拒否されました。このログイン方法は現在利用できません。</string>
+    <string name="api_rejected">Google にこのログインが拒否されました。新しい Google セットアップ トークンをお試しください。</string>
+    <!-- %1$d is an HTTP status code such as 404. -->
+    <string name="api_download_http">ダウンロードに対して Google から HTTP %1$d が返されました。</string>
+    <!-- %1$d is an HTTP status code such as 401. -->
+    <string name="api_upload_http_auth">Google から HTTP %1$d が返されました。この状態が続く場合は、アカウントを再接続してください。</string>
+    <!-- %1$d is an HTTP status code such as 500. -->
+    <string name="api_upload_http">Google から HTTP %1$d が返されました。アップロードは確認されていません。</string>
+    <!-- %1$s is a host name. -->
+    <string name="api_bad_host">ダウンロード先のアドレスは Google のメディア ホストではありません: %1$s</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_reclaim">空き容量を増やす</string>
+    <string name="reclaim_notification_title">Google フォトの空き容量を増やしています</string>
+    <string name="reclaim_preparing">準備しています…</string>
+    <plurals name="reclaim_finishing_leftovers">
+        <item quantity="other">以前から残っている %1$d 件を完了しています…</item>
+    </plurals>
+    <!-- Ongoing warning notification. Keep the folder path unchanged. -->
+    <plurals name="reclaim_only_on_phone">
+        <item quantity="other">%1$d 件は、再アップロードされるまでこのスマートフォンにしかありません。アプリを開いて完了してください。コピーは Pictures/Photos Unlimited/Pending upload に保存されています。</item>
+    </plurals>
+    <string name="reclaim_dont_uninstall">Photos Unlimited をまだアンインストールしないでください</string>
+    <string name="reclaim_stopped_charged">停止しました: 置き換えたアイテムが引き続きストレージを使用しています。残りのアイテムには何も行っていません。</string>
+    <!-- %1$s is a file name. -->
+    <string name="reclaim_stopped_attention">停止しました: %1$s に対応が必要です。残りのアイテムには何も行っていません。</string>
+    <string name="reclaim_checking_phone">写真がまだこのスマートフォンにあることを確認しています…</string>
+    <string name="reclaim_finished">完了しました。</string>
+    <plurals name="reclaim_still_in_progress">
+        <item quantity="other">%1$d 件がまだ処理中です。続行するには「ストレージ」を開いてください。</item>
+    </plurals>
+    <string name="reclaim_paused">一時停止中です。すでに開始したアイテムは、再開すると続行されます。</string>
+    <string name="reclaim_reconnect">空き容量を増やす処理を続行するには、Google アカウントを再接続してください。</string>
+    <!-- %1$s is an error message. -->
+    <string name="reclaim_google_stopped">Google フォトが実行を停止しました: %1$s</string>
+    <!-- %1$s is an error message. -->
+    <string name="reclaim_interrupted">中断されました: %1$s 続行するには再開してください。</string>
+    <string name="reclaim_unexpected">実行が予期せず停止しました。すでに開始したアイテムは安全に再開されます。</string>
+    <string name="reclaim_wait_scan">ストレージのスキャンが完了するまで待機しています。</string>
+    <!-- Free up: state of an item that hasn’t started. -->
+    <string name="job_waiting">開始待ち</string>
+    <!-- Why an item can’t be freed. Shown after “Can’t free this item’s storage:”. -->
+    <string name="why_not_reported">Google がストレージ使用量を報告していません。</string>
+    <string name="why_free">ストレージを使用していません。</string>
+    <string name="why_trash">ゴミ箱に入っています。</string>
+    <string name="why_shared">共有されたアイテムで、自分のものではありません。</string>
+    <string name="why_locked">ロックされたフォルダに入っています。</string>
+    <string name="why_alternate">他のアイテムの別バージョンです。</string>
+    <string name="why_type">写真と動画のみ対応しています。</string>
+    <string name="why_no_dedup">Google が、置き換えに必要な識別子を報告していません。</string>
+    <string name="why_no_size">Google がファイル サイズを報告していません。</string>
+    <string name="why_no_checksum">Google が元ファイルのチェックサムを報告していないため、ダウンロードしたファイルを検証できません。</string>
+    <!-- Free up: progress and result messages for one item. -->
+    <string name="job_paused_next_run">一時停止しました。このアイテムは次回の実行時に続行されます。</string>
+    <string name="job_trashing">元のファイルをゴミ箱に移動しています</string>
+    <string name="job_wait_trash">元のファイルがゴミ箱に入ったことを Google が確認するまで待機しています。</string>
+    <string name="job_deleting">元のファイルを完全に削除しています</string>
+    <string name="job_missing_ids">安全に置き換えるために必要なチェックサムまたは識別子がありません。</string>
+    <string name="job_checking_record">Google が保持する元ファイルの記録を確認しています</string>
+    <string name="job_same_bytes">ライブラリ内の別のアイテムとバイト列がまったく同じです。一方を削除すると、両方が削除される可能性があります。</string>
+    <!-- %1$s is the reason, such as “It’s in the trash.” -->
+    <string name="job_not_replaced">置き換えませんでした: %1$s</string>
+    <string name="job_item_changed">選択した後にアイテムが変更されました。何も変更していません。</string>
+    <string name="job_no_space">一時的なコピーを保存するための空き容量がこのスマートフォンに足りません。何も変更していません。</string>
+    <string name="job_checking_local">このスマートフォン上の一致するファイルを確認しています</string>
+    <string name="job_found_local">元のファイルがこのスマートフォンで見つかり、検証されました</string>
+    <!-- %1$s is a technical download path such as 1.5.2.5. -->
+    <string name="job_downloading">元のファイルをダウンロードしています（%1$s）</string>
+    <!-- %1$s is a technical download path; %2$s is an error message. -->
+    <string name="job_candidate_failed">候補 %1$s は失敗しました: %2$s</string>
+    <!-- %1$s is a technical download path such as 1.5.2.5. -->
+    <string name="job_downloaded">元のファイルを保存し、検証しました（%1$s）</string>
+    <string name="job_wait_deleted">Google が削除済みの元ファイルをまだ報告しています。アップロードする前に待機しています。</string>
+    <string name="job_already_uploaded">置き換え用のファイルはアップロード済みです</string>
+    <string name="job_uploading_copy">保存したコピーをアップロードしています</string>
+    <string name="job_matched_deleted">Google はアップロードしたファイルを、削除済みの元ファイルと一致すると判断しました。ローカルのコピーは保持されます。</string>
+    <string name="job_uploaded_waiting">アップロードしました。Google のストレージ レポートを待機しています</string>
+    <string name="job_checking_replacement">置き換えたファイルのストレージ使用量を確認しています</string>
+    <string name="job_wait_replacement">Google が置き換えたファイルのストレージ使用量を報告するまで待機しています。</string>
+    <string name="job_restoring_details">説明、お気に入り、アーカイブを復元しています</string>
+    <string name="job_done">置き換えました。ストレージは使用されなくなりました</string>
+    <string name="job_restoring_phone">Google フォトがスマートフォン上のコピーを削除したため、復元しています</string>
+    <string name="job_copy_missing">保存したコピーが見つからないか、変更されています。これ以上は何も行っていません。</string>
+    <string name="job_copy_changed_restoring">保存したコピーが変更されたため、元のファイルをゴミ箱から復元しています</string>
+    <string name="job_copy_changed_restored">保存したコピーが変更されたため、元のファイルをゴミ箱から復元しました。</string>
+    <string name="job_trashed">元のファイルをゴミ箱に移動しました</string>
+    <string name="job_deleted">元のファイルを削除しました。保存したコピーをアップロードしています</string>
+    <string name="job_trash_unconfirmed">Google がゴミ箱への移動を確認しなかったため、元のファイルを復元しました。何も削除されていません。</string>
+    <string name="job_gone">Google はこのアイテムをもう報告していません。ストレージのスキャンを更新してください。</string>
+    <string name="job_reduced_no_original">Google には画質を下げたコピーしか保存されておらず、元のファイルはこのスマートフォンで見つかりませんでした。何も変更していません。</string>
+    <!-- %1$s is a technical download path; %2$d is a size in bytes; %3$s is “matches” or “differs” (the next two strings). -->
+    <string name="job_candidate_mismatch">候補 %1$s は元のファイルではありません（%2$d バイト、チェックサム: %3$s）</string>
+    <string name="job_checksum_matches">一致</string>
+    <string name="job_checksum_differs">不一致</string>
+    <string name="job_no_download">Google はこのアイテムのダウンロードを提供しませんでした。</string>
+    <string name="job_no_match">Google が持つ元ファイルのチェックサムと一致するダウンロードはありませんでした。何も変更していません。</string>
+    <string name="job_still_has_original">削除後も Google に元のファイルが残っているため、アップロードしていません。Google フォトのゴミ箱を確認してください。検証済みのコピーはこのアプリに保持されています。</string>
+    <string name="job_replacement_missing">Google は置き換えたファイルを報告していません。検証済みのコピーは Pictures/Photos Unlimited/Pending upload に保持されています。</string>
+    <string name="job_replacement_mismatch">Google が持つ置き換えたファイルの記録が、保存したコピーと一致しません。保存したコピーは Pictures/Photos Unlimited/Pending upload に保持されています。</string>
+    <string name="job_reduced_again">Google は置き換えたファイルを再び画質を下げたコピーとして保存しました。元のファイルはこのアプリに保持されています。</string>
+    <string name="job_still_charged">置き換えたファイルが引き続きストレージを使用しています。ローカルのコピーは保持されています。続行する前に、Pixel のアップロード プロファイルを確認してください。</string>
+    <string name="job_copy_changed_after">元のファイルを削除した後に、保存したコピーが変更されました。Google フォトのゴミ箱を確認してください。</string>
+    <string name="job_separate_video">このライブフォトは動画を別のファイルとして保持しており、検証できません。置き換えると動きが失われるため、何も変更していません。</string>
+    <!-- %1$s is the item’s previous message; this sentence is appended to it. -->
+    <string name="job_phone_copy_removed">%1$s スマートフォン上のコピーは、別のアプリによって削除されました。</string>
+    <!-- %1$s is the item’s previous message; this sentence is appended to it. -->
+    <string name="job_phone_copy_restored">%1$s Google フォトが削除したスマートフォン上のコピーを復元しました。</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_scan">ストレージのスキャン</string>
+    <string name="scan_notification_title">Google フォトをスキャンしています</string>
+    <!-- Notification button. -->
+    <string name="scan_pause">スキャンを一時停止</string>
+    <string name="scan_reading">ストレージのメタデータを読み取っています…</string>
+    <plurals name="scan_pages_checked">
+        <item quantity="other">%1$d ページを確認済み · 読み取り専用スキャン</item>
+    </plurals>
+    <!-- Keep codes in parentheses, such as (SCAN_PAUSED_LIMIT), unchanged. -->
+    <string name="scan_paused_limit">スキャンを一時停止しました。残りのアイテムを読み取るには続行してください。(SCAN_PAUSED_LIMIT)</string>
+    <string name="scan_timeout">スキャンがタイムアウトしました。結果は一部のみです。続行するか、最初からやり直してください。(SCAN_TIMEOUT)</string>
+    <string name="scan_paused">スキャンを一時停止しました。準備ができたら続行してください。</string>
+    <!-- %1$s is a fixed code such as SCAN_SIGN_IN. -->
+    <string name="scan_reconnect">スキャンを続行するには、Google アカウントを再接続してください。(%1$s)</string>
+    <!-- %1$s is a fixed code such as SCAN_HTTP_500. -->
+    <string name="scan_google_failed">Google フォトがスキャンを完了できませんでした。続行するか、最初からやり直せます。(%1$s)</string>
+    <!-- %1$s is a fixed code such as SCAN_FORMAT_PAGE. -->
+    <string name="scan_interrupted">スキャンが中断されたか、メタデータの形式を利用できません。結果は一部のみです。続行するか、最初からやり直してください。(%1$s)</string>
+    <!-- %1$s is a fixed code. -->
+    <string name="scan_stopped">スキャンが停止しました。結果は一部のみです。スキャンの続行をお試しください。(%1$s)</string>
+    <string name="scan_ready">スキャンの準備完了</string>
+    <string name="scan_scanning">Google フォトをスキャンしています…</string>
+    <string name="scan_finished">スキャン完了</string>
+    <string name="scan_checking_recent">最近の変更を確認しています…</string>
+    <!-- %1$s is a fixed code such as SCAN_FORMAT_PAGE_SHAPE_NONE_F4_D. -->
+    <string name="scan_finished_skipped">スキャン完了（%1$s をスキップ）</string>
+    <!-- Advanced account diagnostic: what a test result means. -->
+    <string name="probe_photos_accepted">Google がトークンを発行し、フォトの照会を受け付けました。有望な結果です。アップロード、割り当て量の集計、バックグラウンドでのトークン更新は、引き続きテストが必要です。</string>
+    <string name="probe_basic_token">Google が基本的なアカウント トークンを発行しました。これは認可の経路を確認するもので、フォトへのアクセスは確認していません。</string>
+    <string name="probe_not_registered">Google は、このアプリと署名証明書の OAuth 登録を必要としています。この結果からは、登録後にフォトの権限が許可されるかどうかはわかりません。</string>
+    <string name="probe_configuration">Google がアプリの構成の問題を報告しました。このパッケージと署名証明書の Android OAuth 登録を確認してください。この結果からは、フォトへのアクセスが許可されるかどうかはわかりません。</string>
+    <string name="probe_api_unavailable">Google の認可 API はこのデバイスでは利用できません。</string>
+    <string name="probe_method_unsupported">プロバイダがこの認可方法を拒否しました。</string>
+    <string name="probe_scope_not_granted">要求した権限は Google の結果に含まれていませんでした。フォトの照会は行われていません。</string>
+    <string name="probe_scope_rejected">Google はこのアプリに対して要求された権限を拒否しました。</string>
+    <string name="probe_http_401">トークンは発行されましたが、フォト サービスがその認証を拒否しました。</string>
+    <string name="probe_http_403">トークンは発行されましたが、フォト サービスが照会を拒否しました。これだけでは原因を特定できません。</string>
+    <string name="probe_reauth">Google がアカウントの確認または新たなログインを求めています。</string>
+    <string name="probe_canceled">リクエストはキャンセルまたは拒否されました。フォトへのアクセスについては結論が出ていません。</string>
+    <string name="probe_retry_later">テストを完了できませんでした。後でもう一度お試しください。</string>
+    <string name="probe_no_authenticator">Google アカウント サービスはこのデバイスでは利用できません。</string>
+    <string name="probe_denied">Android またはアカウント プロバイダがこのリクエストを拒否しました。</string>
+    <string name="probe_interrupted">テストが中断されました。もう一度開始してください。</string>
+    <string name="probe_default">このテストではフォトへのアクセスを確認できませんでした。調査のために診断結果をコピーしてください。</string>
+    <string name="api_incomplete_credentials">保存されたログイン情報が不完全です。Google アカウントを再接続してください。</string>
+    <string name="api_device_bound">このログインにはデバイスに紐付いたキーが必要です。代わりに Google のログインを使用してください。</string>
+    <string name="api_enter_token">Google セットアップのログイン トークンを入力してください。</string>
+    <string name="api_download_too_large">ダウンロードが想定より大きくなっています。</string>
+    <string name="api_download_bad_redirect">Google がダウンロードを、このアプリが受け付けないアドレスにリダイレクトしました。</string>
+    <string name="job_keep_copy_failed">ローカルのコピーを保持できませんでした。</string>
+</resources>

@@ -98,7 +98,7 @@ public final class MainActivity extends ThemedActivity {
     LinearLayout root = ui.column();
     root.setBackgroundColor(ui.surface());
     MaterialToolbar toolbar = new MaterialToolbar(this);
-    toolbar.setTitle("Photos Unlimited");
+    toolbar.setTitle(R.string.main_app_name);
     toolbar.setTitleTextColor(ui.ink());
     toolbar.setLogo(R.drawable.ic_backup);
     toolbar.setContentInsetStartWithNavigation(ui.dp(16));
@@ -108,7 +108,7 @@ public final class MainActivity extends ThemedActivity {
     accountButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
     accountButton.setOnClickListener(v -> manageAccount());
     accountButton.setId(R.id.menu_account);
-    var accountMenu = toolbar.getMenu().add(0, R.id.menu_account, 0, "Google account");
+    var accountMenu = toolbar.getMenu().add(0, R.id.menu_account, 0, R.string.main_account_menu);
     accountMenu.setActionView(accountButton);
     accountMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     showProfile(account.email(), null);
@@ -133,10 +133,10 @@ public final class MainActivity extends ThemedActivity {
             ? NavigationBarView.LABEL_VISIBILITY_SELECTED
             : NavigationBarView.LABEL_VISIBILITY_LABELED);
     navigation.setItemHorizontalTranslationEnabled(true);
-    navigation.getMenu().add(0, R.id.nav_backup, 0, "Backup").setIcon(R.drawable.ic_backup);
-    navigation.getMenu().add(0, R.id.nav_activity, 1, "Activity").setIcon(R.drawable.ic_activity);
-    navigation.getMenu().add(0, R.id.nav_storage, 2, "Storage").setIcon(R.drawable.ic_storage);
-    navigation.getMenu().add(0, R.id.nav_settings, 3, "Settings").setIcon(R.drawable.ic_settings);
+    navigation.getMenu().add(0, R.id.nav_backup, 0, R.string.main_nav_backup).setIcon(R.drawable.ic_backup);
+    navigation.getMenu().add(0, R.id.nav_activity, 1, R.string.main_nav_activity).setIcon(R.drawable.ic_activity);
+    navigation.getMenu().add(0, R.id.nav_storage, 2, R.string.main_nav_storage).setIcon(R.drawable.ic_storage);
+    navigation.getMenu().add(0, R.id.nav_settings, 3, R.string.main_nav_settings).setIcon(R.drawable.ic_settings);
     selectScreen(screen);
     navigation.setOnItemSelectedListener(
         item -> {
@@ -222,15 +222,15 @@ public final class MainActivity extends ThemedActivity {
     if (awaitingPhotosReturn) {
       awaitingPhotosReturn = false;
       new MaterialAlertDialogBuilder(this)
-          .setTitle("Is Google Photos backup off?")
-          .setMessage("Photos Unlimited should be the only app backing up this phone.")
+          .setTitle(R.string.main_gp_off_title)
+          .setMessage(R.string.main_gp_off_message)
           .setPositiveButton(
-              "Yes, it’s off",
+              R.string.main_gp_off_yes,
               (d, w) -> {
                 settings.confirmPhotosBackupOff();
                 settings.clearOtherUploader();
               })
-          .setNegativeButton("Not yet", null)
+          .setNegativeButton(R.string.main_gp_off_no, null)
           .show();
       return;
     }
@@ -241,26 +241,24 @@ public final class MainActivity extends ThemedActivity {
     photosPrompted = true;
     String message =
         evidence
-            ? "Google Photos still seems to be backing up: "
-                + settings.otherUploaderCount()
-                + " new item(s), most recently “"
-                + settings.otherUploaderName()
-                + "”, were already uploaded by another app before Photos Unlimited got to them."
-                + " Those copies can use your storage.\n\nOpen Google Photos and turn Backup off."
-            : "Photos Unlimited is backing up this phone. If Google Photos backup is also on, it"
-                + " uploads the same photos first, and its copies can use your storage.\n\n"
-                + "Open Google Photos and turn Backup off.";
+            ? getResources()
+                .getQuantityString(
+                    R.plurals.main_gp_prompt_evidence,
+                    settings.otherUploaderCount(),
+                    settings.otherUploaderCount(),
+                    settings.otherUploaderName())
+            : getString(R.string.main_gp_prompt_plain);
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Turn off Google Photos backup")
+        .setTitle(R.string.main_gp_prompt_title)
         .setMessage(message)
-        .setPositiveButton("Open Google Photos", (d, w) -> openGooglePhotosBackup())
+        .setPositiveButton(R.string.main_gp_open, (d, w) -> openGooglePhotosBackup())
         .setNegativeButton(
-            "It’s already off",
+            R.string.main_gp_already_off,
             (d, w) -> {
               settings.confirmPhotosBackupOff();
               settings.clearOtherUploader();
             })
-        .setNeutralButton("Later", null)
+        .setNeutralButton(R.string.main_later, null)
         .show();
   }
 
@@ -274,12 +272,12 @@ public final class MainActivity extends ThemedActivity {
     } catch (ActivityNotFoundException e) {
       Intent launch = getPackageManager().getLaunchIntentForPackage(GOOGLE_PHOTOS);
       if (launch == null) {
-        message("Google Photos isn’t available on this phone.");
+        message(getString(R.string.main_gp_unavailable));
         return;
       }
       startActivity(launch);
       awaitingPhotosReturn = true;
-      message("In Google Photos, open your profile picture, then Backup, and turn it off.");
+      message(getString(R.string.main_gp_manual_hint));
     }
   }
 
@@ -357,7 +355,7 @@ public final class MainActivity extends ThemedActivity {
   }
 
   private void drawBackup() {
-    heading("Backup", "Original photos and videos.");
+    heading(getString(R.string.backup_heading), getString(R.string.backup_subtitle));
     LinearLayout hero = ui.card(page, true);
     ImageView cloud = new ImageView(this);
     cloud.setImageResource(R.drawable.ic_backup);
@@ -365,7 +363,7 @@ public final class MainActivity extends ThemedActivity {
         ColorStateList.valueOf(
             ui.color(com.google.android.material.R.attr.colorOnPrimaryContainer)));
     hero.addView(cloud, new LinearLayout.LayoutParams(ui.dp(40), ui.dp(40)));
-    status = ui.text("Checking backup status…", 24, false);
+    status = ui.text(getString(R.string.backup_checking), 24, false);
     status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     status.setTextColor(ui.color(com.google.android.material.R.attr.colorOnPrimaryContainer));
     ui.space(status, 16, 8);
@@ -381,11 +379,11 @@ public final class MainActivity extends ThemedActivity {
     progressLabel = ui.supporting("");
     progressLabel.setTextColor(status.getCurrentTextColor());
     hero.addView(progressLabel);
-    primary = ui.button("Back up now", R.drawable.ic_backup, true);
+    primary = ui.button(getString(R.string.backup_back_up_now), R.drawable.ic_backup, true);
     ui.space(primary, 20, 0);
     hero.addView(primary);
     primary.setOnClickListener(v -> startBackup());
-    counts = ui.supporting("Loading device backup records…");
+    counts = ui.supporting(getString(R.string.backup_loading_counts));
     ui.space(counts, 4, 20);
     page.addView(counts);
     updateCard = ui.card(page, false);
@@ -401,12 +399,17 @@ public final class MainActivity extends ThemedActivity {
           runOnUiThread(this::drawUpdateCard);
         });
     LinearLayout group = ui.card(page, false);
-    folders = ui.row(group, "Backup folders", R.drawable.ic_folder, this::chooseFolders);
-    ui.row(group, "Recent activity", R.drawable.ic_activity, () -> selectScreen(2));
-    MaterialButton photos = ui.button("Open Google Photos", R.drawable.ic_open, false);
+    folders = ui.row(
+            group, getString(R.string.backup_folders), R.drawable.ic_folder, this::chooseFolders);
+    ui.row(
+        group,
+        getString(R.string.backup_recent_activity),
+        R.drawable.ic_activity,
+        () -> selectScreen(2));
+    MaterialButton photos = ui.button(getString(R.string.backup_open_google_photos), R.drawable.ic_open, false);
     page.addView(photos);
     photos.setOnClickListener(v -> openPhotos());
-    TextView note = ui.supporting("Original files stay on your phone.");
+    TextView note = ui.supporting(getString(R.string.backup_originals_stay));
     ui.space(note, 12, 0);
     page.addView(note);
   }
@@ -478,8 +481,8 @@ public final class MainActivity extends ThemedActivity {
   }
 
   private void drawActivity() {
-    heading("Activity", "Recent backup records from this device.");
-    MaterialButton retry = ui.button("Retry unsuccessful items", R.drawable.ic_refresh, false);
+    heading(getString(R.string.activity_heading), getString(R.string.activity_subtitle));
+    MaterialButton retry = ui.button(getString(R.string.activity_retry), R.drawable.ic_refresh, false);
     page.addView(retry);
     retry.setOnClickListener(
         v -> {
@@ -500,51 +503,49 @@ public final class MainActivity extends ThemedActivity {
   }
 
   private void drawStorage() {
-    heading("Storage", "Google Photos inventory · Preview");
+    heading(getString(R.string.storage_heading), getString(R.string.storage_subtitle));
     LinearLayout card = ui.card(page, true);
-    storageTotal = ui.text("No scan yet", 28, false);
+    storageTotal = ui.text(getString(R.string.storage_no_scan), 28, false);
     storageTotal.setTextColor(ui.color(com.google.android.material.R.attr.colorOnPrimaryContainer));
     card.addView(storageTotal);
-    TextView caption = ui.supporting("Reported storage used by scanned items");
+    TextView caption = ui.supporting(getString(R.string.storage_caption));
     caption.setTextColor(storageTotal.getCurrentTextColor());
     ui.space(caption, 4, 12);
     card.addView(caption);
     storageSummary = ui.supporting("");
     storageSummary.setTextColor(storageTotal.getCurrentTextColor());
     card.addView(storageSummary);
-    storageStatus = ui.supporting("Read metadata to find photos and videos using storage.");
+    storageStatus = ui.supporting(getString(R.string.storage_scan_prompt));
     ui.space(storageStatus, 12, 8);
     card.addView(storageStatus);
     scanProgress = new LinearProgressIndicator(this);
     scanProgress.setIndeterminate(true);
     card.addView(scanProgress);
     scanProgress.setVisibility(View.GONE);
-    scanButton = ui.button("Scan Google Photos", R.drawable.ic_storage, true);
+    scanButton = ui.button(getString(R.string.storage_scan), R.drawable.ic_storage, true);
     ui.space(scanButton, 16, 0);
     card.addView(scanButton);
     scanButton.setOnClickListener(v -> startScan());
     TextView note =
-        ui.supporting(
-            "Read-only scan. Google may omit items or storage details. Unknown is not zero. This"
-                + " total excludes Drive and Gmail and may differ from your account total.");
+        ui.supporting(getString(R.string.storage_scan_note));
     ui.space(note, 0, 12);
     page.addView(note);
     reclaimCard = ui.card(page, false);
-    reclaimCard.addView(ui.text("Free up storage", 18, true));
+    reclaimCard.addView(ui.text(getString(R.string.freeup_title), 18, true));
     reclaimStatus = ui.supporting("");
     ui.space(reclaimStatus, 6, 8);
     reclaimCard.addView(reclaimStatus);
     reclaimRows = ui.column();
     reclaimCard.addView(reclaimRows);
-    reclaimButton = ui.button("Resume", R.drawable.ic_refresh, false);
+    reclaimButton = ui.button(getString(R.string.freeup_resume), R.drawable.ic_refresh, false);
     ui.space(reclaimButton, 8, 0);
     reclaimCard.addView(reclaimButton);
     reclaimButton.setOnClickListener(v -> toggleReclaim());
-    cleanupButton = ui.button("Remove finished copies", 0, false);
+    cleanupButton = ui.button(getString(R.string.freeup_remove_copies), 0, false);
     ui.space(cleanupButton, 8, 0);
     reclaimCard.addView(cleanupButton);
     cleanupButton.setOnClickListener(v -> removeRecoveredCopies());
-    reviewButton = ui.button("Review files from before", 0, false);
+    reviewButton = ui.button(getString(R.string.freeup_review_files), 0, false);
     ui.space(reviewButton, 8, 0);
     reclaimCard.addView(reviewButton);
     reviewButton.setOnClickListener(v -> reviewLeftovers());
@@ -553,8 +554,13 @@ public final class MainActivity extends ThemedActivity {
     LinearLayout filters = ui.card(page, false);
     picker(
         filters,
-        "Storage status",
-        new String[] {"All scanned items", "Using storage", "Storage unknown", "Reduced quality"},
+        getString(R.string.storage_filter_status),
+        new String[] {
+          getString(R.string.storage_filter_all),
+          getString(R.string.storage_filter_using),
+          getString(R.string.storage_filter_unknown),
+          getString(R.string.storage_filter_reduced)
+        },
         quotaFilter,
         value -> {
           quotaFilter = value;
@@ -564,8 +570,12 @@ public final class MainActivity extends ThemedActivity {
         });
     picker(
         filters,
-        "Media type",
-        new String[] {"All media", "Photos", "Videos"},
+        getString(R.string.storage_filter_media),
+        new String[] {
+          getString(R.string.storage_media_all),
+          getString(R.string.storage_media_photos),
+          getString(R.string.storage_media_videos)
+        },
         mediaFilter,
         value -> {
           mediaFilter = value;
@@ -573,17 +583,25 @@ public final class MainActivity extends ThemedActivity {
           renderedStorage = "";
           refresh();
         });
-    ui.row(filters, "Start a fresh scan", R.drawable.ic_refresh, this::restartScan);
-    storagePage = ui.supporting("Largest reported storage first");
+    ui.row(
+        filters,
+        getString(R.string.storage_fresh_scan),
+        R.drawable.ic_refresh,
+        this::restartScan);
+    storagePage = ui.supporting(getString(R.string.storage_sort_note));
     page.addView(storagePage);
-    selectButton = ui.button(selecting ? "Done selecting" : "Select items", 0, false);
+    selectButton = ui.button(
+            getString(selecting ? R.string.storage_done_selecting : R.string.storage_select_items),
+            0,
+            false);
     ui.space(selectButton, 8, 4);
     page.addView(selectButton);
     selectButton.setOnClickListener(
         v -> {
           selecting = !selecting;
           if (!selecting) chosen.clear();
-          selectButton.setText(selecting ? "Done selecting" : "Select items");
+          selectButton.setText(
+              getString(selecting ? R.string.storage_done_selecting : R.string.storage_select_items));
           updateSelection();
           renderedStorage = "";
           refresh();
@@ -591,11 +609,11 @@ public final class MainActivity extends ThemedActivity {
     selectionBar = ui.card(page, true);
     selectionInfo = ui.text("", 16, true);
     selectionBar.addView(selectionInfo);
-    selectAllButton = ui.button("Select all eligible", 0, false);
+    selectAllButton = ui.button(getString(R.string.storage_select_all), 0, false);
     ui.space(selectAllButton, 8, 0);
     selectionBar.addView(selectAllButton);
     selectAllButton.setOnClickListener(v -> selectAllEligible());
-    freeSelectedButton = ui.button("Free up", R.drawable.ic_storage, true);
+    freeSelectedButton = ui.button(getString(R.string.freeup_button), R.drawable.ic_storage, true);
     ui.space(freeSelectedButton, 8, 0);
     selectionBar.addView(freeSelectedButton);
     freeSelectedButton.setOnClickListener(v -> beforeReclaim(this::confirmBatch));
@@ -603,8 +621,8 @@ public final class MainActivity extends ThemedActivity {
     storageRows = ui.column();
     page.addView(storageRows);
     LinearLayout pages = new LinearLayout(this);
-    previous = ui.button("Previous", R.drawable.ic_back, false);
-    next = ui.button("Next", 0, false);
+    previous = ui.button(getString(R.string.storage_previous), R.drawable.ic_back, false);
+    next = ui.button(getString(R.string.storage_next), 0, false);
     pages.addView(previous, new LinearLayout.LayoutParams(0, -2, 1));
     pages.addView(next, new LinearLayout.LayoutParams(0, -2, 1));
     page.addView(pages);
@@ -625,12 +643,12 @@ public final class MainActivity extends ThemedActivity {
   }
 
   private void drawSettings() {
-    heading("Settings", "Make backup fit your day.");
-    section("Backup");
+    heading(getString(R.string.settings_heading), getString(R.string.settings_subtitle));
+    section(getString(R.string.settings_section_backup));
     LinearLayout backup = ui.card(page, false);
     ui.toggle(
         backup,
-        "Automatic backup",
+        getString(R.string.settings_automatic),
         settings.enabled(),
         (b, on) -> {
           if (on && !ready()) {
@@ -651,7 +669,7 @@ public final class MainActivity extends ThemedActivity {
         });
     ui.toggle(
         backup,
-        "Unmetered networks only\nUsually Wi-Fi",
+        getString(R.string.settings_unmetered),
         settings.wifi(),
         (b, on) -> {
           settings.wifi(on);
@@ -659,7 +677,7 @@ public final class MainActivity extends ThemedActivity {
         });
     ui.toggle(
         backup,
-        "Only while charging",
+        getString(R.string.settings_charging),
         settings.charging(),
         (b, on) -> {
           settings.charging(on);
@@ -668,49 +686,65 @@ public final class MainActivity extends ThemedActivity {
     if (googlePhotosActive())
       ui.row(
           backup,
-          "Turn off Google Photos backup\nAvoid two apps uploading the same photos",
+          getString(R.string.settings_gp_off_row),
           R.drawable.ic_open,
           this::openGooglePhotosBackup);
-    section("Appearance");
+    section(getString(R.string.settings_section_appearance));
     LinearLayout appearance = ui.card(page, false);
     SharedPreferences prefs = getSharedPreferences("appearance", 0);
     String theme = prefs.getString("theme", "system");
     int selected = theme.equals("dark") ? 2 : theme.equals("light") ? 1 : 0;
     picker(
         appearance,
-        "Theme",
-        new String[] {"Follow system", "Light", "Dark"},
+        getString(R.string.settings_theme),
+        new String[] {
+          getString(R.string.settings_theme_system),
+          getString(R.string.settings_theme_light),
+          getString(R.string.settings_theme_dark)
+        },
         selected,
         value -> {
           prefs.edit().putString("theme", new String[] {"system", "light", "dark"}[value]).apply();
           recreate();
         });
+    String[] languages = Languages.NATIVE_NAMES.clone();
+    languages[0] = getString(R.string.settings_language_system);
+    // Android applies the choice to the whole app and recreates this screen in that language.
+    picker(
+        appearance,
+        getString(R.string.settings_language),
+        languages,
+        Languages.current(this),
+        value -> Languages.choose(this, value));
     ui.toggle(
         appearance,
-        "Wallpaper colors",
+        getString(R.string.settings_wallpaper),
         prefs.getBoolean("dynamic", true),
         (b, on) -> {
           prefs.edit().putBoolean("dynamic", on).apply();
           recreate();
         });
-    section("Account and app");
+    section(getString(R.string.settings_section_account));
     LinearLayout app = ui.card(page, false);
     ui.row(
         app,
-        account.email().isEmpty() ? "Connect Google account" : "Google account\n" + account.email(),
+        account.email().isEmpty()
+            ? getString(R.string.main_connect_account)
+            : getString(R.string.settings_account_row, account.email()),
         R.drawable.ic_account,
         this::manageAccount);
-    ui.row(app, "Photo and video permissions", R.drawable.ic_photo, this::permissions);
+    ui.row(
+        app, getString(R.string.settings_permissions), R.drawable.ic_photo, this::permissions);
     ui.toggle(
         app,
         getString(R.string.update_setting),
         settings.updateCheck(),
         (b, on) -> settings.updateCheck(on));
     app.addView(ui.supporting(getString(R.string.update_setting_summary)));
-    ui.row(app, "About and open-source credits", R.drawable.ic_info, this::about);
+    ui.row(app, getString(R.string.settings_about), R.drawable.ic_info, this::about);
     ui.row(
         app,
-        "Advanced account diagnostic",
+        getString(R.string.settings_diagnostic),
         R.drawable.ic_settings,
         () -> startActivity(new Intent(this, AccountProbeActivity.class)));
   }
@@ -725,7 +759,7 @@ public final class MainActivity extends ThemedActivity {
     TextView caption = ui.supporting(label);
     parent.addView(caption);
     MaterialButton button = ui.button(values[selected], 0, false);
-    button.setContentDescription(label + ": " + values[selected]);
+    button.setContentDescription(getString(R.string.main_picker_description, label, values[selected]));
     ui.space(button, 0, 8);
     parent.addView(button);
     button.setOnClickListener(
@@ -740,11 +774,12 @@ public final class MainActivity extends ThemedActivity {
                       if (which != current[0]) {
                         current[0] = which;
                         button.setText(values[which]);
-                        button.setContentDescription(label + ": " + values[which]);
+                        button.setContentDescription(
+                            getString(R.string.main_picker_description, label, values[which]));
                         changed.accept(which);
                       }
                     })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.main_cancel, null)
                 .show());
   }
 
@@ -832,9 +867,9 @@ public final class MainActivity extends ThemedActivity {
                 () -> {
                   loading = false;
                   if (alive() && revision == generation) {
-                    if (status != null) status.setText("Couldn’t read backup records");
+                    if (status != null) status.setText(getString(R.string.main_read_failed));
                     if (storageStatus != null)
-                      storageStatus.setText("Couldn’t read the local scan cache. Try again.");
+                      storageStatus.setText(getString(R.string.storage_cache_failed));
                   }
                 });
           }
@@ -848,19 +883,20 @@ public final class MainActivity extends ThemedActivity {
             c.getOrDefault("ready", 0) + c.getOrDefault("running", 0) + c.getOrDefault("error", 0),
         failed = c.getOrDefault("blocked", 0) + c.getOrDefault("error", 0);
     counts.setText(
-        uploaded
-            + " uploaded · "
-            + existing
-            + " already in library\n"
-            + pending
-            + " waiting"
-            + (failed > 0 ? " · " + failed + " need attention" : ""));
+        failed > 0
+            ? getString(R.string.backup_counts_attention, uploaded, existing, pending, failed)
+            : getString(R.string.backup_counts, uploaded, existing, pending));
     List<String> names = new ArrayList<>();
     for (String f : selected) names.add(f.substring(f.indexOf(':') + 1).replaceAll("/$", ""));
     Collections.sort(names);
     folders.setText(
-        "Backup folders\n" + (names.isEmpty() ? "Choose folders" : String.join(", ", names)));
-    String title, description, action;
+        getString(
+            R.string.backup_folders_row,
+            names.isEmpty()
+                ? getString(R.string.backup_choose_folders)
+                : String.join(", ", names)));
+    String title, description;
+    int actionRes = R.string.backup_back_up_now;
     int icon = R.drawable.ic_backup;
     MediaScanner scanner = new MediaScanner(this);
     BackupEngine.ProgressState live = BackupEngine.progress();
@@ -868,81 +904,86 @@ public final class MainActivity extends ThemedActivity {
     progress.setVisibility(View.GONE);
     progressLabel.setText("");
     if (account.email().isEmpty()) {
-      title = "Connect your account";
-      description = "Choose the Google Photos library for your backup.";
-      action = "Connect Google account";
+      title = getString(R.string.backup_title_connect);
+      description = getString(R.string.backup_desc_connect);
+      actionRes = R.string.main_connect_account;
     } else if (!scanner.fullAccess() || !scanner.originalAccess()) {
-      title = "Allow media access";
-      description = "Photo, video and media location access preserve complete originals.";
-      action = "Review permissions";
+      title = getString(R.string.backup_title_media);
+      description = getString(R.string.backup_desc_media);
+      actionRes = R.string.backup_action_permissions;
     } else if (selected.isEmpty()) {
-      title = "Choose your folders";
-      description = "Select the photos and videos you want to back up.";
-      action = "Choose folders";
+      title = getString(R.string.backup_title_folders);
+      description = getString(R.string.backup_desc_folders);
+      actionRes = R.string.backup_choose_folders;
     } else if (busy) {
       title =
           settings.enabled()
-              ? (live.uploading() ? "Backing up" : "Checking your folders")
-              : "Pausing backup…";
+              ? getString(
+                  live.uploading() ? R.string.backup_title_running : R.string.backup_title_checking)
+              : getString(R.string.backup_title_pausing);
       description =
-          account.email().equals(live.account()) ? live.detail() : "Preparing your backup…";
-      action = "Pause backup";
+          account.email().equals(live.account())
+              ? live.detail()
+              : getString(R.string.backup_desc_preparing);
+      actionRes = R.string.backup_action_pause;
       icon = R.drawable.ic_pause;
       if (live.uploading() && live.total() > 0 && account.email().equals(live.account())) {
         progress.setVisibility(View.VISIBLE);
         progress.setIndeterminate(false);
         progress.setProgressCompat(
             (int) Math.min(1000, 1000.0 * live.sent() / live.total()), false);
-        progressLabel.setText(bytes(live.sent()) + " / " + bytes(live.total()) + " · Current file");
+        progressLabel.setText(
+            getString(R.string.backup_progress_label, bytes(live.sent()), bytes(live.total())));
       }
     } else if (!settings.failure().isEmpty()) {
-      title = "Backup needs attention";
+      title = getString(R.string.backup_title_attention);
       description = settings.status();
-      action =
+      actionRes =
           settings.failure().equals("auth")
-              ? "Reconnect account"
-              : settings.failure().equals("media") ? "Review permissions" : "Back up now";
+              ? R.string.backup_action_reconnect
+              : settings.failure().equals("media")
+                  ? R.string.backup_action_permissions
+                  : R.string.backup_back_up_now;
       icon = R.drawable.ic_warning;
     } else if (!settings.enabled()) {
-      title = "Backup is paused";
+      title = getString(R.string.backup_title_paused);
       description = settings.status();
-      action = "Back up now";
+      actionRes = R.string.backup_back_up_now;
       icon = R.drawable.ic_play;
     } else if (!BackupEngine.allowed(this, settings)) {
-      title = "Waiting to back up";
+      title = getString(R.string.backup_title_waiting);
       description = waitingReason();
-      action = "Backup settings";
+      actionRes = R.string.backup_action_settings;
       icon = R.drawable.ic_settings;
     } else if (failed > 0) {
-      title = "Some items need attention";
-      description = "Open Activity to review unsuccessful uploads and retries.";
-      action = "Review activity";
+      title = getString(R.string.backup_title_some_attention);
+      description = getString(R.string.backup_desc_some_attention);
+      actionRes = R.string.backup_action_activity;
       icon = R.drawable.ic_warning;
     } else if (pending > 0 || settings.lastRun() == 0) {
-      title = "Backup scheduled";
-      description =
-          "Android will run background work when conditions allow. You can also start now.";
-      action = "Back up now";
+      title = getString(R.string.backup_title_scheduled);
+      description = getString(R.string.backup_desc_scheduled);
+      actionRes = R.string.backup_back_up_now;
     } else {
-      title = "You’re up to date";
+      title = getString(R.string.backup_title_up_to_date);
       description =
-          "Selected folders are backed up. Last checked "
-              + DateUtils.getRelativeTimeSpanString(settings.lastRun())
-              + ".";
-      action = "Back up now";
+          getString(
+              R.string.backup_desc_up_to_date,
+              DateUtils.getRelativeTimeSpanString(settings.lastRun()));
+      actionRes = R.string.backup_back_up_now;
       icon = R.drawable.ic_check;
     }
     if (!title.contentEquals(status.getText())) status.setText(title);
     detail.setText(description);
-    primary.setText(action);
+    primary.setText(getString(actionRes));
     primary.setIconResource(icon);
-    final String choice = action;
+    final int choice = actionRes;
     primary.setOnClickListener(
         v -> {
-          if (choice.equals("Backup settings")) selectScreen(4);
-          else if (choice.equals("Review activity")) selectScreen(2);
-          else if (choice.equals("Reconnect account")) connect();
-          else if (choice.equals("Review permissions")) permissions();
+          if (choice == R.string.backup_action_settings) selectScreen(4);
+          else if (choice == R.string.backup_action_activity) selectScreen(2);
+          else if (choice == R.string.backup_action_reconnect) connect();
+          else if (choice == R.string.backup_action_permissions) permissions();
           else startBackup();
         });
   }
@@ -951,10 +992,10 @@ public final class MainActivity extends ThemedActivity {
     ConnectivityManager cm = getSystemService(ConnectivityManager.class);
     NetworkCapabilities network = cm.getNetworkCapabilities(cm.getActiveNetwork());
     if (network == null || !network.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED))
-      return "Waiting for an internet connection.";
+      return getString(R.string.backup_waiting_internet);
     if (settings.wifi() && !network.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED))
-      return "Waiting for an unmetered connection, usually Wi-Fi.";
-    return "Waiting for your phone to charge.";
+      return getString(R.string.backup_waiting_unmetered);
+    return getString(R.string.backup_waiting_charging);
   }
 
   private void updateActivity(List<String> recent) {
@@ -963,7 +1004,7 @@ public final class MainActivity extends ThemedActivity {
     renderedHistory = key;
     historyRows.removeAllViews();
     if (recent.isEmpty()) {
-      TextView empty = ui.supporting("Your confirmed uploads and queued items will appear here.");
+      TextView empty = ui.supporting(getString(R.string.activity_empty));
       ui.space(empty, 24, 0);
       historyRows.addView(empty);
       return;
@@ -985,43 +1026,44 @@ public final class MainActivity extends ThemedActivity {
     boolean done = summary.scan().cursor().stage() == LibraryProtocol.Stage.DONE;
     storageTotal.setText(
         summary.scan().pages() == 0
-            ? "No results yet"
+            ? getString(R.string.storage_no_results)
             : summary.items() > 0 && summary.unknown() == summary.items()
-                ? "Usage unknown"
+                ? getString(R.string.storage_usage_unknown)
                 : bytes(summary.chargedBytes()));
     storageSummary.setText(
-        summary.items()
-            + " scanned · "
-            + summary.chargedItems()
-            + " using storage\n"
-            + summary.unknown()
-            + " unknown · "
-            + summary.zero()
-            + " reported as zero");
+        getString(
+            R.string.storage_summary,
+            summary.items(),
+            summary.chargedItems(),
+            summary.unknown(),
+            summary.zero()));
     storageStatus.setText(
-        (done ? "Finished" : summary.scan().pages() > 0 ? "Partial results" : "")
-            + (summary.scan().pages() > 0 ? " · " + summary.scan().pages() + " pages\n" : "")
-            + summary.scan().message());
+        summary.scan().pages() > 0
+            ? getResources()
+                .getQuantityString(
+                    done ? R.plurals.storage_status_finished : R.plurals.storage_status_partial,
+                    summary.scan().pages(),
+                    summary.scan().pages(),
+                    summary.scan().message())
+            : done
+                ? getString(R.string.storage_status_finished_nopages, summary.scan().message())
+                : summary.scan().message());
     scanProgress.setVisibility(active ? View.VISIBLE : View.GONE);
     scanButton.setText(
         account.email().isEmpty()
-            ? "Connect Google account"
+            ? getString(R.string.main_connect_account)
             : active
-                ? "Pause scan"
+                ? getString(R.string.storage_pause_scan)
                 : done
-                    ? "Refresh scan"
+                    ? getString(R.string.storage_refresh_scan)
                     : summary.scan().generation().isEmpty()
-                        ? "Scan Google Photos"
-                        : "Continue scan");
+                        ? getString(R.string.storage_scan)
+                        : getString(R.string.storage_continue_scan));
     int visible = Math.min(rows.size(), 50);
     storagePage.setText(
         visible == 0
-            ? "No matching scanned items"
-            : "Items "
-                + (storageOffset + 1)
-                + "–"
-                + (storageOffset + visible)
-                + " · Largest charged size first");
+            ? getString(R.string.storage_no_matches)
+            : getString(R.string.storage_range, storageOffset + 1, storageOffset + visible));
     previous.setEnabled(storageOffset > 0);
     next.setEnabled(rows.size() > 50);
     String fingerprint =
@@ -1045,11 +1087,10 @@ public final class MainActivity extends ThemedActivity {
       TextView empty =
           ui.supporting(
               summary.scan().pages() == 0
-                  ? "Start a scan to read the metadata for your Google Photos library."
+                  ? getString(R.string.storage_empty_start)
                   : quotaFilter == 1
-                      ? "No items with reported charged storage in this view. Check Storage unknown"
-                          + " for items without accounting data."
-                      : "No items match these filters.");
+                      ? getString(R.string.storage_empty_none_charged)
+                      : getString(R.string.storage_empty_no_match));
       ui.space(empty, 20, 20);
       storageRows.addView(empty);
     }
@@ -1079,7 +1120,7 @@ public final class MainActivity extends ThemedActivity {
         card.setOnClickListener(
             v -> {
               if (why != null) {
-                message("Can’t select: " + why);
+                message(getString(R.string.storage_cant_select, why));
                 return;
               }
               if (chosen.remove(item.key()) == null) chosen.put(item.key(), item);
@@ -1088,24 +1129,36 @@ public final class MainActivity extends ThemedActivity {
             });
       } else card.setOnClickListener(v -> showItem(item));
       body.addView(ui.text(item.name(), 16, false));
-      String type = item.type() == 2 ? "Video" : item.type() == 1 ? "Photo" : "Media";
-      String info = type + " · File size " + (item.size() == null ? "unknown" : bytes(item.size()));
-      if (item.trash()) info += " · In trash";
-      if (item.archived()) info += " · Archived";
-      if (item.origin() == 3 || item.origin() == 4) info += " · Shared";
-      if (item.extra().edited()) info += " · Edited";
-      if (item.extra().quality() == LibraryProtocol.Quality.REDUCED) info += " · Reduced quality";
+      String type = mediaTypeLabel(item);
+      String info =
+          item.size() == null
+              ? getString(R.string.storage_item_info_nosize, type)
+              : getString(R.string.storage_item_info, type, bytes(item.size()));
+      if (item.trash()) info += " · " + getString(R.string.storage_flag_trash);
+      if (item.archived()) info += " · " + getString(R.string.storage_flag_archived);
+      if (item.origin() == 3 || item.origin() == 4)
+        info += " · " + getString(R.string.storage_flag_shared);
+      if (item.extra().edited()) info += " · " + getString(R.string.storage_flag_edited);
+      if (item.extra().quality() == LibraryProtocol.Quality.REDUCED)
+        info += " · " + getString(R.string.storage_filter_reduced);
       TextView sub = ui.supporting(info);
       ui.space(sub, 6, 8);
       body.addView(sub);
       body.addView(
           ui.text(
               item.charged() == null
-                  ? "Storage usage unknown"
-                  : bytes(item.charged()) + " reported storage",
+                  ? getString(R.string.storage_usage_unknown_row)
+                  : getString(R.string.storage_reported, bytes(item.charged())),
               16,
               true));
     }
+  }
+
+  private String mediaTypeLabel(LibraryProtocol.Item item) {
+    return getString(
+        item.type() == 2
+            ? R.string.storage_type_video
+            : item.type() == 1 ? R.string.storage_type_photo : R.string.storage_type_media);
   }
 
   private String bytes(long n) {
@@ -1142,7 +1195,7 @@ public final class MainActivity extends ThemedActivity {
     boolean wasOn = settings.enabled();
     settings.enabled(true);
     Scheduler.configure(this);
-    settings.status("Preparing backup…");
+    settings.status(getString(R.string.backup_preparing_status));
     if (!wasOn) {
       photosPrompted = false;
       checkGooglePhotosBackup();
@@ -1150,23 +1203,24 @@ public final class MainActivity extends ThemedActivity {
     try {
       startForegroundService(new Intent(this, BackupService.class));
     } catch (RuntimeException e) {
-      message("Android could not start backup. Reopen the app and try again.");
+      message(getString(R.string.backup_start_failed));
     }
     refresh();
   }
 
-  private static String stateLabel(ReclaimEngine.State state) {
-    return switch (state) {
-      case QUEUED -> "Waiting";
-      case DOWNLOADED -> "Original saved";
-      case TRASHING, TRASHED -> "In trash";
-      case DELETING, DELETED -> "Uploading copy";
-      case UPLOADED -> "Verifying";
-      case DONE -> "Freed";
-      case CHARGED -> "Still charged";
-      case FAILED -> "Not changed";
-      case ATTENTION -> "Needs attention";
-    };
+  private String stateLabel(ReclaimEngine.State state) {
+    return getString(
+        switch (state) {
+          case QUEUED -> R.string.freeup_state_waiting;
+          case DOWNLOADED -> R.string.freeup_state_saved;
+          case TRASHING, TRASHED -> R.string.freeup_state_trash;
+          case DELETING, DELETED -> R.string.freeup_state_uploading;
+          case UPLOADED -> R.string.freeup_state_verifying;
+          case DONE -> R.string.freeup_state_freed;
+          case CHARGED -> R.string.freeup_state_charged;
+          case FAILED -> R.string.freeup_state_failed;
+          case ATTENTION -> R.string.freeup_state_attention;
+        });
   }
 
   private void updateReclaim(
@@ -1195,47 +1249,44 @@ public final class MainActivity extends ThemedActivity {
       if (!job.state.terminal()) active++;
     }
     String text =
-        (freed > 0 ? bytes(freed) + " freed in recent items. " : "")
+        (freed > 0 ? getString(R.string.freeup_freed, bytes(freed)) + " " : "")
             + (running
                 ? ReclaimService.status()
                 : active > 0
-                    ? active + " item(s) not finished. Resume to continue safely."
-                    : "Idle.");
+                    ? getResources()
+                        .getQuantityString(R.plurals.freeup_unfinished, active, active)
+                    : getString(R.string.freeup_idle));
     if (onlyOnPhone > 0)
       text +=
-          "\n\n⚠ "
-              + onlyOnPhone
-              + " item(s) are only on this phone until they’re uploaded again. Don’t uninstall"
-              + " the app or clear its storage until this finishes. Copies are in"
-              + " Pictures/Photos Unlimited/Pending upload.";
+          "\n\n"
+              + getResources()
+                  .getQuantityString(R.plurals.freeup_only_on_phone, onlyOnPhone, onlyOnPhone);
     if (leftovers > 0 && !running)
       text +=
           "\n\n"
-              + leftovers
-              + " item(s) from before (for example a previous install) are waiting in"
-              + " Pictures/Photos Unlimited/Pending upload. Finish now uploads any that Google"
-              + " Photos is missing.";
+              + getResources().getQuantityString(R.plurals.freeup_leftovers, leftovers, leftovers);
     if (!review.isEmpty() && !running)
       text +=
           "\n\n"
-              + review.size()
-              + " file(s) in Pictures/Photos Unlimited/Pending upload weren’t saved by this"
-              + " installation. Review them before anything is uploaded.";
+              + getResources()
+                  .getQuantityString(R.plurals.freeup_review, review.size(), review.size());
     if (otherAccount > 0)
       text +=
           "\n\n"
-              + otherAccount
-              + " waiting file(s) belong to a different Google account. Connect that account to"
-              + " finish them.";
+              + getResources()
+                  .getQuantityString(R.plurals.freeup_other_account, otherAccount, otherAccount);
     if (cleanup > 0)
       text +=
           "\n\n"
-              + cleanup
-              + " finished copy(ies) from a previous install are already in Google Photos and can"
-              + " be removed from this phone.";
+              + getResources().getQuantityString(R.plurals.freeup_cleanup, cleanup, cleanup);
     reclaimStatus.setText(text);
     reclaimButton.setText(
-        running ? "Pause" : leftovers > 0 && active == 0 ? "Finish now" : "Resume");
+        getString(
+            running
+                ? R.string.freeup_pause
+                : leftovers > 0 && active == 0
+                    ? R.string.freeup_finish_now
+                    : R.string.freeup_resume));
     reclaimButton.setVisibility(running || active > 0 || leftovers > 0 ? View.VISIBLE : View.GONE);
     cleanupButton.setVisibility(cleanup > 0 && !running ? View.VISIBLE : View.GONE);
     reviewButton.setVisibility(!review.isEmpty() && !running ? View.VISIBLE : View.GONE);
@@ -1246,53 +1297,48 @@ public final class MainActivity extends ThemedActivity {
     renderedReclaim = fingerprint.toString();
     reclaimRows.removeAllViews();
     for (ReclaimEngine.Job job : jobs) {
-      TextView title = ui.text(job.name + " · " + stateLabel(job.state), 15, false);
+      TextView title = ui.text(
+              getString(R.string.freeup_row_title, job.name, stateLabel(job.state)), 15, false);
       ui.space(title, 10, 0);
       reclaimRows.addView(title);
       TextView sub =
           ui.supporting(
-              (job.charged == null ? "" : bytes(job.charged) + " · ") + job.message);
+              job.charged == null
+                  ? job.message
+                  : getString(R.string.freeup_row_detail, bytes(job.charged), job.message));
       reclaimRows.addView(sub);
     }
   }
 
   private void showItem(LibraryProtocol.Item item) {
     String why = ReclaimEngine.ineligible(item);
-    String type = item.type() == 2 ? "Video" : item.type() == 1 ? "Photo" : "Media";
     StringBuilder info = new StringBuilder();
-    info.append(type)
-        .append(" · ")
-        .append(item.size() == null ? "size unknown" : bytes(item.size()))
-        .append("\n")
-        .append(
+    info.append(
+        getString(
+            R.string.storage_detail_header,
+            mediaTypeLabel(item),
+            item.size() == null ? getString(R.string.storage_size_unknown) : bytes(item.size()),
             item.charged() == null
-                ? "Storage use unknown"
-                : bytes(item.charged()) + " reported storage")
-        .append("\n\n");
+                ? getString(R.string.storage_use_unknown)
+                : getString(R.string.storage_reported, bytes(item.charged()))));
     MaterialAlertDialogBuilder dialog =
-        new MaterialAlertDialogBuilder(this).setTitle(item.name()).setNegativeButton("Close", null);
+        new MaterialAlertDialogBuilder(this).setTitle(item.name()).setNegativeButton(R.string.main_close, null);
     if (why != null) {
-      info.append("Can’t free this item’s storage: ").append(why);
+      info.append(getString(R.string.freeup_detail_cant, why));
       dialog.setMessage(info.toString()).show();
       return;
     }
-    info.append(
-        "Free up storage replaces it with a copy uploaded through this app: the original file is"
-            + " downloaded and checked against Google’s checksum, deleted from Google Photos,"
-            + " then uploaded again with its embedded metadata (date, location, camera details)"
-            + " intact. Caption, favorite, and archive are restored.");
-    info.append(
-        "\n\nLost: album membership, shared-album copies and comments, people and face"
-            + " groupings, and any date or location changes made inside Google Photos.");
-    if (item.extra().edited())
-      info.append(" This item was edited in Google Photos; only the unedited original is kept.");
+    info.append(getString(R.string.freeup_detail_explain));
+    info.append("\n\n").append(getString(R.string.freeup_detail_lost));
+    if (item.extra().edited()) info.append(" ").append(getString(R.string.freeup_detail_edited));
     dialog
         .setMessage(info.toString())
         .setPositiveButton(
             item.extra().quality() == LibraryProtocol.Quality.REDUCED
                     && (item.charged() == null || item.charged() == 0)
-                ? "Replace with original"
-                : "Free up " + bytes(item.charged() == null ? 0 : item.charged()),
+                ? getString(R.string.freeup_replace_original)
+                : getString(
+                    R.string.freeup_button_size, bytes(item.charged() == null ? 0 : item.charged())),
             (d, w) -> beforeReclaim(() -> confirmReclaim(item)))
         .show();
   }
@@ -1305,11 +1351,14 @@ public final class MainActivity extends ThemedActivity {
       if (item.charged() != null) total += item.charged();
     selectionInfo.setText(
         chosen.isEmpty()
-            ? "Tap items to select them"
-            : chosen.size() + " selected · " + bytes(total) + " to free");
+            ? getString(R.string.storage_tap_to_select)
+            : getString(R.string.storage_selected_info, chosen.size(), bytes(total)));
     freeSelectedButton.setEnabled(!chosen.isEmpty());
     freeSelectedButton.setText(
-        chosen.isEmpty() ? "Free up" : "Free up " + chosen.size() + " item(s)");
+        chosen.isEmpty()
+            ? getString(R.string.freeup_button)
+            : getResources()
+                .getQuantityString(R.plurals.freeup_button_count, chosen.size(), chosen.size()));
   }
 
   /** Every eligible item under the current filters, across all pages. */
@@ -1336,7 +1385,10 @@ public final class MainActivity extends ThemedActivity {
                 updateSelection();
                 renderedStorage = "";
                 refresh();
-                if (skipped > 0) message(skipped + " item(s) in this view can’t be freed and were skipped.");
+                if (skipped > 0)
+                  message(
+                      getResources()
+                          .getQuantityString(R.plurals.freeup_skipped, skipped, skipped));
               });
         });
   }
@@ -1351,22 +1403,27 @@ public final class MainActivity extends ThemedActivity {
       if (item.extra().edited()) edited++;
     }
     String detail =
-        "Each item is downloaded (or found on this phone) and checked against Google’s"
-            + " checksum, deleted from Google Photos, and uploaded again. Embedded metadata stays"
-            + " intact; caption, favorite and archive are restored. Albums, shared copies,"
-            + " comments, face groups and edits made inside Google Photos are lost."
-            + (edited > 0 ? "\n\n" + edited + " item(s) were edited in Google Photos; only the"
-                + " original is kept." : "")
-            + (reduced > 0 ? "\n\n" + reduced + " item(s) are reduced-quality copies. They"
-                + " are replaced only if the original is still on this phone." : "")
-            + "\n\nPhotos on this phone are kept; if another app removes one, it’s put back."
-            + " The run stops by itself if a replacement still uses storage. Keep the phone"
-            + " on Wi-Fi until it finishes.";
+        getString(R.string.freeup_batch_body)
+            + (edited > 0
+                ? "\n\n"
+                    + getResources()
+                        .getQuantityString(R.plurals.freeup_batch_edited, edited, edited)
+                : "")
+            + (reduced > 0
+                ? "\n\n"
+                    + getResources()
+                        .getQuantityString(R.plurals.freeup_batch_reduced, reduced, reduced)
+                : "")
+            + "\n\n"
+            + getString(R.string.freeup_batch_footer);
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Free up " + bytes(total) + " from " + chosen.size() + " item(s)?")
+        .setTitle(
+            getResources()
+                .getQuantityString(
+                    R.plurals.freeup_batch_title, chosen.size(), bytes(total), chosen.size()))
         .setMessage(detail)
         .setPositiveButton(
-            "Delete and re-upload",
+            R.string.freeup_delete_reupload,
             (d, w) -> {
               String email = account.email();
               List<LibraryProtocol.Item> items = new ArrayList<>(chosen.values());
@@ -1383,15 +1440,18 @@ public final class MainActivity extends ThemedActivity {
                           if (!alive()) return;
                           chosen.clear();
                           selecting = false;
-                          if (selectButton != null) selectButton.setText("Select items");
+                          if (selectButton != null)
+                            selectButton.setText(getString(R.string.storage_select_items));
                           updateSelection();
                           renderedStorage = "";
-                          message(queued + " item(s) queued.");
+                          message(
+                              getResources()
+                                  .getQuantityString(R.plurals.freeup_queued, queued, queued));
                           startReclaim();
                         });
                   });
             })
-        .setNegativeButton("Cancel", null)
+        .setNegativeButton(R.string.main_cancel, null)
         .show();
   }
 
@@ -1407,34 +1467,26 @@ public final class MainActivity extends ThemedActivity {
       return;
     }
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Turn off Google Photos backup first")
-        .setMessage(
-            "While Google Photos backup is on, Google Photos deletes this phone’s copy of every"
-                + " photo removed from the cloud, including the ones Free up replaces.\n\n"
-                + "Turn its backup off, then come back. Other phones or tablets signed in to this"
-                + " account with Google Photos backup on would delete their copies too.")
-        .setPositiveButton("Open Google Photos", (d, w) -> openGooglePhotosBackup())
+        .setTitle(R.string.freeup_gp_title)
+        .setMessage(R.string.freeup_gp_message)
+        .setPositiveButton(R.string.main_gp_open, (d, w) -> openGooglePhotosBackup())
         .setNegativeButton(
-            "It’s off",
+            R.string.freeup_gp_its_off,
             (d, w) -> {
               settings.confirmPhotosBackupOff();
               settings.clearOtherUploader();
               next.run();
             })
-        .setNeutralButton("Cancel", null)
+        .setNeutralButton(R.string.main_cancel, null)
         .show();
   }
 
   private void confirmReclaim(LibraryProtocol.Item item) {
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Delete and re-upload?")
-        .setMessage(
-            "The original is deleted from Google Photos before the copy is uploaded. Keep the"
-                + " phone on Wi-Fi until this item shows Freed. If anything fails after the"
-                + " deletion, the verified copy stays in this app and the upload is retried."
-                + " Photos on this phone are kept; if another app removes one, it’s put back.")
+        .setTitle(R.string.freeup_confirm_title)
+        .setMessage(R.string.freeup_confirm_message)
         .setPositiveButton(
-            "Delete and re-upload",
+            R.string.freeup_delete_reupload,
             (d, w) -> {
               String email = account.email();
               io.execute(
@@ -1446,12 +1498,12 @@ public final class MainActivity extends ThemedActivity {
                     runOnUiThread(
                         () -> {
                           if (!alive()) return;
-                          if (!added) message("This item is already being processed.");
+                          if (!added) message(getString(R.string.freeup_already_queued));
                           startReclaim();
                         });
                   });
             })
-        .setNegativeButton("Cancel", null)
+        .setNegativeButton(R.string.main_cancel, null)
         .show();
   }
 
@@ -1461,13 +1513,13 @@ public final class MainActivity extends ThemedActivity {
       return;
     }
     if (InventoryService.busy()) {
-      message("The storage scan is running. Free up storage starts after you pause it.");
+      message(getString(R.string.freeup_scan_running));
       return;
     }
     try {
       startForegroundService(new Intent(this, ReclaimService.class));
     } catch (RuntimeException e) {
-      message("Android could not start the task. Reopen the app and try again.");
+      message(getString(R.string.freeup_start_failed));
     }
     renderedReclaim = "";
     refresh();
@@ -1482,29 +1534,22 @@ public final class MainActivity extends ThemedActivity {
     if (review.isEmpty()) return;
     StringBuilder list = new StringBuilder();
     for (ReclaimRecovery.Orphan o : review.subList(0, Math.min(30, review.size())))
-      list.append("• ")
-          .append(ReclaimEngine.stagedName(o.name()))
-          .append(" (")
-          .append(bytes(o.size()))
-          .append(")\n");
-    if (review.size() > 30) list.append("…and ").append(review.size() - 30).append(" more\n");
+      list.append(getString(R.string.freeup_review_item, ReclaimEngine.stagedName(o.name()), bytes(o.size())))
+          .append("\n");
+    if (review.size() > 30)
+      list.append(getString(R.string.freeup_review_more, review.size() - 30)).append("\n");
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Upload these files to Google Photos?")
-        .setMessage(
-            "These files are in Pictures/Photos Unlimited/Pending upload but weren’t saved by this"
-                + " installation, usually because the app was reinstalled during Free up. Upload"
-                + " them only if you recognize them; you can check them in your gallery first."
-                + " Each file is checked against its checksum before uploading.\n\n"
-                + list)
+        .setTitle(R.string.freeup_review_title)
+        .setMessage(getString(R.string.freeup_review_message, list))
         .setPositiveButton(
-            "Upload",
+            R.string.freeup_review_upload,
             (d, w) -> {
               Set<String> approved = settings.recoveryApproved();
               for (ReclaimRecovery.Orphan o : review) approved.add(o.uri().toString());
               settings.recoveryApproved(approved);
               startReclaim();
             })
-        .setNegativeButton("Not now", null)
+        .setNegativeButton(R.string.main_not_now, null)
         .show();
   }
 
@@ -1523,7 +1568,7 @@ public final class MainActivity extends ThemedActivity {
           0,
           0);
     } catch (Exception e) {
-      message("Android could not open the delete request. Remove them from the gallery instead.");
+      message(getString(R.string.freeup_delete_request_failed));
     }
   }
 
@@ -1555,24 +1600,24 @@ public final class MainActivity extends ThemedActivity {
       return;
     }
     if (ReclaimService.busy()) {
-      message("Pause Free up storage before scanning.");
+      message(getString(R.string.storage_pause_freeup_first));
       return;
     }
     try {
       startForegroundService(new Intent(this, InventoryService.class));
     } catch (RuntimeException e) {
-      message("Android could not start the scan. Reopen the app and try again.");
+      message(getString(R.string.storage_start_failed));
     }
     refresh();
   }
 
   private void restartScan() {
     if (InventoryService.busy()) {
-      message("Pause the current scan first.");
+      message(getString(R.string.storage_pause_scan_first));
       return;
     }
     if (ReclaimService.busy()) {
-      message("Pause Free up storage first.");
+      message(getString(R.string.storage_pause_freeup));
       return;
     }
     if (account.email().isEmpty()) {
@@ -1580,10 +1625,10 @@ public final class MainActivity extends ThemedActivity {
       return;
     }
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Start a fresh scan?")
-        .setMessage("Replaces this app’s cached inventory. Your photos and videos stay in place.")
+        .setTitle(R.string.storage_fresh_title)
+        .setMessage(R.string.storage_fresh_message)
         .setPositiveButton(
-            "Scan again",
+            R.string.storage_scan_again,
             (d, w) -> {
               String email = account.email();
               io.execute(
@@ -1600,13 +1645,13 @@ public final class MainActivity extends ThemedActivity {
                         });
                   });
             })
-        .setNegativeButton("Cancel", null)
+        .setNegativeButton(R.string.main_cancel, null)
         .show();
   }
 
   private void connect() {
     if (BackupEngine.busy() || InventoryService.busy() || ReclaimService.busy()) {
-      message("Pause backup, the storage scan, and Free up storage before changing accounts.");
+      message(getString(R.string.account_pause_first));
       return;
     }
     if (unfinishedReclaim()) return;
@@ -1624,12 +1669,10 @@ public final class MainActivity extends ThemedActivity {
     }
     if (unsafe == 0) return false;
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Finish Free up first")
+        .setTitle(R.string.account_finish_title)
         .setMessage(
-            unsafe
-                + " item(s) were removed from Google Photos and are only on this phone until they’re"
-                + " uploaded again. Open Storage and tap Resume, then change the account.")
-        .setPositiveButton("OK", null)
+            getResources().getQuantityString(R.plurals.account_unfinished, unsafe, unsafe))
+        .setPositiveButton(R.string.main_ok, null)
         .show();
     return true;
   }
@@ -1641,20 +1684,20 @@ public final class MainActivity extends ThemedActivity {
     }
     String name = new ProfileStore(this).name(account.email());
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Google account")
+        .setTitle(R.string.account_title)
         .setItems(
             new String[] {
               name.isBlank() ? account.email() : name + "\n" + account.email(),
-              "Refresh profile photo",
-              "Reconnect",
-              "Disconnect"
+              getString(R.string.account_refresh_photo),
+              getString(R.string.account_reconnect),
+              getString(R.string.account_disconnect)
             },
             (d, which) -> {
               if (which == 1) refreshProfile(true);
               else if (which == 2) connect();
               else if (which == 3) disconnect();
             })
-        .setNegativeButton("Close", null)
+        .setNegativeButton(R.string.main_close, null)
         .show();
   }
 
@@ -1667,7 +1710,10 @@ public final class MainActivity extends ThemedActivity {
             ui.color(com.google.android.material.R.attr.colorPrimaryContainer),
             ui.color(com.google.android.material.R.attr.colorOnPrimaryContainer)));
     accountButton.setImageTintList(email.isEmpty() ? ColorStateList.valueOf(ui.ink()) : null);
-    String label = email.isEmpty() ? "Connect Google account" : "Google account: " + email;
+    String label =
+        email.isEmpty()
+            ? getString(R.string.main_connect_account)
+            : getString(R.string.account_description, email);
     accountButton.setContentDescription(label);
     accountButton.setTooltipText(label);
   }
@@ -1709,7 +1755,7 @@ public final class MainActivity extends ThemedActivity {
                   return;
                 }
                 showProfile(email, bitmap);
-                if (force && label == null) message("Profile refreshed.");
+                if (force && label == null) message(getString(R.string.account_profile_refreshed));
                 else if (force && !label.isEmpty())
                   message(getString(R.string.profile_failed, label));
               });
@@ -1719,12 +1765,10 @@ public final class MainActivity extends ThemedActivity {
   private void disconnect() {
     if (unfinishedReclaim()) return;
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Disconnect account?")
-        .setMessage(
-            "Stops uploads and scanning, removes the saved sign-in and cached storage inventory."
-                + " Your local files and Google Photos library stay in place.")
+        .setTitle(R.string.account_disconnect_title)
+        .setMessage(R.string.account_disconnect_message)
         .setPositiveButton(
-            "Disconnect",
+            R.string.account_disconnect,
             (d, w) -> {
               String old = account.email();
               settings.enabled(false);
@@ -1743,24 +1787,22 @@ public final class MainActivity extends ThemedActivity {
                     runOnUiThread(
                         () -> {
                           if (alive()) {
-                            settings.status("Account disconnected.");
+                            settings.status(getString(R.string.account_disconnected_status));
                             draw();
                           }
                         });
                   });
             })
-        .setNegativeButton("Cancel", null)
+        .setNegativeButton(R.string.main_cancel, null)
         .show();
   }
 
   private void permissions() {
     new MaterialAlertDialogBuilder(this)
-        .setTitle("Keep complete originals")
-        .setMessage(
-            "Allow all photos and videos so folder backup can discover new files. Media location"
-                + " access preserves embedded location in your originals.")
+        .setTitle(R.string.main_perm_title)
+        .setMessage(R.string.main_perm_message)
         .setPositiveButton(
-            "Continue",
+            R.string.main_continue,
             (d, w) ->
                 requestPermissions(
                     new String[] {
@@ -1771,13 +1813,13 @@ public final class MainActivity extends ThemedActivity {
                     },
                     10))
         .setNeutralButton(
-            "App settings",
+            R.string.main_app_settings,
             (d, w) ->
                 startActivity(
                     new Intent(
                         android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                         Uri.parse("package:" + getPackageName()))))
-        .setNegativeButton("Cancel", null)
+        .setNegativeButton(R.string.main_cancel, null)
         .show();
   }
 
@@ -1794,7 +1836,7 @@ public final class MainActivity extends ThemedActivity {
       permissions();
       return;
     }
-    message("Finding photo and video folders…");
+    message(getString(R.string.backup_finding_folders));
     io.execute(
         () -> {
           try {
@@ -1803,7 +1845,7 @@ public final class MainActivity extends ThemedActivity {
                 () -> {
                   if (!alive()) return;
                   if (found.isEmpty()) {
-                    message("No photo or video folders found yet.");
+                    message(getString(R.string.backup_no_folders));
                     return;
                   }
                   Set<String> selected = settings.folders();
@@ -1811,15 +1853,21 @@ public final class MainActivity extends ThemedActivity {
                   boolean[] checked = new boolean[found.size()];
                   for (int i = 0; i < found.size(); i++) {
                     MediaScanner.Folder folder = found.get(i);
-                    labels[i] = folder.label() + " · " + folder.count() + " items";
+                    labels[i] =
+                        getResources()
+                            .getQuantityString(
+                                R.plurals.backup_folder_label,
+                                folder.count(),
+                                folder.label(),
+                                folder.count());
                     checked[i] = selected.contains(folder.key());
                   }
                   new MaterialAlertDialogBuilder(this)
-                      .setTitle("Backup folders")
+                      .setTitle(R.string.backup_folders)
                       .setMultiChoiceItems(
                           labels, checked, (dialog, which, on) -> checked[which] = on)
                       .setPositiveButton(
-                          "Save folders",
+                          R.string.backup_save_folders,
                           (dialog, which) -> {
                             Set<String> choices = new HashSet<>();
                             for (int i = 0; i < checked.length; i++)
@@ -1829,13 +1877,13 @@ public final class MainActivity extends ThemedActivity {
                             Scheduler.configure(this);
                             refresh();
                           })
-                      .setNegativeButton("Cancel", null)
+                      .setNegativeButton(R.string.main_cancel, null)
                       .show();
                 });
           } catch (Exception e) {
             runOnUiThread(
                 () -> {
-                  if (alive()) message("Couldn’t read folders. Check photo and video permissions.");
+                  if (alive()) message(getString(R.string.backup_folders_failed));
                 });
           }
         });
@@ -1857,34 +1905,20 @@ public final class MainActivity extends ThemedActivity {
               license = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             }
             String version = installedVersionName();
-            String text =
-                "Photos Unlimited "
-                    + version
-                    + "\n\n"
-                    + "Independent Android uploader. Not affiliated with Google.\n\n"
-                    + "Turn off backup in the official Google Photos app when this app handles"
-                    + " uploads. Original files stay on your phone. Upload acceptance is not proof"
-                    + " of storage exemption. Existing library items keep their accounting unless"
-                    + " you replace them with Free up storage.\n\n"
-                    + "Storage scans read Google Photos metadata; Drive and Gmail are not included."
-                    + " Missing accounting is shown as unknown. Free up storage deletes the items"
-                    + " you choose from Google Photos only after a byte-identical copy is saved"
-                    + " on this phone, then uploads that copy again.\n\n"
-                    + "Protocol adapted from xob0t’s GPMC and gotohp.\n\n"
-                    + license;
+            String text = getString(R.string.about_text, version, license);
             runOnUiThread(
                 () -> {
                   if (alive())
                     new MaterialAlertDialogBuilder(this)
-                        .setTitle("About Photos Unlimited")
+                        .setTitle(R.string.about_title)
                         .setMessage(text)
-                        .setPositiveButton("Close", null)
+                        .setPositiveButton(R.string.main_close, null)
                         .show();
                 });
           } catch (Exception e) {
             runOnUiThread(
                 () -> {
-                  if (alive()) message("Couldn’t read credits.");
+                  if (alive()) message(getString(R.string.about_failed));
                 });
           }
         });

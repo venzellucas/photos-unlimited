@@ -18,7 +18,7 @@ public final class BackupService extends Service {
     getSystemService(NotificationManager.class)
         .createNotificationChannel(
             new NotificationChannel(
-                "backup", "Backup progress", NotificationManager.IMPORTANCE_LOW));
+                "backup", getString(R.string.channel_backup), NotificationManager.IMPORTANCE_LOW));
   }
 
   private Notification notification(String text, long sent, long total) {
@@ -39,7 +39,7 @@ public final class BackupService extends Service {
             .setContentIntent(open)
             .setOnlyAlertOnce(true)
             .setOngoing(true)
-            .addAction(new Notification.Action.Builder(null, "Pause", pause).build());
+            .addAction(new Notification.Action.Builder(null, getString(R.string.action_pause), pause).build());
     if (total > 0) builder.setProgress(100, (int) Math.min(100, sent * 100 / total), false);
     return builder.build();
   }
@@ -53,7 +53,7 @@ public final class BackupService extends Service {
       stopSelf();
       return START_NOT_STICKY;
     }
-    startForeground(7400, notification("Preparing backup…", 0, 0));
+    startForeground(7400, notification(getString(R.string.backup_notification_preparing), 0, 0));
     if (running) return START_NOT_STICKY;
     running = true;
     wakeLock =

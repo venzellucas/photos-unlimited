@@ -49,12 +49,15 @@ public final class ReclaimService extends Service {
     ensureChannel(this);
   }
 
-  /** Creating a channel that already exists does nothing. */
+  /** Creating a channel that already exists only updates its name (to the current language). */
   static void ensureChannel(Context context) {
     context
         .getSystemService(NotificationManager.class)
         .createNotificationChannel(
-            new NotificationChannel("reclaim", "Free up storage", NotificationManager.IMPORTANCE_LOW));
+            new NotificationChannel(
+                "reclaim",
+                context.getString(R.string.channel_reclaim),
+                NotificationManager.IMPORTANCE_LOW));
   }
 
   private Notification notification(String text, long done, long total) {
@@ -73,12 +76,12 @@ public final class ReclaimService extends Service {
     Notification.Builder b =
         new Notification.Builder(this, "reclaim")
             .setSmallIcon(R.drawable.ic_storage)
-            .setContentTitle("Freeing up Google Photos storage")
+            .setContentTitle(getString(R.string.reclaim_notification_title))
             .setContentText(text)
             .setContentIntent(open)
             .setOnlyAlertOnce(true)
             .setOngoing(true)
-            .addAction(new Notification.Action.Builder(null, "Pause", pause).build());
+            .addAction(new Notification.Action.Builder(null, getString(R.string.action_pause), pause).build());
     if (total > 0) b.setProgress(1000, (int) (done * 1000 / total), false);
     else b.setProgress(0, 0, true);
     return b.build();
@@ -90,7 +93,7 @@ public final class ReclaimService extends Service {
       stop.set(true);
       return START_NOT_STICKY;
     }
-    startForeground(7402, notification("Preparing…", 0, 0));
+    startForeground(7402, notification(getString(R.string.reclaim_preparing), 0, 0));
     if (!BUSY.compareAndSet(false, true)) return START_NOT_STICKY;
     ownsRun = true;
     wake =
@@ -111,7 +114,9 @@ public final class ReclaimService extends Service {
     for (ReclaimRecovery.Orphan o : ReclaimRecovery.orphans(this))
       if (!pendingConsent.contains(o.uri().toString())) orphans.add(o);
     if (orphans.isEmpty()) return;
-    say("Finishing " + orphans.size() + " item(s) left from before…");
+    say(
+        getResources()
+            .getQuantityString(R.plurals.reclaim_finishing_leftovers, orphans.size(), orphans.size()));
     Settings settings = new Settings(this);
     ReclaimRecovery.Result r =
         ReclaimRecovery.finish(this, api, account, orphans, settings.recoveryApproved(), stop);
@@ -147,14 +152,12 @@ public final class ReclaimService extends Service {
             new Intent(context, MainActivity.class).putExtra("screen", 3),
             PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     String text =
-        unsafe
-            + " item(s) are only on this phone until they’re uploaded again. Open the app to"
-            + " finish. Copies are kept in Pictures/Photos Unlimited/Pending upload.";
+        context.getResources().getQuantityString(R.plurals.reclaim_only_on_phone, unsafe, unsafe);
     nm.notify(
         7403,
         new Notification.Builder(context, "reclaim")
             .setSmallIcon(R.drawable.ic_storage)
-            .setContentTitle("Don’t uninstall Photos Unlimited yet")
+            .setContentTitle(context.getString(R.string.reclaim_dont_uninstall))
             .setContentText(text)
             .setStyle(new Notification.BigTextStyle().bigText(text))
             .setContentIntent(open)
@@ -243,10 +246,8 @@ public final class ReclaimService extends Service {
             db.cancelQueued(account);
             stopped =
                 job.state == ReclaimEngine.State.CHARGED
-                    ? "Stopped: a replacement still used storage. Remaining items were not"
-                        + " touched."
-                    : "Stopped: " + job.name + " needs attention. Remaining items were not"
-                        + " touched.";
+                    ? getString(R.string.reclaim_stopped_charged)
+                    : getString(R.string.reclaim_stopped_attention, job.name);
             break outer;
           }
           guard(db, engine, account, GUARD_DELAY);
@@ -260,7 +261,7 @@ public final class ReclaimService extends Service {
       long last = 0;
       for (ReclaimEngine.Job job : db.guarding(account)) last = Math.max(last, job.updated);
       if (last > 0) {
-        say("Checking that photos are still on this phone…");
+        say(getString(R.string.reclaim_checking_phone));
         long wait2 = last + GUARD_DELAY - System.currentTimeMillis();
         if (wait2 > 0) ReclaimEngine.SYSTEM.sleep(Math.min(wait2, GUARD_DELAY));
         guard(db, engine, account, 0);
@@ -270,19 +271,20 @@ public final class ReclaimService extends Service {
           stopped != null
               ? stopped
               : left == 0
-                  ? "Finished."
-                  : left + " item(s) still in progress. Open Storage to continue.");
+                  ? getString(R.string.reclaim_finished)
+                  : getResources()
+                      .getQuantityString(R.plurals.reclaim_still_in_progress, left, left));
     } catch (InterruptedIOException e) {
-      say("Paused. Items already started will continue when you resume.");
+      say(getString(R.string.reclaim_paused));
     } catch (PhotosApi.ApiException e) {
       say(
           e.signIn
-              ? "Reconnect your Google account to continue freeing storage."
-              : "Google Photos stopped the run: " + e.getMessage());
+              ? getString(R.string.reclaim_reconnect)
+              : getString(R.string.reclaim_google_stopped, Text.reason(e)));
     } catch (IOException e) {
-      say("Interrupted: " + e.getMessage() + " Resume to continue.");
+      say(getString(R.string.reclaim_interrupted, Text.reason(e)));
     } catch (Exception e) {
-      say("The run stopped unexpectedly. Items already started will resume safely.");
+      say(getString(R.string.reclaim_unexpected));
     } finally {
       warnIfOnlyOnPhone(this, account);
       BUSY.set(false);

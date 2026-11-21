@@ -103,7 +103,7 @@ public final class Settings {
   }
 
   public String status() {
-    return prefs.getString("status", "Choose an account and the folders you want to back up.");
+    return prefs.getString("status", Text.get(R.string.backup_status_initial));
   }
 
   public void status(String status) {

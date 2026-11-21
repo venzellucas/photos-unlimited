@@ -106,40 +106,23 @@ public final class AccountProbe {
 
   static String explanation(String result) {
     return switch (result) {
-      case "PHOTOS_LOOKUP_ACCEPTED" ->
-          "Google issued a token and accepted a Photos lookup. This is promising. Uploads, quota"
-              + " accounting, and background token renewal still need testing.";
-      case "BASIC_TOKEN_ISSUED" ->
-          "Google issued a basic account token. This checks the authorization path, not Photos"
-              + " access.";
-      case "APP_NOT_REGISTERED" ->
-          "Google requires an OAuth registration for this app and signing certificate. This result"
-              + " does not tell us whether the Photos permission would be allowed after"
-              + " registration.";
-      case "APP_REGISTRATION_CONFIGURATION", "CLIENT_REJECTED", "GOOGLE_DEVELOPER_ERROR" ->
-          "Google reported an app configuration problem. Check the Android OAuth registration for"
-              + " this package and signing certificate. This does not establish whether Photos"
-              + " access is allowed.";
-      case "GOOGLE_API_UNAVAILABLE" -> "Google's authorization API is unavailable on this device.";
-      case "METHOD_UNSUPPORTED" -> "The provider rejected this authorization method.";
-      case "SCOPE_NOT_GRANTED" ->
-          "The requested permission was not included in Google's result. No Photos lookup was"
-              + " made.";
-      case "SCOPE_REJECTED" -> "Google rejected the requested permission for this app.";
-      case "PHOTOS_HTTP_401" ->
-          "A token was issued, but the Photos service rejected its authentication.";
-      case "PHOTOS_HTTP_403" ->
-          "A token was issued, but the Photos service refused the lookup. This alone does not"
-              + " identify the cause.";
-      case "GOOGLE_REAUTH_REQUIRED" -> "Google requires account verification or a fresh sign-in.";
-      case "CANCELED" -> "The request was canceled or declined. No conclusion about Photos access.";
-      case "NETWORK_FAILURE", "PHOTOS_RATE_LIMITED", "TIMED_OUT" ->
-          "The test could not finish. Try again later.";
-      case "NO_GOOGLE_AUTHENTICATOR" -> "Google account services are not available on this device.";
-      case "DEVICE_ACCESS_DENIED" -> "Android or the account provider denied this request.";
-      case "INTERRUPTED" -> "The test was interrupted. Start it again.";
-      default ->
-          "The test did not establish Photos access. Copy the diagnostic result for investigation.";
+      case "PHOTOS_LOOKUP_ACCEPTED" -> Text.get(R.string.probe_photos_accepted);
+      case "BASIC_TOKEN_ISSUED" -> Text.get(R.string.probe_basic_token);
+      case "APP_NOT_REGISTERED" -> Text.get(R.string.probe_not_registered);
+      case "APP_REGISTRATION_CONFIGURATION", "CLIENT_REJECTED", "GOOGLE_DEVELOPER_ERROR" -> Text.get(R.string.probe_configuration);
+      case "GOOGLE_API_UNAVAILABLE" -> Text.get(R.string.probe_api_unavailable);
+      case "METHOD_UNSUPPORTED" -> Text.get(R.string.probe_method_unsupported);
+      case "SCOPE_NOT_GRANTED" -> Text.get(R.string.probe_scope_not_granted);
+      case "SCOPE_REJECTED" -> Text.get(R.string.probe_scope_rejected);
+      case "PHOTOS_HTTP_401" -> Text.get(R.string.probe_http_401);
+      case "PHOTOS_HTTP_403" -> Text.get(R.string.probe_http_403);
+      case "GOOGLE_REAUTH_REQUIRED" -> Text.get(R.string.probe_reauth);
+      case "CANCELED" -> Text.get(R.string.probe_canceled);
+      case "NETWORK_FAILURE", "PHOTOS_RATE_LIMITED", "TIMED_OUT" -> Text.get(R.string.probe_retry_later);
+      case "NO_GOOGLE_AUTHENTICATOR" -> Text.get(R.string.probe_no_authenticator);
+      case "DEVICE_ACCESS_DENIED" -> Text.get(R.string.probe_denied);
+      case "INTERRUPTED" -> Text.get(R.string.probe_interrupted);
+      default -> Text.get(R.string.probe_default);
     };
   }
 }

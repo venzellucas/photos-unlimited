@@ -16,7 +16,7 @@
         <package android:name="com.google.android.gms" />
         <intent><action android:name="android.accounts.AccountAuthenticator" /></intent>
     </queries>
-    <application android:label="Photos Unlimited" android:theme="@style/AppTheme" android:icon="@mipmap/ic_launcher" android:allowBackup="false" android:fullBackupContent="false" android:usesCleartextTraffic="false" android:supportsRtl="true" android:hasFragileUserData="true">
+    <application android:name=".App" android:localeConfig="@xml/locales_config" android:label="Photos Unlimited" android:theme="@style/AppTheme" android:icon="@mipmap/ic_launcher" android:allowBackup="false" android:fullBackupContent="false" android:usesCleartextTraffic="false" android:supportsRtl="true" android:hasFragileUserData="true">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity>

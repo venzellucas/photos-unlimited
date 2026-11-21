@@ -45,24 +45,22 @@ public final class SignInActivity extends ThemedActivity {
           return insets;
         });
     status = new TextView(this);
-    status.setText("Google sign-in · accounts.google.com");
+    status.setText(getString(R.string.signin_status));
     status.setTextSize(16);
     status.setPadding(8, 8, 8, 12);
     root.addView(status);
     TextView help = new TextView(this);
-    help.setText(
-        "Try the account already on your phone, or sign in below. The phone-account option is"
-            + " a diagnostic test; it does not connect backup yet.");
+    help.setText(getString(R.string.signin_help));
     help.setPadding(8, 0, 8, 12);
     root.addView(help);
     Button phoneAccount = new com.google.android.material.button.MaterialButton(this);
-    phoneAccount.setText("Test account on this phone");
+    phoneAccount.setText(getString(R.string.signin_test_account));
     phoneAccount.setAllCaps(false);
     root.addView(phoneAccount);
     phoneAccount.setOnClickListener(
         v -> startActivity(new Intent(this, AccountProbeActivity.class)));
     Button fallback = new com.google.android.material.button.MaterialButton(this);
-    fallback.setText("Use browser setup token");
+    fallback.setText(getString(R.string.signin_use_token));
     fallback.setAllCaps(false);
     root.addView(fallback);
     fallback.setOnClickListener(v -> importToken());
@@ -99,7 +97,7 @@ public final class SignInActivity extends ThemedActivity {
           public void onReceivedSslError(
               WebView view, SslErrorHandler errorHandler, SslError error) {
             errorHandler.cancel();
-            status.setText("Could not verify Google's secure connection.");
+            status.setText(getString(R.string.signin_ssl_error));
           }
         });
     root.addView(web, new LinearLayout.LayoutParams(-1, 0, 1));
@@ -126,7 +124,7 @@ public final class SignInActivity extends ThemedActivity {
     if (connecting) return;
     connecting = true;
     handler.removeCallbacks(poll);
-    status.setText("Connecting to your Google Photos library…");
+    status.setText(getString(R.string.signin_connecting));
     web.setVisibility(View.INVISIBLE);
     io.execute(
         () -> {
@@ -142,7 +140,7 @@ public final class SignInActivity extends ThemedActivity {
               settings.lastRun(0);
             }
             settings.failure("");
-            settings.status("Account connected. Choose folders, then start your first backup.");
+            settings.status(getString(R.string.signin_connected_status));
             runOnUiThread(
                 () -> {
                   CookieManager.getInstance().removeAllCookies(null);
@@ -158,7 +156,7 @@ public final class SignInActivity extends ThemedActivity {
                   status.setText(
                       e instanceof PhotosApi.ApiException
                           ? e.getMessage()
-                          : "Couldn't connect. Try a fresh browser setup token.");
+                          : getString(R.string.signin_connect_failed));
                   CookieManager.getInstance().removeAllCookies(null);
                 });
           }
@@ -170,38 +168,34 @@ public final class SignInActivity extends ThemedActivity {
     EditText token = new EditText(this);
     token.setSingleLine(true);
     token.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-    token.setHint("Google setup token");
+    token.setHint(getString(R.string.signin_token_hint));
     token.setSaveEnabled(false);
     token.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
     LinearLayout layout = new LinearLayout(this);
     layout.setOrientation(LinearLayout.VERTICAL);
     layout.setPadding(32, 12, 32, 4);
     TextView text = new TextView(this);
-    text.setText(
-        "On a computer, visit accounts.google.com/EmbeddedSetup and sign in. In browser developer"
-            + " tools → Application/Storage → Cookies → accounts.google.com, copy only the"
-            + " oauth_token value. Enter it here on your phone.\n\n"
-            + "Keep this token private. It provides account access; never send it in chat.");
+    text.setText(getString(R.string.signin_token_help));
     layout.addView(text);
     layout.addView(token);
     new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-        .setTitle("Browser setup")
+        .setTitle(R.string.signin_browser_setup)
         .setView(layout)
         .setPositiveButton(
-            "Connect",
+            R.string.signin_connect,
             (dialog, which) -> {
               String value = token.getText().toString();
               token.setText("");
               connect(value);
             })
         .setNeutralButton(
-            "Open setup page",
+            R.string.signin_open_setup,
             (d, w) ->
                 startActivity(
                     new Intent(
                         Intent.ACTION_VIEW,
                         Uri.parse("https://accounts.google.com/EmbeddedSetup"))))
-        .setNegativeButton("Cancel", (d, w) -> token.setText(""))
+        .setNegativeButton(R.string.main_cancel, (d, w) -> token.setText(""))
         .show();
   }
 

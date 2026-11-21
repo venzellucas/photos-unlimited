@@ -36,12 +36,12 @@ public final class AccountStore {
           .edit()
           .putString("sealed", value)
           .putString("email", PhotosApi.email(credentials))
-          .commit()) throw new IOException("Could not save account");
+          .commit()) throw new UserFacingException(Text.get(R.string.account_save_failed));
       if (!previous.equals(email())) ProfileStore.clear(context);
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {
-      throw new IOException("Could not securely save your account");
+      throw new UserFacingException(Text.get(R.string.account_save_failed));
     }
   }
 
@@ -58,7 +58,7 @@ public final class AccountStore {
       return new String(
           cipher.doFinal(Base64.getDecoder().decode(parts[1])), StandardCharsets.UTF_8);
     } catch (Exception e) {
-      throw new IOException("Your saved sign-in is unavailable. Reconnect your Google account.");
+      throw new UserFacingException(Text.get(R.string.account_saved_unavailable));
     }
   }
 

@@ -100,7 +100,7 @@ public class ProtocolTest {
           (a, b) -> {});
       fail();
     } catch (IOException expectedFailure) {
-      assertTrue(expectedFailure.getMessage().contains("changed"));
+      assertEquals(Text.get(R.string.api_file_changed), expectedFailure.getMessage());
     }
     assertEquals(0, commits.get());
   }

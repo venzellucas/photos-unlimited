@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f9ff">
+  <title>Photos Unlimited — Backup de fotos originais para Android</title>
+  <meta name="description" content="Faça backup de fotos e vídeos originais no Google Fotos. Escolha suas pastas, controle quando os envios acontecem e continue usando o app Google Fotos que você já conhece. Gratuito e de código aberto para Android.">
+  <link rel="canonical" href="https://venzellucas.github.io/photos-unlimited/pt-BR/">
+  <link rel="alternate" hreflang="en" href="https://venzellucas.github.io/photos-unlimited/">
+  <link rel="alternate" hreflang="pt-BR" href="https://venzellucas.github.io/photos-unlimited/pt-BR/">
+  <link rel="alternate" hreflang="es" href="https://venzellucas.github.io/photos-unlimited/es/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://venzellucas.github.io/photos-unlimited/zh-Hans/">
+  <link rel="alternate" hreflang="ja" href="https://venzellucas.github.io/photos-unlimited/ja/">
+  <link rel="alternate" hreflang="x-default" href="https://venzellucas.github.io/photos-unlimited/">
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Photos Unlimited — Backup de fotos originais para Android">
+  <meta property="og:description" content="Suas pastas. Seus originais. Um app de envio dedicado para o Google Fotos no Android.">
+  <meta property="og:url" content="https://venzellucas.github.io/photos-unlimited/pt-BR/">
+  <meta property="og:image" content="https://venzellucas.github.io/photos-unlimited/media/backup-dark.png">
+  <link rel="stylesheet" href="../style.css">
+  <script type="application/json" id="site-text">{"screens":{"backup":{"label":"Backup","description":"mostrando Conectar sua conta"},"activity":{"label":"Atividade","description":"com o histórico de envios vazio"},"storage":{"label":"Armazenamento","description":"mostrando a prévia da verificação da biblioteca antes de conectar uma conta"},"settings":{"label":"Configurações","description":"mostrando as preferências de backup e os controles de tema"}},"themes":{"dark":"escuro","light":"claro"},"alt":"Tela {screen} do app no tema {theme}, {description}","label":"{screen}, tema {theme}","caption":"App real · {label}"}</script>
+  <script src="../site.js" defer></script>
+</head>
+<body>
+<svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M7 18H6a5 5 0 0 1-.5-10A7 7 0 0 1 19 7.5a5.5 5.5 0 0 1-.5 11H17M12 20V9m-4 4 4-4 4 4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 17v4h14v-4"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V5h6l2 2h10v13H3Z"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-6 5 6"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M3 6h6m4 0h8M3 12h12m4 0h2M3 18h2m4 0h12M9 3v6m6 0v6M5 15v6"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 5-6 7 6 7m8-14 6 7-6 7M14 3l-4 18"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v2m0 18v2M1 12h2m18 0h2M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></symbol>
+</defs></svg>
+<a class="skip" href="#main">Ir para o conteúdo</a>
+<header class="site-header"><div class="wrap nav-row">
+  <a class="brand" href="./"><img src="../icon.svg" width="38" height="38" alt=""><span>Photos Unlimited</span></a>
+  <nav aria-label="Navegação principal"><a href="#features">Recursos</a><a href="#app">O app</a><a href="https://github.com/venzellucas/photos-unlimited/blob/main/README.pt-BR.md">GitHub <span aria-hidden="true">↗</span></a></nav>
+  <a class="button compact" href="#download">Baixar o app <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></a>
+  <details class="lang"><summary aria-label="Idioma: Português (Brasil)"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><span>PT</span></summary><ul><li><a href="../" hreflang="en" lang="en">English</a></li><li><a href="../pt-BR/" hreflang="pt-BR" lang="pt-BR" aria-current="page">Português (Brasil)</a></li><li><a href="../es/" hreflang="es" lang="es">Español</a></li><li><a href="../zh-Hans/" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="../ja/" hreflang="ja" lang="ja">日本語</a></li></ul></details>
+</div></header>
+<main id="main">
+<section class="wrap hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <a class="release-badge" href="https://github.com/venzellucas/photos-unlimited/releases/latest"><span class="status-dot" aria-hidden="true"></span> Versão mais recente <span aria-hidden="true">↗</span></a>
+    <h1 id="hero-title">Suas memórias.<br><span>Com backup<br class="hero-break"> completo.</span></h1>
+    <p class="hero-description">Fotos e vídeos originais, do seu celular Android para o Google Fotos. Escolha o que é enviado e quando isso acontece.</p>
+    <div class="hero-actions"><a class="button" href="https://github.com/venzellucas/photos-unlimited/releases/latest/download/Photos-Unlimited.apk"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Baixar para Android</a><a class="button secondary" href="https://github.com/venzellucas/photos-unlimited/blob/main/README.pt-BR.md">Ver código-fonte <svg class="icon" aria-hidden="true"><use href="#i-code"/></svg></a></div>
+    <p class="hero-meta">Android 13+ <span>·</span> Gratuito e de código aberto</p>
+    <p class="hero-note">App de envio experimental. O Google define a contabilização do armazenamento; a isenção de cota não é garantida.</p>
+  </div>
+  <figure class="backup-visual" aria-label="Ilustração de pastas de fotos e vídeos selecionadas sendo enviadas diretamente ao Google Fotos">
+    <div class="visual-top"><span><svg class="icon" aria-hidden="true"><use href="#i-photo"/></svg> Do rolo da sua câmera</span><span class="original-pill">Qualidade original</span></div>
+    <div class="photo-grid" aria-hidden="true">
+      <div class="landscape mountain"><svg viewBox="0 0 240 190"><defs><linearGradient id="sky-a" x2="0" y2="1"><stop stop-color="#b9d8f8"/><stop offset="1" stop-color="#e8e7e8"/></linearGradient></defs><path fill="url(#sky-a)" d="M0 0h240v190H0z"/><circle fill="#fff2bd" cx="183" cy="43" r="23"/><path fill="#8d9bab" d="m-10 159 98-132 95 132"/><path fill="#e9edf2" d="m59 67 29-40 34 46-23-8-15 10-10-13Z"/><path fill="#536f7e" d="m90 167 94-111 91 111"/><path fill="#cbd7dd" d="m155 91 29-35 30 37-20-7-10 13-15-10Z"/><path fill="#497875" d="M0 143q70-10 119 15t121-8v40H0Z"/><path fill="#365653" d="m0 185 50-26 47 13 52-13 91 25v6H0Z"/></svg><span>Montanhas.jpg</span></div>
+      <div class="landscape coast"><svg viewBox="0 0 240 190"><defs><linearGradient id="sea-a" x2="0" y2="1"><stop stop-color="#67b4c5"/><stop offset="1" stop-color="#afd9d1"/></linearGradient></defs><path fill="#c5e0ec" d="M0 0h240v190H0z"/><path fill="url(#sea-a)" d="M0 57h240v133H0z"/><path fill="#f4dfb9" d="M240 45q-28 49-89 78T34 190h206Z"/><path fill="none" stroke="#eef5e9" stroke-width="8" d="M233 56q-35 49-91 70T29 187"/><path fill="none" stroke="#e4f4f0" stroke-width="2" d="m22 93 43-4m21-14 54 2M40 130l35-6"/></svg><span>Litoral.jpg</span></div>
+      <div class="landscape sunset"><svg viewBox="0 0 240 190"><defs><linearGradient id="sunset-a" x2="0" y2="1"><stop stop-color="#d9b4ca"/><stop offset=".6" stop-color="#f0b8a0"/><stop offset="1" stop-color="#f7d1a1"/></linearGradient></defs><path fill="url(#sunset-a)" d="M0 0h240v190H0z"/><circle fill="#fff0c9" cx="121" cy="97" r="25"/><path fill="#718794" d="M0 117q61-13 121 0t119-6v79H0Z"/><path fill="none" stroke="#d3bdaf" stroke-width="4" d="M88 132h61m-44 13h32m-21 12h10"/><path fill="#425c6c" d="m0 168 52-16 36 7 45-8 107 21v18H0Z"/></svg><span>Entardecer.mp4 <b>▶</b></span></div>
+      <div class="landscape plant"><svg viewBox="0 0 240 190"><path fill="#e1e6d5" d="M0 0h240v190H0z"/><path fill="#d0dac5" d="M0 143h240v47H0z"/><path fill="none" stroke="#58765a" stroke-width="5" d="M124 144V33m0 65L78 62m46 61 48-44"/><path fill="#789773" d="M122 73Q78 62 89 24q38 8 33 49"/><path fill="#6a8969" d="M122 103q-51-2-58-44 42-6 58 44"/><path fill="#8fa985" d="M125 86q-5-52 34-57 9 45-34 57"/><path fill="#5e8163" d="M127 125q9-51 54-52 0 42-54 52"/><path fill="#b98268" d="m93 135 9 43h45l10-43Z"/><path fill="#c7947c" d="M90 134h69v10H90Z"/></svg><span>Em casa.jpg</span></div>
+    </div>
+    <div class="folder-chips"><span><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg> Câmera</span><span><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg> Vídeos</span><span class="add-folder" aria-hidden="true">+</span></div>
+    <div class="transfer-line"><span></span><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><span></span></div>
+    <div class="destination"><div class="destination-icon"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg></div><div><strong>Sua biblioteca do Google Fotos</strong><small>Navegue e edite no app que você já usa</small></div><svg class="icon arrow-icon" aria-hidden="true"><use href="#i-arrow"/></svg></div>
+    <figcaption>Arquivos ilustrativos · os envios vão direto para o Google</figcaption>
+  </figure>
+</section>
+<section class="wrap quick-facts" aria-label="Requisitos do app"><span><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Sem necessidade de root</span><span><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Sem microG</span><span><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Sem ROM personalizada</span><span><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg> Código aberto</span></section>
+<section class="wrap section" id="features" aria-labelledby="features-title">
+  <div class="section-heading"><p class="eyebrow">Um app de envio dedicado</p><h2 id="features-title">Mais controle sobre<br>o backup das suas fotos.</h2><p>Deixe os envios com o Photos Unlimited. Use o Google Fotos para tudo o que você faz com a sua biblioteca.</p></div>
+  <div class="feature-grid">
+    <article class="feature-card blue"><div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-photo"/></svg></div><h3>Seus arquivos originais</h3><p>Envie os bytes originais da foto ou do vídeo. A permissão de localização da mídia também preserva a localização incorporada. Os arquivos continuam no seu celular.</p><span class="feature-tag">Fotos + vídeos</span></article>
+    <article class="feature-card green"><div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-tune"/></svg></div><h3>Suas regras de backup</h3><p>Selecione pastas, limite os envios a redes sem tarifação por uso e espere até o celular estar carregando. Execute um backup manualmente sempre que precisar.</p><span class="feature-tag">Você define o ritmo</span></article>
+    <article class="feature-card lavender"><div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></div><h3>Direto para a sua conta</h3><p>As fotos vão direto para o Google. Seu login é criptografado no seu dispositivo. Não há nenhum servidor de contas do Photos Unlimited no meio do caminho.</p><span class="feature-tag">Controles no dispositivo</span></article>
+  </div>
+</section>
+<section class="app-section" id="app" aria-labelledby="app-title"><div class="wrap app-grid">
+  <div class="app-copy"><p class="eyebrow">Feito para Android</p><h2 id="app-title">Uma interface familiar.<br>Uma tarefa bem definida.</h2><p class="app-intro">Controles nativos do Material, cores do papel de parede e modo claro ou escuro. Encontre o que precisa sem vasculhar menus.</p>
+    <div class="screen-tabs" role="tablist" aria-label="Explorar as telas do app">
+      <button type="button" role="tab" id="tab-backup" aria-selected="true" aria-controls="screen-panel" data-screen="backup"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><span>Backup<small>Conecte, escolha as pastas e comece a enviar.</small></span><svg class="icon tab-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <button type="button" role="tab" id="tab-activity" aria-selected="false" aria-controls="screen-panel" tabindex="-1" data-screen="activity"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>Atividade<small>Revise envios, correspondências já existentes e novas tentativas.</small></span><svg class="icon tab-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <button type="button" role="tab" id="tab-storage" aria-selected="false" aria-controls="screen-panel" tabindex="-1" data-screen="storage"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg><span>Armazenamento <b class="preview-label">Prévia</b><small>Inspecione o uso informado a partir de uma verificação da biblioteca.</small></span><svg class="icon tab-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <button type="button" role="tab" id="tab-settings" aria-selected="false" aria-controls="screen-panel" tabindex="-1" data-screen="settings"><svg class="icon" aria-hidden="true"><use href="#i-tune"/></svg><span>Configurações<small>Defina as preferências de backup e deixe do seu jeito.</small></span><svg class="icon tab-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+    </div>
+  </div>
+  <div class="screen-panel" id="screen-panel" role="tabpanel" aria-labelledby="tab-backup" tabindex="0">
+    <div class="screenshot-frame"><img id="app-screenshot" src="../media/backup-dark.png" width="720" height="1280" loading="lazy" alt="Tela Backup do app no tema escuro, mostrando Conectar sua conta"></div>
+    <div class="appearance-control" id="appearance-control" role="group" aria-label="Aparência da tela Backup"><button type="button" data-appearance="light" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg> Claro</button><button type="button" data-appearance="dark" aria-pressed="true"><span aria-hidden="true">◐</span> Escuro</button></div>
+    <p class="screen-caption" id="screen-caption">App real · Backup, tema escuro</p>
+    <noscript><p>Ative o JavaScript para alternar a prévia da tela.</p></noscript>
+  </div>
+</div></section>
+<section class="wrap section setup-section" aria-labelledby="setup-title"><div class="section-heading"><p class="eyebrow">Primeiros passos</p><h2 id="setup-title">Três passos até o seu primeiro backup.</h2></div>
+  <ol class="setup-steps"><li><span class="step-number">1</span><h3>Conecte sua conta</h3><p>Use o fluxo de configuração do Google no app. Há uma alternativa com token de configuração pelo navegador, caso o login incorporado não funcione.</p></li><li><span class="step-number">2</span><h3>Escolha suas pastas</h3><p>Permita o acesso completo a fotos, vídeos e à localização da mídia. Selecione as pastas de que quer fazer backup, incluindo os arquivos que já estão nelas.</p></li><li><span class="step-number">3</span><h3>Inicie o backup</h3><p>Desative o backup automático no app oficial Google Fotos e toque em <strong>Fazer backup agora</strong> no Photos Unlimited.</p></li></ol>
+  <p class="scheduling-note">O Android controla o momento do trabalho em segundo plano. Configurações de rede, carregamento, bateria e inatividade podem atrasar os envios automáticos.</p>
+</section>
+<section class="wrap download-wrap" id="download" aria-labelledby="download-title"><div class="download-card">
+  <div class="download-icon"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg></div><div class="download-copy"><p class="eyebrow">Gratuito e de código aberto</p><h2 id="download-title">Pronto para o seu<br>primeiro backup?</h2><p>Baixe o APK assinado para Android e escolha o que será copiado.</p><div class="download-actions"><a class="button" href="https://github.com/venzellucas/photos-unlimited/releases/latest/download/Photos-Unlimited.apk"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Baixar APK</a><a href="https://github.com/venzellucas/photos-unlimited/releases/latest">Notas da versão <span aria-hidden="true">↗</span></a></div><p class="download-meta">Android 13+</p></div>
+  <aside class="install-note"><strong>Já usa o app?</strong><p>Instale sobre a sua versão atual para manter seu login, as pastas escolhidas e o histórico de envios.</p><p>A partir da versão 1.1, o app avisa quando há uma nova versão (Configurações → Verificar atualizações). O Android pode pedir que você permita a instalação a partir do navegador.</p><a href="https://github.com/venzellucas/photos-unlimited/releases/latest/download/SHA256SUMS.txt">Baixar checksums <span aria-hidden="true">↗</span></a></aside>
+</div></section>
+<section class="wrap section faq-section" aria-labelledby="faq-title"><div><p class="eyebrow">Bom saber</p><h2 id="faq-title">Algumas coisas<br>antes de instalar.</h2><p>Esta é uma versão inicial de um app independente. Veja o que esperar.</p></div><div class="faq-list">
+  <details><summary>O armazenamento é mesmo ilimitado?<span aria-hidden="true">+</span></summary><p>O app usa um protocolo móvel não documentado e solicita tratamento em qualidade original com um perfil de envio de Pixel. O Google controla a aceitação e a contabilização da cota; por isso, um envio aceito não garante isenção de armazenamento. Verifique envios de amostra novos e o uso real do armazenamento antes de depender dele. Correspondências já existentes mantêm a sua contabilização.</p></details>
+  <details><summary>Ele consegue liberar o armazenamento usado por envios antigos?<span aria-hidden="true">+</span></summary><p>Sim, com o Liberar espaço. O original de cada item é verificado byte a byte com o checksum do próprio Google e mantido no seu celular antes de o item ser excluído e enviado de novo; assim, metadados incorporados, como data e localização, permanecem intactos. Desative primeiro o backup do Google Fotos. Álbuns, rostos e edições feitas dentro do Google Fotos não são mantidos. Comece com poucos itens.</p></details>
+  <details><summary>O que acontece com a minha conta e os meus arquivos?<span aria-hidden="true">+</span></summary><p>O app envia os arquivos diretamente ao Google e mantém seu login criptografado no armazenamento privado do app no Android, fora do backup do Android. As fotos de perfil e o inventário de armazenamento opcional ficam em cache local. Uma vez por dia, enquanto o app está aberto, ele pergunta ao GitHub se existe uma versão mais nova; você pode desativar isso. Não há servidor de contas do projeto nem SDK de análise de uso. Leia as <a href="https://github.com/venzellucas/photos-unlimited/blob/main/PRIVACY.md">notas de privacidade</a>.</p></details>
+  <details><summary>Qual é a confiabilidade dele?<span aria-hidden="true">+</span></summary><p>Os envios principais foram usados em um aparelho real. Cada versão passa nos testes automatizados e em uma verificação de atualização assinada. A versão 1.0.0 também teve uma revisão de segurança independente. A contabilização de armazenamento em tempo real não está totalmente validada. O Google pode mudar os métodos não documentados. Transferências interrompidas reiniciam o arquivo. Fotos com movimento são compatíveis; Live Photos do iPhone em pares não são substituídas.</p></details>
+</div></section>
+</main>
+<footer class="site-footer"><div class="wrap footer-top"><a class="brand" href="./"><img src="../icon.svg" width="34" height="34" alt=""><span>Photos Unlimited</span></a><div class="footer-links"><a href="https://github.com/venzellucas/photos-unlimited/blob/main/README.pt-BR.md">GitHub</a><a href="https://github.com/venzellucas/photos-unlimited/issues">Relatar um problema</a><a href="https://github.com/venzellucas/photos-unlimited/blob/main/PRIVACY.md">Privacidade</a><a href="https://github.com/venzellucas/photos-unlimited/blob/main/LICENSE">Licença MIT</a></div></div><div class="wrap footer-bottom"><p>Um projeto independente de <a href="https://github.com/venzellucas">@venzellucas</a>.</p><p>Não é afiliado ao Google. Os nomes de produtos pertencem aos seus respectivos proprietários.</p></div></footer>
+</body>
+</html>

@@ -103,7 +103,7 @@ public final class ReclaimRemote implements ReclaimEngine.Remote {
   @Override
   public LibraryProtocol.Item lookup(String key) throws IOException {
     if (!LibrarySync.tryLock())
-      throw new ReclaimEngine.Later("Waiting for the storage scan to finish.");
+      throw new ReclaimEngine.Later(Text.get(R.string.reclaim_wait_scan));
     try (InventoryDb db = new InventoryDb(context)) {
       InventoryDb.Scan scan = db.scan(account);
       if (scan.cursor().stage() == LibraryProtocol.Stage.DONE) db.beginDelta(account);

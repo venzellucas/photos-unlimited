@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared / main screen -->
+    <string name="main_app_name" translatable="false">Photos Unlimited</string>
+    <!-- Toolbar action and dialog title for the signed-in Google account. -->
+    <string name="main_account_menu">Google account</string>
+    <!-- Bottom navigation labels: keep each to about 10 characters so it fits on one line. -->
+    <string name="main_nav_backup">Backup</string>
+    <string name="main_nav_activity">Activity</string>
+    <string name="main_nav_storage">Storage</string>
+    <string name="main_nav_settings">Settings</string>
+    <string name="main_cancel">Cancel</string>
+    <string name="main_back">Back</string>
+    <string name="main_close">Close</string>
+    <string name="main_ok">OK</string>
+    <string name="main_later">Later</string>
+    <string name="main_not_now">Not now</string>
+    <string name="main_continue">Continue</string>
+    <string name="main_app_settings">App settings</string>
+    <!-- Button and accessibility label for connecting a Google account. -->
+    <string name="main_connect_account">Connect Google account</string>
+    <!-- Accessibility description of a picker button. %1$s is the picker name (for example "Theme"), %2$s is the selected option. -->
+    <string name="main_picker_description">%1$s: %2$s</string>
+    <string name="main_read_failed">Couldn’t read backup records</string>
+    <string name="main_perm_title">Keep complete originals</string>
+    <string name="main_perm_message">Allow all photos and videos so folder backup can discover new files. Media location access preserves embedded location in your originals.</string>
+
+    <!-- Google Photos backup prompts -->
+    <string name="main_gp_off_title">Is Google Photos backup off?</string>
+    <string name="main_gp_off_message">Photos Unlimited should be the only app backing up this phone.</string>
+    <string name="main_gp_off_yes">Yes, it’s off</string>
+    <string name="main_gp_off_no">Not yet</string>
+    <string name="main_gp_prompt_title">Turn off Google Photos backup</string>
+    <string name="main_gp_prompt_plain">Photos Unlimited is backing up this phone. If Google Photos backup is also on, it uploads the same photos first, and its copies can use your storage.\n\nOpen Google Photos and turn Backup off.</string>
+    <string name="main_gp_open">Open Google Photos</string>
+    <string name="main_gp_already_off">It’s already off</string>
+    <string name="main_gp_unavailable">Google Photos isn’t available on this phone.</string>
+    <string name="main_gp_manual_hint">In Google Photos, open your profile picture, then Backup, and turn it off.</string>
+    <!-- %1$d is the number of items, %2$s is the file name of the most recent one. -->
+    <plurals name="main_gp_prompt_evidence">
+        <item quantity="one">Google Photos still seems to be backing up: %1$d new item, most recently “%2$s”, was already uploaded by another app before Photos Unlimited got to it. That copy can use your storage.\n\nOpen Google Photos and turn Backup off.</item>
+        <item quantity="other">Google Photos still seems to be backing up: %1$d new items, most recently “%2$s”, were already uploaded by another app before Photos Unlimited got to them. Those copies can use your storage.\n\nOpen Google Photos and turn Backup off.</item>
+    </plurals>
+
+    <!-- Backup screen -->
+    <string name="backup_heading">Backup</string>
+    <string name="backup_subtitle">Original photos and videos.</string>
+    <string name="backup_checking">Checking backup status…</string>
+    <string name="backup_back_up_now">Back up now</string>
+    <string name="backup_loading_counts">Loading device backup records…</string>
+    <string name="backup_folders">Backup folders</string>
+    <!-- Two-line row. %1$s is the list of chosen folder names, or the text of backup_choose_folders. -->
+    <string name="backup_folders_row">Backup folders\n%1$s</string>
+    <string name="backup_choose_folders">Choose folders</string>
+    <string name="backup_save_folders">Save folders</string>
+    <string name="backup_recent_activity">Recent activity</string>
+    <string name="backup_open_google_photos">Open Google Photos</string>
+    <string name="backup_originals_stay">Original files stay on your phone.</string>
+    <!-- Item counts: %1$d uploaded, %2$d already in the library, %3$d waiting, %4$d need attention. Two lines. -->
+    <string name="backup_counts">%1$d uploaded · %2$d already in library\n%3$d waiting</string>
+    <string name="backup_counts_attention">%1$d uploaded · %2$d already in library\n%3$d waiting · %4$d need attention</string>
+    <!-- Upload progress. %1$s is the size sent so far and %2$s the total size (for example "3 MB"). -->
+    <string name="backup_progress_label">%1$s / %2$s · Current file</string>
+    <string name="backup_preparing_status">Preparing backup…</string>
+    <string name="backup_start_failed">Android could not start backup. Reopen the app and try again.</string>
+    <string name="backup_finding_folders">Finding photo and video folders…</string>
+    <string name="backup_no_folders">No photo or video folders found yet.</string>
+    <string name="backup_folders_failed">Couldn’t read folders. Check photo and video permissions.</string>
+    <!-- Row in the folder chooser. %1$s is the folder name, %2$d the number of items in it. -->
+    <plurals name="backup_folder_label">
+        <item quantity="one">%1$s · %2$d item</item>
+        <item quantity="other">%1$s · %2$d items</item>
+    </plurals>
+    <!-- Status card on the Backup screen: title, description and the label of its main button. -->
+    <string name="backup_title_connect">Connect your account</string>
+    <string name="backup_desc_connect">Choose the Google Photos library for your backup.</string>
+    <string name="backup_title_media">Allow media access</string>
+    <string name="backup_desc_media">Photo, video and media location access preserve complete originals.</string>
+    <string name="backup_action_permissions">Review permissions</string>
+    <string name="backup_title_folders">Choose your folders</string>
+    <string name="backup_desc_folders">Select the photos and videos you want to back up.</string>
+    <string name="backup_title_running">Backing up</string>
+    <string name="backup_title_checking">Checking your folders</string>
+    <string name="backup_title_pausing">Pausing backup…</string>
+    <string name="backup_desc_preparing">Preparing your backup…</string>
+    <string name="backup_action_pause">Pause backup</string>
+    <string name="backup_title_attention">Backup needs attention</string>
+    <string name="backup_action_reconnect">Reconnect account</string>
+    <string name="backup_title_paused">Backup is paused</string>
+    <string name="backup_title_waiting">Waiting to back up</string>
+    <string name="backup_action_settings">Backup settings</string>
+    <string name="backup_title_some_attention">Some items need attention</string>
+    <string name="backup_desc_some_attention">Open Activity to review unsuccessful uploads and retries.</string>
+    <string name="backup_action_activity">Review activity</string>
+    <string name="backup_title_scheduled">Backup scheduled</string>
+    <string name="backup_desc_scheduled">Android will run background work when conditions allow. You can also start now.</string>
+    <string name="backup_title_up_to_date">You’re up to date</string>
+    <!-- %1$s is a relative time such as "5 minutes ago". -->
+    <string name="backup_desc_up_to_date">Selected folders are backed up. Last checked %1$s.</string>
+    <string name="backup_waiting_internet">Waiting for an internet connection.</string>
+    <string name="backup_waiting_unmetered">Waiting for an unmetered connection, usually Wi-Fi.</string>
+    <string name="backup_waiting_charging">Waiting for your phone to charge.</string>
+
+    <!-- Activity screen -->
+    <string name="activity_heading">Activity</string>
+    <string name="activity_subtitle">Recent backup records from this device.</string>
+    <string name="activity_retry">Retry unsuccessful items</string>
+    <string name="activity_empty">Your confirmed uploads and queued items will appear here.</string>
+
+    <!-- Storage screen -->
+    <string name="storage_heading">Storage</string>
+    <string name="storage_subtitle">Google Photos inventory · Preview</string>
+    <string name="storage_no_scan">No scan yet</string>
+    <string name="storage_no_results">No results yet</string>
+    <string name="storage_usage_unknown">Usage unknown</string>
+    <string name="storage_caption">Reported storage used by scanned items</string>
+    <string name="storage_scan_prompt">Read metadata to find photos and videos using storage.</string>
+    <string name="storage_scan">Scan Google Photos</string>
+    <string name="storage_pause_scan">Pause scan</string>
+    <string name="storage_refresh_scan">Refresh scan</string>
+    <string name="storage_continue_scan">Continue scan</string>
+    <string name="storage_scan_note">Read-only scan. Google may omit items or storage details. Unknown is not zero. This total excludes Drive and Gmail and may differ from your account total.</string>
+    <!-- Scan summary, two lines. All four are item counts. -->
+    <string name="storage_summary">%1$d scanned · %2$d using storage\n%3$d unknown · %4$d reported as zero</string>
+    <!-- Scan status. %1$d is the number of pages read, %2$s is a status message from the scanner. Two lines. -->
+    <plurals name="storage_status_finished">
+        <item quantity="one">Finished · %1$d page\n%2$s</item>
+        <item quantity="other">Finished · %1$d pages\n%2$s</item>
+    </plurals>
+    <plurals name="storage_status_partial">
+        <item quantity="one">Partial results · %1$d page\n%2$s</item>
+        <item quantity="other">Partial results · %1$d pages\n%2$s</item>
+    </plurals>
+    <!-- %1$s is a status message from the scanner. -->
+    <string name="storage_status_finished_nopages">Finished\n%1$s</string>
+    <string name="storage_cache_failed">Couldn’t read the local scan cache. Try again.</string>
+    <!-- Filters. -->
+    <string name="storage_filter_status">Storage status</string>
+    <string name="storage_filter_all">All scanned items</string>
+    <string name="storage_filter_using">Using storage</string>
+    <string name="storage_filter_unknown">Storage unknown</string>
+    <!-- Also used as the "reduced quality" tag on an item. -->
+    <string name="storage_filter_reduced">Reduced quality</string>
+    <string name="storage_filter_media">Media type</string>
+    <string name="storage_media_all">All media</string>
+    <string name="storage_media_photos">Photos</string>
+    <string name="storage_media_videos">Videos</string>
+    <string name="storage_fresh_scan">Start a fresh scan</string>
+    <string name="storage_sort_note">Largest reported storage first</string>
+    <string name="storage_select_items">Select items</string>
+    <string name="storage_done_selecting">Done selecting</string>
+    <string name="storage_select_all">Select all eligible</string>
+    <string name="storage_tap_to_select">Tap items to select them</string>
+    <!-- %1$d is the number of selected items, %2$s the total size to be freed. -->
+    <string name="storage_selected_info">%1$d selected · %2$s to free</string>
+    <string name="storage_previous">Previous</string>
+    <string name="storage_next">Next</string>
+    <string name="storage_no_matches">No matching scanned items</string>
+    <!-- %1$d and %2$d are the first and last item number shown (for example "Items 1–50"). -->
+    <string name="storage_range">Items %1$d–%2$d · Largest charged size first</string>
+    <string name="storage_empty_start">Start a scan to read the metadata for your Google Photos library.</string>
+    <!-- "Storage unknown" refers to the filter option of that name. -->
+    <string name="storage_empty_none_charged">No items with reported charged storage in this view. Check Storage unknown for items without accounting data.</string>
+    <string name="storage_empty_no_match">No items match these filters.</string>
+    <!-- %1$s is the reason, already translated. -->
+    <string name="storage_cant_select">Can’t select: %1$s</string>
+    <string name="storage_type_video">Video</string>
+    <string name="storage_type_photo">Photo</string>
+    <string name="storage_type_media">Media</string>
+    <!-- Item info line. %1$s is the media type, %2$s the file size (for example "3 MB"). -->
+    <string name="storage_item_info">%1$s · File size %2$s</string>
+    <!-- %1$s is the media type. -->
+    <string name="storage_item_info_nosize">%1$s · File size unknown</string>
+    <!-- Tags appended to an item info line, separated by " · ". -->
+    <string name="storage_flag_trash">In trash</string>
+    <string name="storage_flag_archived">Archived</string>
+    <string name="storage_flag_shared">Shared</string>
+    <string name="storage_flag_edited">Edited</string>
+    <string name="storage_usage_unknown_row">Storage usage unknown</string>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="storage_reported">%1$s reported storage</string>
+    <!-- Item details dialog header. %1$s is the media type, %2$s the file size or storage_size_unknown, %3$s the storage usage or storage_use_unknown. -->
+    <string name="storage_detail_header">%1$s · %2$s\n%3$s\n\n</string>
+    <string name="storage_size_unknown">size unknown</string>
+    <string name="storage_use_unknown">Storage use unknown</string>
+    <string name="storage_fresh_title">Start a fresh scan?</string>
+    <string name="storage_fresh_message">Replaces this app’s cached inventory. Your photos and videos stay in place.</string>
+    <string name="storage_scan_again">Scan again</string>
+    <string name="storage_pause_freeup_first">Pause Free up storage before scanning.</string>
+    <string name="storage_pause_freeup">Pause Free up storage first.</string>
+    <string name="storage_pause_scan_first">Pause the current scan first.</string>
+    <string name="storage_start_failed">Android could not start the scan. Reopen the app and try again.</string>
+
+    <!-- Free up storage -->
+    <string name="freeup_title">Free up storage</string>
+    <string name="freeup_button">Free up</string>
+    <plurals name="freeup_button_count">
+        <item quantity="one">Free up %d item</item>
+        <item quantity="other">Free up %d items</item>
+    </plurals>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="freeup_button_size">Free up %1$s</string>
+    <string name="freeup_replace_original">Replace with original</string>
+    <string name="freeup_pause">Pause</string>
+    <string name="freeup_resume">Resume</string>
+    <string name="freeup_finish_now">Finish now</string>
+    <string name="freeup_remove_copies">Remove finished copies</string>
+    <string name="freeup_review_files">Review files from before</string>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="freeup_freed">%1$s freed in recent items.</string>
+    <string name="freeup_idle">Idle.</string>
+    <plurals name="freeup_unfinished">
+        <item quantity="one">%d item not finished. Resume to continue safely.</item>
+        <item quantity="other">%d items not finished. Resume to continue safely.</item>
+    </plurals>
+    <!-- Keep the folder path Pictures/Photos Unlimited/Pending upload as is. -->
+    <plurals name="freeup_only_on_phone">
+        <item quantity="one">⚠ %d item is only on this phone until it’s uploaded again. Don’t uninstall the app or clear its storage until this finishes. Copies are in Pictures/Photos Unlimited/Pending upload.</item>
+        <item quantity="other">⚠ %d items are only on this phone until they’re uploaded again. Don’t uninstall the app or clear its storage until this finishes. Copies are in Pictures/Photos Unlimited/Pending upload.</item>
+    </plurals>
+    <plurals name="freeup_leftovers">
+        <item quantity="one">%d item from before (for example a previous install) is waiting in Pictures/Photos Unlimited/Pending upload. Finish now uploads it if Google Photos is missing it.</item>
+        <item quantity="other">%d items from before (for example a previous install) are waiting in Pictures/Photos Unlimited/Pending upload. Finish now uploads any that Google Photos is missing.</item>
+    </plurals>
+    <plurals name="freeup_review">
+        <item quantity="one">%d file in Pictures/Photos Unlimited/Pending upload wasn’t saved by this installation. Review it before anything is uploaded.</item>
+        <item quantity="other">%d files in Pictures/Photos Unlimited/Pending upload weren’t saved by this installation. Review them before anything is uploaded.</item>
+    </plurals>
+    <plurals name="freeup_other_account">
+        <item quantity="one">%d waiting file belongs to a different Google account. Connect that account to finish it.</item>
+        <item quantity="other">%d waiting files belong to a different Google account. Connect that account to finish them.</item>
+    </plurals>
+    <plurals name="freeup_cleanup">
+        <item quantity="one">%d finished copy from a previous install is already in Google Photos and can be removed from this phone.</item>
+        <item quantity="other">%d finished copies from a previous install are already in Google Photos and can be removed from this phone.</item>
+    </plurals>
+    <!-- Job list row. %1$s is the file name, %2$s the job state. -->
+    <string name="freeup_row_title">%1$s · %2$s</string>
+    <!-- %1$s is a size, %2$s a status message. -->
+    <string name="freeup_row_detail">%1$s · %2$s</string>
+    <!-- Job states. -->
+    <string name="freeup_state_waiting">Waiting</string>
+    <string name="freeup_state_saved">Original saved</string>
+    <string name="freeup_state_trash">In trash</string>
+    <string name="freeup_state_uploading">Uploading copy</string>
+    <string name="freeup_state_verifying">Verifying</string>
+    <string name="freeup_state_freed">Freed</string>
+    <string name="freeup_state_charged">Still charged</string>
+    <string name="freeup_state_failed">Not changed</string>
+    <string name="freeup_state_attention">Needs attention</string>
+    <!-- Item details dialog. %1$s is the reason, already translated. -->
+    <string name="freeup_detail_cant">Can’t free this item’s storage: %1$s</string>
+    <string name="freeup_detail_explain">Free up storage replaces it with a copy uploaded through this app: the original file is downloaded and checked against Google’s checksum, deleted from Google Photos, then uploaded again with its embedded metadata (date, location, camera details) intact. Caption, favorite, and archive are restored.</string>
+    <string name="freeup_detail_lost">Lost: album membership, shared-album copies and comments, people and face groupings, and any date or location changes made inside Google Photos.</string>
+    <string name="freeup_detail_edited">This item was edited in Google Photos; only the unedited original is kept.</string>
+    <!-- Batch confirmation dialog. %1$s is a size, %2$d the number of items. -->
+    <plurals name="freeup_batch_title">
+        <item quantity="one">Free up %1$s from %2$d item?</item>
+        <item quantity="other">Free up %1$s from %2$d items?</item>
+    </plurals>
+    <string name="freeup_batch_body">Each item is downloaded (or found on this phone) and checked against Google’s checksum, deleted from Google Photos, and uploaded again. Embedded metadata stays intact; caption, favorite and archive are restored. Albums, shared copies, comments, face groups and edits made inside Google Photos are lost.</string>
+    <plurals name="freeup_batch_edited">
+        <item quantity="one">%d item was edited in Google Photos; only the original is kept.</item>
+        <item quantity="other">%d items were edited in Google Photos; only the originals are kept.</item>
+    </plurals>
+    <plurals name="freeup_batch_reduced">
+        <item quantity="one">%d item is a reduced-quality copy. It is replaced only if the original is still on this phone.</item>
+        <item quantity="other">%d items are reduced-quality copies. They are replaced only if the original is still on this phone.</item>
+    </plurals>
+    <string name="freeup_batch_footer">Photos on this phone are kept; if another app removes one, it’s put back. The run stops by itself if a replacement still uses storage. Keep the phone on Wi-Fi until it finishes.</string>
+    <string name="freeup_delete_reupload">Delete and re-upload</string>
+    <plurals name="freeup_queued">
+        <item quantity="one">%d item queued.</item>
+        <item quantity="other">%d items queued.</item>
+    </plurals>
+    <plurals name="freeup_skipped">
+        <item quantity="one">%d item in this view can’t be freed and was skipped.</item>
+        <item quantity="other">%d items in this view can’t be freed and were skipped.</item>
+    </plurals>
+    <string name="freeup_gp_title">Turn off Google Photos backup first</string>
+    <string name="freeup_gp_message">While Google Photos backup is on, Google Photos deletes this phone’s copy of every photo removed from the cloud, including the ones Free up replaces.\n\nTurn its backup off, then come back. Other phones or tablets signed in to this account with Google Photos backup on would delete their copies too.</string>
+    <string name="freeup_gp_its_off">It’s off</string>
+    <string name="freeup_confirm_title">Delete and re-upload?</string>
+    <string name="freeup_confirm_message">The original is deleted from Google Photos before the copy is uploaded. Keep the phone on Wi-Fi until this item shows Freed. If anything fails after the deletion, the verified copy stays in this app and the upload is retried. Photos on this phone are kept; if another app removes one, it’s put back.</string>
+    <string name="freeup_already_queued">This item is already being processed.</string>
+    <string name="freeup_scan_running">The storage scan is running. Free up storage starts after you pause it.</string>
+    <string name="freeup_start_failed">Android could not start the task. Reopen the app and try again.</string>
+    <!-- Review of leftover files. Keep the folder path Pictures/Photos Unlimited/Pending upload as is. -->
+    <string name="freeup_review_title">Upload these files to Google Photos?</string>
+    <!-- %1$s is a bulleted list of file names and sizes. -->
+    <string name="freeup_review_message">These files are in Pictures/Photos Unlimited/Pending upload but weren’t saved by this installation, usually because the app was reinstalled during Free up. Upload them only if you recognize them; you can check them in your gallery first. Each file is checked against its checksum before uploading.\n\n%1$s</string>
+    <!-- One bullet in the list. %1$s is a file name, %2$s a size. -->
+    <string name="freeup_review_item">• %1$s (%2$s)</string>
+    <!-- %1$d is the number of files not listed. -->
+    <string name="freeup_review_more">…and %1$d more</string>
+    <string name="freeup_review_upload">Upload</string>
+    <string name="freeup_delete_request_failed">Android could not open the delete request. Remove them from the gallery instead.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_heading">Settings</string>
+    <string name="settings_subtitle">Make backup fit your day.</string>
+    <string name="settings_section_backup">Backup</string>
+    <string name="settings_automatic">Automatic backup</string>
+    <!-- Two-line label: title, then a short hint. -->
+    <string name="settings_unmetered">Unmetered networks only\nUsually Wi-Fi</string>
+    <string name="settings_charging">Only while charging</string>
+    <!-- Two-line label: title, then a short hint. -->
+    <string name="settings_gp_off_row">Turn off Google Photos backup\nAvoid two apps uploading the same photos</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">Follow system</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_wallpaper">Wallpaper colors</string>
+    <string name="settings_section_account">Account and app</string>
+    <!-- Two-line label. %1$s is the account email address. -->
+    <string name="settings_account_row">Google account\n%1$s</string>
+    <string name="settings_permissions">Photo and video permissions</string>
+    <string name="settings_about">About and open-source credits</string>
+    <string name="settings_diagnostic">Advanced account diagnostic</string>
+
+    <!-- Account dialog -->
+    <string name="account_title">Google account</string>
+    <string name="account_refresh_photo">Refresh profile photo</string>
+    <string name="account_reconnect">Reconnect</string>
+    <string name="account_disconnect">Disconnect</string>
+    <!-- Accessibility label of the toolbar account button. %1$s is the account email address. -->
+    <string name="account_description">Google account: %1$s</string>
+    <string name="account_profile_refreshed">Profile refreshed.</string>
+    <string name="account_pause_first">Pause backup, the storage scan, and Free up storage before changing accounts.</string>
+    <string name="account_finish_title">Finish Free up first</string>
+    <plurals name="account_unfinished">
+        <item quantity="one">%d item was removed from Google Photos and is only on this phone until it’s uploaded again. Open Storage and tap Resume, then change the account.</item>
+        <item quantity="other">%d items were removed from Google Photos and are only on this phone until they’re uploaded again. Open Storage and tap Resume, then change the account.</item>
+    </plurals>
+    <string name="account_disconnect_title">Disconnect account?</string>
+    <string name="account_disconnect_message">Stops uploads and scanning, removes the saved sign-in and cached storage inventory. Your local files and Google Photos library stay in place.</string>
+    <!-- Status line shown on the Backup screen after disconnecting. -->
+    <string name="account_disconnected_status">Account disconnected.</string>
+
+    <!-- About dialog -->
+    <string name="about_title">About Photos Unlimited</string>
+    <!-- %1$s is the app version, %2$s is the license text (English). -->
+    <string name="about_text">Photos Unlimited %1$s\n\nIndependent Android uploader. Not affiliated with Google.\n\nTurn off backup in the official Google Photos app when this app handles uploads. Original files stay on your phone. Upload acceptance is not proof of storage exemption. Existing library items keep their accounting unless you replace them with Free up storage.\n\nStorage scans read Google Photos metadata; Drive and Gmail are not included. Missing accounting is shown as unknown. Free up storage deletes the items you choose from Google Photos only after a byte-identical copy is saved on this phone, then uploads that copy again.\n\nProtocol adapted from xob0t’s GPMC and gotohp.\n\n%2$s</string>
+    <string name="about_failed">Couldn’t read credits.</string>
+
+
+    <!-- Sign-in screen -->
+    <string name="signin_status">Google sign-in · accounts.google.com</string>
+    <string name="signin_help">Try the account already on your phone, or sign in below. The phone-account option is a diagnostic test; it does not connect backup yet.</string>
+    <string name="signin_test_account">Test account on this phone</string>
+    <string name="signin_use_token">Use browser setup token</string>
+    <string name="signin_ssl_error">Could not verify Google\'s secure connection.</string>
+    <string name="signin_connecting">Connecting to your Google Photos library…</string>
+    <!-- Status line shown on the Backup screen right after sign-in. -->
+    <string name="signin_connected_status">Account connected. Choose folders, then start your first backup.</string>
+    <string name="signin_connect_failed">Couldn\'t connect. Try a fresh browser setup token.</string>
+    <string name="signin_token_hint">Google setup token</string>
+    <!-- Keep accounts.google.com/EmbeddedSetup and oauth_token untranslated. -->
+    <string name="signin_token_help">On a computer, visit accounts.google.com/EmbeddedSetup and sign in. In browser developer tools → Application/Storage → Cookies → accounts.google.com, copy only the oauth_token value. Enter it here on your phone.\n\nKeep this token private. It provides account access; never send it in chat.</string>
+    <string name="signin_browser_setup">Browser setup</string>
+    <string name="signin_connect">Connect</string>
+    <string name="signin_open_setup">Open setup page</string>
+
+    <!-- Account test (diagnostic) screen -->
+    <string name="probe_title">Test your phone account</string>
+    <string name="probe_help">Start with the basic Google access test. If it succeeds, test Photos access. Choose the account already on this phone when prompted.\n\nGoogle handles consent and account verification. This diagnostic does not upload photos or connect automatic backup.</string>
+    <string name="probe_test_photos">Test Photos access</string>
+    <string name="probe_test_basic">Test basic Google access</string>
+    <string name="probe_copy">Copy diagnostic result</string>
+    <!-- Label of the clipboard entry. -->
+    <string name="probe_clip_label">Account test</string>
+    <string name="probe_copied">Copied: no email, password, or tokens</string>
+    <string name="probe_ready">Ready to test.</string>
+    <string name="probe_restored">Previous results restored. Restart an interrupted test.</string>
+    <!-- Title shown by Android\'s account chooser. -->
+    <string name="probe_chooser_title">Choose an account for the Photos access test</string>
+    <string name="probe_choosing">Choose an account in Android\'s account chooser…</string>
+    <string name="probe_requesting_photos">Requesting Photos access through Google Play services…</string>
+    <string name="probe_requesting_basic">Requesting basic account access through Google Play services…</string>
+    <string name="probe_continue_google">Continue in Google\'s authorization screen…</string>
+    <string name="probe_checking_photos">Token issued. Checking access to the Photos service…</string>
+    <!-- %1$s is a status sentence. %2$s and %3$s are diagnostic result codes (not translated). -->
+    <string name="probe_status">%1$s\n\nPhotos: %2$s\nBasic: %3$s</string>
+    <!-- Settings → Appearance: language menu. The other choices are each language's own name. -->
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System default</string>
+</resources>

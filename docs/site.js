@@ -6,12 +6,10 @@
   const appearanceControl = document.querySelector('#appearance-control');
   const tabs = [...document.querySelectorAll('[data-screen]')];
   const appearances = [...document.querySelectorAll('[data-appearance]')];
-  const screens = {
-    backup: {label: 'Backup', description: 'showing Connect your account'},
-    activity: {label: 'Activity', description: 'with an empty upload history'},
-    storage: {label: 'Storage', description: 'showing the library-scan preview before connecting an account'},
-    settings: {label: 'Settings', description: 'showing backup preferences and theme controls'}
-  };
+  // Page text comes from the page itself, so each translated page carries its own words.
+  const text = JSON.parse(document.querySelector('#site-text').textContent);
+  const screens = text.screens;
+  const fill = (template, values) => template.replace(/\{(\w+)\}/g, (_, key) => values[key] ?? '');
   let selectedScreen = 'backup';
   let selectedAppearance = 'dark';
   let request = 0;
@@ -20,16 +18,17 @@
     const currentRequest = ++request;
     const screen = screens[selectedScreen];
     const appearance = selectedScreen === 'backup' ? selectedAppearance : 'dark';
-    const src = `media/${selectedScreen}-${appearance}.png`;
-    const label = `${screen.label}, ${appearance} theme`;
+    const src = `${document.documentElement.dataset.root || ''}media/${selectedScreen}-${appearance}.png`;
+    const theme = text.themes[appearance];
+    const label = fill(text.label, {screen: screen.label, theme});
     panel.setAttribute('aria-busy', 'true');
     const preload = new Image();
     preload.src = src;
     try { await preload.decode(); } catch { /* The image element exposes a failed asset. */ }
     if (currentRequest !== request) return;
     screenshot.src = src;
-    screenshot.alt = `The app’s ${appearance} ${screen.label} screen, ${screen.description}`;
-    caption.textContent = `Actual app · ${label}`;
+    screenshot.alt = fill(text.alt, {theme, screen: screen.label, description: screen.description});
+    caption.textContent = fill(text.caption, {label});
     panel.setAttribute('aria-busy', 'false');
   }
 

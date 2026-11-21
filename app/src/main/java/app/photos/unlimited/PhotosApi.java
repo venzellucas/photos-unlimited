@@ -54,7 +54,7 @@ public final class PhotosApi {
 
   public record Response(byte[] bytes, Map<String, String> headers) {}
 
-  public static final class ApiException extends IOException {
+  public static final class ApiException extends UserFacingException {
     public final boolean signIn, permanent;
     public final int httpStatus;
 
@@ -86,9 +86,9 @@ public final class PhotosApi {
     this.stop = stop;
     for (String key : List.of("Email", "Token", "androidId"))
       if (this.credentials.getOrDefault(key, "").isBlank())
-        throw new IOException("Incomplete account credentials");
+        throw new ApiException(Text.get(R.string.api_incomplete_credentials), true, false);
     if (this.credentials.containsKey("token_binding_alias"))
-      throw new IOException("This credential needs device-bound keys. Use Google sign-in instead.");
+      throw new ApiException(Text.get(R.string.api_device_bound), true, false);
   }
 
   public static String email(String credentials) throws IOException {
@@ -106,7 +106,7 @@ public final class PhotosApi {
         || token.length() > 8192
         || token.contains("\n")
         || token.contains("\r"))
-      throw new IOException("Enter the sign-in token from Google setup.");
+      throw new UserFacingException(Text.get(R.string.api_enter_token));
     byte[] id = new byte[8];
     new SecureRandom().nextBytes(id);
     StringBuilder androidId = new StringBuilder();
@@ -147,7 +147,7 @@ public final class PhotosApi {
     String mail = result.getOrDefault("Email", "");
     String master = result.getOrDefault("Token", "");
     if (!mail.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+") || master.isEmpty())
-      throw new IOException("Google did not return usable account credentials.");
+      throw new UserFacingException(Text.get(R.string.api_no_credentials));
     form.clear();
     form.put("Email", mail);
     form.put("Token", master);
@@ -350,7 +350,7 @@ public final class PhotosApi {
     URL parsed = new URL(url);
     if (!parsed.getProtocol().equals("https") || !firstDownloadHost(parsed.getHost()))
       throw new ApiException(
-          "Download address is not a Google media host: " + parsed.getHost(), false, true);
+          Text.get(R.string.api_bad_host, parsed.getHost()), false, true);
     MessageDigest digest = sha1();
     long[] count = {0};
     Map<String, String> headers = headers();
@@ -367,7 +367,7 @@ public final class PhotosApi {
             public void write(byte[] b, int off, int len) throws IOException {
               checkStopped(stop);
               count[0] += len;
-              if (count[0] > limit) throw new IOException("Download is larger than expected");
+              if (count[0] > limit) throw new UserFacingException(Text.get(R.string.api_download_too_large));
               digest.update(b, off, len);
               file.write(b, off, len);
               progress.update(count[0], limit);
@@ -396,7 +396,7 @@ public final class PhotosApi {
   public String upload(
       Source source, String name, long size, long timestamp, byte[] hash, Progress progress)
       throws IOException {
-    if (size <= 0) throw new ApiException("File is empty.", false, true);
+    if (size <= 0) throw new ApiException(Text.get(R.string.api_file_empty), false, true);
     byte[] request =
         new Proto().number(1, 2).number(2, 2).number(3, 1).number(4, 3).number(7, size).build();
     Response init =
@@ -409,7 +409,7 @@ public final class PhotosApi {
                 "X-Upload-Content-Length",
                 Long.toString(size)));
     String id = init.headers.getOrDefault("x-guploader-uploadid", "");
-    if (id.isEmpty()) throw new IOException("Google did not create an upload session.");
+    if (id.isEmpty()) throw new UserFacingException(Text.get(R.string.api_no_session));
     MessageDigest sentDigest = sha1();
     long[] sent = {0};
     Body body =
@@ -435,10 +435,10 @@ public final class PhotosApi {
             -1,
             stop);
     if (sent[0] != size || !MessageDigest.isEqual(hash, sentDigest.digest()))
-      throw new IOException("File changed during upload; it will be checked again.");
+      throw new UserFacingException(Text.get(R.string.api_file_changed));
     // Receipt is an opaque protobuf envelope. Preserve every byte for commit.
     if (Proto.fields(uploaded.bytes, 2).isEmpty())
-      throw new IOException("Google returned an invalid upload receipt.");
+      throw new UserFacingException(Text.get(R.string.api_bad_receipt));
     byte[] commit = commitBody(uploaded.bytes, name, hash, timestamp);
     Response result =
         post(
@@ -451,8 +451,7 @@ public final class PhotosApi {
                 "CgIIAg=="));
     String key = Proto.path(result.bytes, 1, 3, 1);
     if (key.isEmpty())
-      throw new IOException(
-          "Upload was not confirmed. The next attempt will check for duplicates.");
+      throw new UserFacingException(Text.get(R.string.api_unconfirmed));
     return key;
   }
 
@@ -508,7 +507,7 @@ public final class PhotosApi {
       checkAuth(parsed);
       bearer = parsed.getOrDefault("Auth", "");
       if (bearer.isEmpty())
-        throw new ApiException("Google sign-in needs to be renewed.", true, false);
+        throw new ApiException(Text.get(R.string.api_renew_sign_in), true, false);
       try {
         expiry = Long.parseLong(parsed.getOrDefault("Expiry", "0"));
       } catch (NumberFormatException e) {
@@ -526,11 +525,9 @@ public final class PhotosApi {
     if (values.containsKey("Error"))
       throw new ApiException(
           switch (values.get("Error")) {
-            case "NeedsBrowser" -> "Google requires a new sign-in. Reconnect your account.";
-            case "MissingDroidguard" ->
-                "Google rejected device verification. This sign-in method is currently"
-                    + " unavailable.";
-            default -> "Google rejected this sign-in. Try a fresh Google setup token.";
+            case "NeedsBrowser" -> Text.get(R.string.api_needs_browser);
+            case "MissingDroidguard" -> Text.get(R.string.api_droidguard);
+            default -> Text.get(R.string.api_rejected);
           },
           true,
           false);
@@ -595,7 +592,7 @@ public final class PhotosApi {
         checkStopped(stop);
         URL url = new URL(current);
         if (!url.getProtocol().equals("https") || !downloadHost(url.getHost()))
-          throw new IOException("Download redirected to an unrecognized host");
+          throw new UserFacingException(Text.get(R.string.api_download_bad_redirect));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
           connection.setInstanceFollowRedirects(false);
@@ -606,7 +603,7 @@ public final class PhotosApi {
           int code = connection.getResponseCode();
           if (code >= 300 && code < 400) {
             String location = connection.getHeaderField("Location");
-            if (location == null) throw new IOException("Download redirect without location");
+            if (location == null) throw new UserFacingException(Text.get(R.string.api_download_bad_redirect));
             URL next = new URL(url, location);
             if (!next.getHost().equals(url.getHost())) {
               // The account token never follows a redirect to another host.
@@ -618,7 +615,7 @@ public final class PhotosApi {
           }
           if (code < 200 || code >= 300)
             throw new ApiException(
-                "Google returned HTTP " + code + " for the download.",
+                Text.get(R.string.api_download_http, code),
                 code == 401,
                 code == 404 || code == 410,
                 code);
@@ -635,7 +632,7 @@ public final class PhotosApi {
           connection.disconnect();
         }
       }
-      throw new IOException("Too many download redirects");
+      throw new UserFacingException(Text.get(R.string.api_download_bad_redirect));
     }
 
     public Response call(
@@ -673,11 +670,11 @@ public final class PhotosApi {
         int code = connection.getResponseCode();
         if (code < 200 || code >= 300)
           throw new ApiException(
-              "Google returned HTTP "
-                  + code
-                  + (code == 401 || code == 403
-                      ? ". Reconnect your account if this persists."
-                      : ". Upload is not confirmed."),
+              Text.get(
+                  code == 401 || code == 403
+                      ? R.string.api_upload_http_auth
+                      : R.string.api_upload_http,
+                  code),
               code == 401,
               code >= 400 && code < 500 && code != 401 && code != 403 && code != 408 && code != 429,
               code);

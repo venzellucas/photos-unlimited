@@ -52,7 +52,7 @@ public final class InventoryDb extends SQLiteOpenHelper {
         getReadableDatabase()
             .query("scans", null, "account=?", new String[] {account}, null, null, null)) {
       if (!c.moveToFirst())
-        return new Scan(LibraryProtocol.Cursor.fresh(), "", 0, 0, "Ready to scan");
+        return new Scan(LibraryProtocol.Cursor.fresh(), "", 0, 0, Text.get(R.string.scan_ready));
       return new Scan(
           new LibraryProtocol.Cursor(
               LibraryProtocol.Stage.valueOf(s(c, "stage")),
@@ -77,7 +77,7 @@ public final class InventoryDb extends SQLiteOpenHelper {
       v.put("generation", UUID.randomUUID().toString());
       v.put("pages", 0);
       v.put("updated", System.currentTimeMillis());
-      v.put("message", "Scanning Google Photos…");
+      v.put("message", Text.get(R.string.scan_scanning));
       db.insertOrThrow("scans", null, v);
       db.setTransactionSuccessful();
     } finally {
@@ -129,8 +129,8 @@ public final class InventoryDb extends SQLiteOpenHelper {
       v.put(
           "message",
           after.stage() == LibraryProtocol.Stage.DONE
-              ? "Scan finished"
-              : "Scanning Google Photos…");
+              ? Text.get(R.string.scan_finished)
+              : Text.get(R.string.scan_scanning));
       db.update(
           "scans", v, "account=? AND generation=?", new String[] {account, before.generation});
       db.setTransactionSuccessful();
@@ -218,7 +218,7 @@ public final class InventoryDb extends SQLiteOpenHelper {
         cursorValues(
             new LibraryProtocol.Cursor(
                 LibraryProtocol.Stage.SYNC, new byte[0], sync, sync, false));
-    v.put("message", "Checking recent changes…");
+    v.put("message", Text.get(R.string.scan_checking_recent));
     getWritableDatabase()
         .update(
             "scans",

@@ -93,7 +93,7 @@ public final class LibrarySync {
       if (progress != null) progress.page(current);
     }
     if (skipped != null && current.cursor().stage() == LibraryProtocol.Stage.DONE) {
-      db.message(account, current.generation(), "Scan finished (" + skipped + " skipped)");
+      db.message(account, current.generation(), Text.get(R.string.scan_finished_skipped, skipped));
       current = db.scan(account);
     }
     return current;

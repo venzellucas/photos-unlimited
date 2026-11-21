@@ -7,6 +7,9 @@ import java.util.List;
 
 /** Read-only library sync, adapted from the pinned MIT GPMC parser. */
 public final class LibraryProtocol {
+  /** Library data, not interface text: the name is cached and can name a re-uploaded file. */
+  static final String UNNAMED = "Unnamed media";
+
   public record Item(
       String key,
       String name,
@@ -255,7 +258,7 @@ public final class LibraryProtocol {
     if (details.length == 0) throw new ScanFailure("SCAN_ITEM_INVALID", "Library item has no details");
     // Strict: the name is also the re-upload name, so a damaged one must never be freed.
     String name = text(details, 4);
-    if (name.isBlank()) name = "Unnamed media";
+    if (name.isBlank()) name = UNNAMED;
     byte[] kind = Proto.message(media, 5);
     int type = (int) number(kind, 1, 0);
     // Use media envelopes as the fallback if the type enum is absent.
@@ -279,7 +282,7 @@ public final class LibraryProtocol {
 
   /** An item whose body could not be read: kept so the key stays known, but never eligible. */
   static Item unknown(String key) {
-    return new Item(key, "Unnamed media", 0, null, null, 0, false, false, 0, Extra.NONE);
+    return new Item(key, UNNAMED, 0, null, null, 0, false, false, 0, Extra.NONE);
   }
 
 

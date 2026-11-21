@@ -85,41 +85,36 @@ public final class AccountProbeActivity extends ThemedActivity {
           return insets;
         });
     TextView title = new TextView(this);
-    title.setText("Test your phone account");
+    title.setText(getString(R.string.probe_title));
     title.setTextSize(26);
     title.setTextColor(new Ui(this).ink());
     root.addView(title);
     TextView help = new TextView(this);
-    help.setText(
-        "Start with the basic Google access test. If it succeeds, test Photos access. Choose the"
-            + " account already on this phone when prompted.\n\n"
-            + "Google handles consent and account verification. This diagnostic does not upload"
-            + " photos or connect automatic backup.");
+    help.setText(getString(R.string.probe_help));
     help.setTextSize(16);
     help.setPadding(0, dp(16), 0, dp(20));
     root.addView(help);
-    photos = button(root, "Test Photos access");
-    basic = button(root, "Test basic Google access");
+    photos = button(root, getString(R.string.probe_test_photos));
+    basic = button(root, getString(R.string.probe_test_basic));
     photos.setOnClickListener(v -> choose(true));
     basic.setOnClickListener(v -> choose(false));
     status = new TextView(this);
     status.setTextSize(16);
     status.setPadding(0, dp(20), 0, dp(20));
     root.addView(status);
-    copy = button(root, "Copy diagnostic result");
+    copy = button(root, getString(R.string.probe_copy));
     copy.setOnClickListener(
         v -> {
           getSystemService(ClipboardManager.class)
-              .setPrimaryClip(ClipData.newPlainText("Account test", report()));
-          Toast.makeText(this, "Copied: no email, password, or tokens", Toast.LENGTH_SHORT).show();
+              .setPrimaryClip(ClipData.newPlainText(getString(R.string.probe_clip_label), report()));
+          Toast.makeText(this, R.string.probe_copied, Toast.LENGTH_SHORT).show();
         });
-    button(root, "Back").setOnClickListener(v -> finish());
+    button(root, getString(R.string.main_back)).setOnClickListener(v -> finish());
     scroll.addView(root);
     setContentView(scroll);
     show(
-        saved == null
-            ? "Ready to test."
-            : "Previous results restored. Restart an interrupted test.");
+        getString(
+            saved == null ? R.string.probe_ready : R.string.probe_restored));
     if (awaitingConsent) armTimeout(generation);
   }
 
@@ -128,7 +123,7 @@ public final class AccountProbeActivity extends ThemedActivity {
         null,
         null,
         new String[] {"com.google"},
-        "Choose an account for the Photos access test",
+        Text.get(R.string.probe_chooser_title),
         null,
         null,
         null);
@@ -142,7 +137,7 @@ public final class AccountProbeActivity extends ThemedActivity {
     detail = "NONE";
     stage = Stage.CHOOSER;
     busy = true;
-    show("Choose an account in Android's account chooser…");
+    show(getString(R.string.probe_choosing));
     boolean available = false;
     for (var authenticator : AccountManager.get(this).getAuthenticatorTypes()) {
       if ("com.google".equals(authenticator.type)) available = true;
@@ -210,9 +205,8 @@ public final class AccountProbeActivity extends ThemedActivity {
     int current = generation;
     stage = Stage.AUTHORIZE_REQUEST;
     show(
-        "Requesting "
-            + (photosTest ? "Photos" : "basic account")
-            + " access through Google Play services…");
+        getString(
+            photosTest ? R.string.probe_requesting_photos : R.string.probe_requesting_basic));
     armTimeout(current);
     try {
       Identity.getAuthorizationClient(this)
@@ -254,7 +248,7 @@ public final class AccountProbeActivity extends ThemedActivity {
       stage = Stage.GOOGLE_CONSENT;
       detail = "stage=GOOGLE_CONSENT; resolution=REQUESTED";
       awaitingConsent = true;
-      show("Continue in Google's authorization screen…");
+      show(getString(R.string.probe_continue_google));
       try {
         startIntentSenderForResult(
             result.getPendingIntent().getIntentSender(), GOOGLE_CONSENT, null, 0, 0, 0);
@@ -284,7 +278,7 @@ public final class AccountProbeActivity extends ThemedActivity {
     }
     stage = Stage.PHOTOS_LOOKUP;
     detail = "stage=PHOTOS_LOOKUP; requestedScopeGranted=true; tokenPresent=true";
-    show("Token issued. Checking access to the Photos service…");
+    show(getString(R.string.probe_checking_photos));
     int current = generation;
     AtomicBoolean canceled = stop;
     io.execute(
@@ -362,7 +356,7 @@ public final class AccountProbeActivity extends ThemedActivity {
   }
 
   private void show(String message) {
-    status.setText(message + "\n\nPhotos: " + photosResult + "\nBasic: " + basicResult);
+    status.setText(getString(R.string.probe_status, message, photosResult, basicResult));
     photos.setEnabled(!busy);
     basic.setEnabled(!busy);
     copy.setEnabled(!busy);

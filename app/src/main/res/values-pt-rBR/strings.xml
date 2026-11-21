@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Profile lookup failure. %1$s is a fixed diagnostic label such as AUTH_HTTP_403. -->
+    <string name="profile_failed">Não foi possível carregar a foto do seu perfil do Google (%1$s). Os backups não foram afetados.</string>
+    <!-- Update card on the Backup screen. %1$s is a version such as 1.1.0. -->
+    <string name="update_title">A versão %1$s está disponível</string>
+    <string name="update_body">Instale-a sobre este app. Não desinstale o Photos Unlimited antes. Se o Android não permitir a instalação, continue usando esta versão.</string>
+    <string name="update_blocked_body">Conclua o Liberar espaço antes de atualizar. Algumas fotos estão somente neste smartphone até que o Liberar espaço as envie novamente.</string>
+    <string name="update_download">Baixar a versão mais recente</string>
+    <string name="update_whats_new">Novidades</string>
+    <string name="update_not_now">Agora não</string>
+    <string name="update_open_free_up">Abrir Liberar espaço</string>
+    <!-- Settings toggle for the daily update check. -->
+    <string name="update_setting">Verificar atualizações</string>
+    <string name="update_setting_summary">Uma vez por dia, enquanto o app estiver aberto, consulta o GitHub para saber a versão mais recente. O GitHub vê seu endereço IP.</string>
+    <string name="no_browser">Nenhum navegador encontrado</string>
+    <!-- Backup status line, shown on the Backup screen. -->
+    <string name="backup_status_connect">Conecte sua Conta do Google para começar o backup.</string>
+    <string name="backup_status_choose_folders">Escolha pelo menos uma pasta para o backup.</string>
+    <string name="backup_status_waiting_conditions">Aguardando as condições de rede e carregamento selecionadas.</string>
+    <string name="backup_status_allow_location">Permita o acesso ao local da mídia para enviar os arquivos originais completos.</string>
+    <string name="backup_status_checking_folders">Verificando as pastas selecionadas…</string>
+    <string name="backup_too_large">O arquivo excede o limite de tamanho de upload individual do Google.</string>
+    <!-- %1$s is a file name. -->
+    <string name="backup_checking_file">Verificando %1$s</string>
+    <string name="backup_file_changed">O arquivo foi alterado; aguardando uma cópia estável.</string>
+    <!-- %1$s is a file name. -->
+    <string name="backup_uploading_file">Enviando %1$s</string>
+    <string name="backup_status_sign_in_expired">O login expirou. Reconecte sua Conta do Google e retome o backup.</string>
+    <string name="backup_local_missing">O arquivo local não está mais disponível.</string>
+    <string name="backup_status_media_changed">O acesso à mídia foi alterado. Revise as permissões antes de retomar.</string>
+    <string name="backup_status_paused_queue">Backup pausado. Os arquivos pendentes continuam na fila.</string>
+    <plurals name="backup_status_attention">
+        <item quantity="one">%1$d item precisa de atenção. Veja a atividade recente.</item>
+        <item quantity="many">%1$d itens precisam de atenção. Veja a atividade recente.</item>
+        <item quantity="other">%1$d itens precisam de atenção. Veja a atividade recente.</item>
+    </plurals>
+    <string name="backup_status_more_queued">Há mais arquivos na fila. O backup continuará automaticamente.</string>
+    <string name="backup_status_up_to_date">As pastas selecionadas estão atualizadas.</string>
+    <string name="backup_status_paused_resume">Backup pausado. Ele será retomado quando as condições permitirem.</string>
+    <string name="backup_status_stopped">O backup foi interrompido inesperadamente. Abra o app novamente e tente de novo.</string>
+    <string name="backup_error_timeout">A conexão expirou. Uma nova tentativa será feita automaticamente.</string>
+    <string name="backup_error_offline">Conexão indisponível. Uma nova tentativa será feita automaticamente.</string>
+    <string name="backup_error_tls">Não foi possível estabelecer uma conexão segura com o Google.</string>
+    <string name="backup_error_unconfirmed">Não foi possível confirmar o upload. Uma nova tentativa será feita automaticamente.</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_backup">Progresso do backup</string>
+    <string name="backup_notification_preparing">Preparando o backup…</string>
+    <!-- Notification button. -->
+    <string name="action_pause">Pausar</string>
+    <!-- Activity list: state of one file. -->
+    <string name="history_uploaded">Enviado</string>
+    <string name="history_existing">Já está no Google Fotos</string>
+    <string name="history_uploading">Enviando</string>
+    <string name="history_waiting">Aguardando</string>
+    <string name="backup_status_initial">Escolha uma conta e as pastas das quais você quer fazer backup.</string>
+    <string name="account_saved_unavailable">O login salvo não está disponível. Reconecte sua Conta do Google.</string>
+    <string name="account_save_failed">Não foi possível salvar sua conta com segurança.</string>
+    <string name="media_need_full_access">Permita o acesso a todas as fotos e vídeos para descobrir pastas e fazer backup delas.</string>
+    <string name="media_library_unavailable">A biblioteca de mídia do Android não está disponível.</string>
+    <string name="media_permission_changed">A permissão de mídia foi alterada. Permita o acesso a todas as fotos e vídeos.</string>
+    <string name="media_phone_copy_check_failed">Não foi possível verificar a cópia no smartphone.</string>
+    <string name="media_restore_failed">O Android não conseguiu restaurar a cópia no smartphone.</string>
+    <string name="media_need_location">Permita o acesso ao local da mídia para preservar o arquivo original completo.</string>
+    <string name="media_original_unavailable">A mídia original não está disponível. Verifique as permissões de fotos e de local da mídia.</string>
+    <string name="api_no_credentials">O Google não retornou credenciais de conta utilizáveis.</string>
+    <string name="api_file_empty">O arquivo está vazio.</string>
+    <string name="api_no_session">O Google não criou uma sessão de upload.</string>
+    <string name="api_file_changed">O arquivo foi alterado durante o upload; ele será verificado novamente.</string>
+    <string name="api_bad_receipt">O Google retornou um recibo de upload inválido.</string>
+    <string name="api_unconfirmed">O upload não foi confirmado. A próxima tentativa verificará se há duplicatas.</string>
+    <string name="api_renew_sign_in">O login do Google precisa ser renovado.</string>
+    <string name="api_needs_browser">O Google exige um novo login. Reconecte sua conta.</string>
+    <string name="api_droidguard">O Google rejeitou a verificação do dispositivo. Este método de login está indisponível no momento.</string>
+    <string name="api_rejected">O Google rejeitou este login. Tente um novo token de configuração do Google.</string>
+    <!-- %1$d is an HTTP status code such as 404. -->
+    <string name="api_download_http">O Google retornou HTTP %1$d para o download.</string>
+    <!-- %1$d is an HTTP status code such as 401. -->
+    <string name="api_upload_http_auth">O Google retornou HTTP %1$d. Reconecte sua conta se isso persistir.</string>
+    <!-- %1$d is an HTTP status code such as 500. -->
+    <string name="api_upload_http">O Google retornou HTTP %1$d. O upload não foi confirmado.</string>
+    <!-- %1$s is a host name. -->
+    <string name="api_bad_host">O endereço de download não é um host de mídia do Google: %1$s</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_reclaim">Liberar espaço</string>
+    <string name="reclaim_notification_title">Liberando espaço no Google Fotos</string>
+    <string name="reclaim_preparing">Preparando…</string>
+    <plurals name="reclaim_finishing_leftovers">
+        <item quantity="one">Concluindo %1$d item restante de antes…</item>
+        <item quantity="many">Concluindo %1$d itens restantes de antes…</item>
+        <item quantity="other">Concluindo %1$d itens restantes de antes…</item>
+    </plurals>
+    <!-- Ongoing warning notification. Keep the folder path unchanged. -->
+    <plurals name="reclaim_only_on_phone">
+        <item quantity="one">%1$d item está somente neste smartphone até ser enviado novamente. Abra o app para concluir. As cópias são mantidas em Pictures/Photos Unlimited/Pending upload.</item>
+        <item quantity="many">%1$d itens estão somente neste smartphone até serem enviados novamente. Abra o app para concluir. As cópias são mantidas em Pictures/Photos Unlimited/Pending upload.</item>
+        <item quantity="other">%1$d itens estão somente neste smartphone até serem enviados novamente. Abra o app para concluir. As cópias são mantidas em Pictures/Photos Unlimited/Pending upload.</item>
+    </plurals>
+    <string name="reclaim_dont_uninstall">Não desinstale o Photos Unlimited ainda</string>
+    <string name="reclaim_stopped_charged">Interrompido: uma substituição ainda ocupou armazenamento. Os itens restantes não foram alterados.</string>
+    <!-- %1$s is a file name. -->
+    <string name="reclaim_stopped_attention">Interrompido: %1$s precisa de atenção. Os itens restantes não foram alterados.</string>
+    <string name="reclaim_checking_phone">Verificando se as fotos ainda estão neste smartphone…</string>
+    <string name="reclaim_finished">Concluído.</string>
+    <plurals name="reclaim_still_in_progress">
+        <item quantity="one">%1$d item ainda em andamento. Abra Armazenamento para continuar.</item>
+        <item quantity="many">%1$d itens ainda em andamento. Abra Armazenamento para continuar.</item>
+        <item quantity="other">%1$d itens ainda em andamento. Abra Armazenamento para continuar.</item>
+    </plurals>
+    <string name="reclaim_paused">Pausado. Os itens já iniciados continuarão quando você retomar.</string>
+    <string name="reclaim_reconnect">Reconecte sua Conta do Google para continuar liberando espaço.</string>
+    <!-- %1$s is an error message. -->
+    <string name="reclaim_google_stopped">O Google Fotos interrompeu a execução: %1$s</string>
+    <!-- %1$s is an error message. -->
+    <string name="reclaim_interrupted">Interrompido: %1$s Retome para continuar.</string>
+    <string name="reclaim_unexpected">A execução foi interrompida inesperadamente. Os itens já iniciados serão retomados com segurança.</string>
+    <string name="reclaim_wait_scan">Aguardando a conclusão da verificação de armazenamento.</string>
+    <!-- Free up: state of an item that hasn’t started. -->
+    <string name="job_waiting">Aguardando para iniciar</string>
+    <!-- Why an item can’t be freed. Shown after “Can’t free this item’s storage:”. -->
+    <string name="why_not_reported">O Google não informou o uso de armazenamento dele.</string>
+    <string name="why_free">Ele não usa armazenamento.</string>
+    <string name="why_trash">Ele está na Lixeira.</string>
+    <string name="why_shared">Ele foi compartilhado com você e não é seu.</string>
+    <string name="why_locked">Ele está na Pasta trancada.</string>
+    <string name="why_alternate">É uma versão alternativa de outro item.</string>
+    <string name="why_type">Somente fotos e vídeos são compatíveis.</string>
+    <string name="why_no_dedup">O Google não informou o identificador necessário para substituí-lo.</string>
+    <string name="why_no_size">O Google não informou o tamanho do arquivo.</string>
+    <string name="why_no_checksum">O Google não informou o checksum do original, então não é possível verificar um download.</string>
+    <!-- Free up: progress and result messages for one item. -->
+    <string name="job_paused_next_run">Pausado; este item continuará na próxima execução.</string>
+    <string name="job_trashing">Movendo o original para a Lixeira</string>
+    <string name="job_wait_trash">Aguardando o Google confirmar que o original está na Lixeira.</string>
+    <string name="job_deleting">Excluindo o original permanentemente</string>
+    <string name="job_missing_ids">Faltam o checksum ou o identificador necessários para uma substituição segura.</string>
+    <string name="job_checking_record">Verificando o registro do original no Google</string>
+    <string name="job_same_bytes">Outro item da biblioteca tem bytes idênticos; excluir um poderia remover os dois.</string>
+    <!-- %1$s is the reason, such as “It’s in the trash.” -->
+    <string name="job_not_replaced">Não substituído: %1$s</string>
+    <string name="job_item_changed">O item foi alterado desde que foi selecionado. Nada foi alterado.</string>
+    <string name="job_no_space">Não há espaço livre suficiente neste smartphone para uma cópia temporária. Nada foi alterado.</string>
+    <string name="job_checking_local">Verificando um arquivo correspondente neste smartphone</string>
+    <string name="job_found_local">Original encontrado neste smartphone e verificado</string>
+    <!-- %1$s is a technical download path such as 1.5.2.5. -->
+    <string name="job_downloading">Baixando o original (%1$s)</string>
+    <!-- %1$s is a technical download path; %2$s is an error message. -->
+    <string name="job_candidate_failed">O candidato %1$s falhou: %2$s</string>
+    <!-- %1$s is a technical download path such as 1.5.2.5. -->
+    <string name="job_downloaded">Original salvo e verificado (%1$s)</string>
+    <string name="job_wait_deleted">O Google ainda informa o original excluído. Aguardando antes de enviar.</string>
+    <string name="job_already_uploaded">Substituição já enviada</string>
+    <string name="job_uploading_copy">Enviando a cópia salva</string>
+    <string name="job_matched_deleted">O Google associou o upload ao original excluído. A cópia local foi mantida.</string>
+    <string name="job_uploaded_waiting">Enviado; aguardando o relatório de armazenamento do Google</string>
+    <string name="job_checking_replacement">Verificando o uso de armazenamento da substituição</string>
+    <string name="job_wait_replacement">Aguardando o Google informar o uso de armazenamento da substituição.</string>
+    <string name="job_restoring_details">Restaurando legenda, favorito e arquivamento</string>
+    <string name="job_done">Substituído; agora não usa armazenamento</string>
+    <string name="job_restoring_phone">O Google Fotos removeu a cópia do smartphone; restaurando-a</string>
+    <string name="job_copy_missing">A cópia salva não foi encontrada ou foi alterada. Nada mais foi feito.</string>
+    <string name="job_copy_changed_restoring">A cópia salva foi alterada; restaurando o original da Lixeira</string>
+    <string name="job_copy_changed_restored">A cópia salva foi alterada, então o original foi restaurado da Lixeira.</string>
+    <string name="job_trashed">Original movido para a Lixeira</string>
+    <string name="job_deleted">Original excluído; enviando a cópia salva</string>
+    <string name="job_trash_unconfirmed">O Google não confirmou a movimentação para a Lixeira; o original foi restaurado e nada foi excluído.</string>
+    <string name="job_gone">O Google não informa mais este item. Atualize a verificação de armazenamento.</string>
+    <string name="job_reduced_no_original">O Google mantém apenas uma cópia de qualidade reduzida, e o original não foi encontrado neste smartphone. Nada foi alterado.</string>
+    <!-- %1$s is a technical download path; %2$d is a size in bytes; %3$s is “matches” or “differs” (the next two strings). -->
+    <string name="job_candidate_mismatch">O candidato %1$s não é o original (%2$d bytes, checksum %3$s)</string>
+    <string name="job_checksum_matches">corresponde</string>
+    <string name="job_checksum_differs">difere</string>
+    <string name="job_no_download">O Google não ofereceu nenhum download para este item.</string>
+    <string name="job_no_match">Nenhum download correspondeu ao checksum do original no Google. Nada foi alterado.</string>
+    <string name="job_still_has_original">O Google ainda tem o original após a exclusão, então nada foi enviado. Verifique a Lixeira do Google Fotos; a cópia verificada foi mantida neste app.</string>
+    <string name="job_replacement_missing">O Google não informou a substituição. A cópia verificada foi mantida em Pictures/Photos Unlimited/Pending upload.</string>
+    <string name="job_replacement_mismatch">O registro da substituição no Google não corresponde à cópia salva, que foi mantida em Pictures/Photos Unlimited/Pending upload.</string>
+    <string name="job_reduced_again">O Google armazenou a substituição novamente como uma cópia de qualidade reduzida. O original foi mantido neste app.</string>
+    <string name="job_still_charged">A substituição ainda usa armazenamento. A cópia local foi mantida; verifique o perfil de upload do Pixel antes de continuar.</string>
+    <string name="job_copy_changed_after">A cópia salva foi alterada depois que o original foi removido. Verifique a Lixeira do Google Fotos.</string>
+    <string name="job_separate_video">Esta Live Photo mantém o vídeo em um arquivo separado que não pode ser verificado, então substituí-la faria perder o movimento. Nada foi alterado.</string>
+    <!-- %1$s is the item’s previous message; this sentence is appended to it. -->
+    <string name="job_phone_copy_removed">%1$s A cópia no smartphone foi removida por outro app.</string>
+    <!-- %1$s is the item’s previous message; this sentence is appended to it. -->
+    <string name="job_phone_copy_restored">%1$s Cópia no smartphone restaurada após o Google Fotos removê-la.</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_scan">Verificação de armazenamento</string>
+    <string name="scan_notification_title">Verificando o Google Fotos</string>
+    <!-- Notification button. -->
+    <string name="scan_pause">Pausar verificação</string>
+    <string name="scan_reading">Lendo metadados de armazenamento…</string>
+    <plurals name="scan_pages_checked">
+        <item quantity="one">%1$d página verificada · Verificação somente leitura</item>
+        <item quantity="many">%1$d páginas verificadas · Verificação somente leitura</item>
+        <item quantity="other">%1$d páginas verificadas · Verificação somente leitura</item>
+    </plurals>
+    <!-- Keep codes in parentheses, such as (SCAN_PAUSED_LIMIT), unchanged. -->
+    <string name="scan_paused_limit">Verificação pausada. Continue para ler os itens restantes. (SCAN_PAUSED_LIMIT)</string>
+    <string name="scan_timeout">A verificação expirou. Os resultados são parciais. Continue ou recomece. (SCAN_TIMEOUT)</string>
+    <string name="scan_paused">Verificação pausada. Continue quando quiser.</string>
+    <!-- %1$s is a fixed code such as SCAN_SIGN_IN. -->
+    <string name="scan_reconnect">Reconecte sua Conta do Google para continuar a verificação. (%1$s)</string>
+    <!-- %1$s is a fixed code such as SCAN_HTTP_500. -->
+    <string name="scan_google_failed">O Google Fotos não conseguiu concluir a verificação. Você pode continuar ou recomeçar. (%1$s)</string>
+    <!-- %1$s is a fixed code such as SCAN_FORMAT_PAGE. -->
+    <string name="scan_interrupted">Verificação interrompida ou formato de metadados indisponível. Os resultados são parciais. Continue ou recomece. (%1$s)</string>
+    <!-- %1$s is a fixed code. -->
+    <string name="scan_stopped">A verificação foi interrompida. Os resultados são parciais. Tente continuar a verificação. (%1$s)</string>
+    <string name="scan_ready">Pronto para verificar</string>
+    <string name="scan_scanning">Verificando o Google Fotos…</string>
+    <string name="scan_finished">Verificação concluída</string>
+    <string name="scan_checking_recent">Verificando alterações recentes…</string>
+    <!-- %1$s is a fixed code such as SCAN_FORMAT_PAGE_SHAPE_NONE_F4_D. -->
+    <string name="scan_finished_skipped">Verificação concluída (%1$s ignorado)</string>
+    <!-- Advanced account diagnostic: what a test result means. -->
+    <string name="probe_photos_accepted">O Google emitiu um token e aceitou uma consulta ao Fotos. Isso é promissor. Uploads, contabilização de cota e renovação de token em segundo plano ainda precisam ser testados.</string>
+    <string name="probe_basic_token">O Google emitiu um token básico de conta. Isso verifica o caminho de autorização, não o acesso ao Fotos.</string>
+    <string name="probe_not_registered">O Google exige um registro OAuth para este app e certificado de assinatura. Este resultado não indica se a permissão do Fotos seria permitida após o registro.</string>
+    <string name="probe_configuration">O Google informou um problema de configuração do app. Verifique o registro OAuth do Android para este pacote e certificado de assinatura. Isso não estabelece se o acesso ao Fotos é permitido.</string>
+    <string name="probe_api_unavailable">A API de autorização do Google não está disponível neste dispositivo.</string>
+    <string name="probe_method_unsupported">O provedor rejeitou este método de autorização.</string>
+    <string name="probe_scope_not_granted">A permissão solicitada não foi incluída no resultado do Google. Nenhuma consulta ao Fotos foi feita.</string>
+    <string name="probe_scope_rejected">O Google rejeitou a permissão solicitada para este app.</string>
+    <string name="probe_http_401">Um token foi emitido, mas o serviço do Fotos rejeitou a autenticação dele.</string>
+    <string name="probe_http_403">Um token foi emitido, mas o serviço do Fotos recusou a consulta. Isso, por si só, não identifica a causa.</string>
+    <string name="probe_reauth">O Google exige verificação da conta ou um novo login.</string>
+    <string name="probe_canceled">A solicitação foi cancelada ou recusada. Nenhuma conclusão sobre o acesso ao Fotos.</string>
+    <string name="probe_retry_later">Não foi possível concluir o teste. Tente novamente mais tarde.</string>
+    <string name="probe_no_authenticator">Os serviços de conta do Google não estão disponíveis neste dispositivo.</string>
+    <string name="probe_denied">O Android ou o provedor da conta negou esta solicitação.</string>
+    <string name="probe_interrupted">O teste foi interrompido. Inicie-o novamente.</string>
+    <string name="probe_default">O teste não estabeleceu o acesso ao Fotos. Copie o resultado do diagnóstico para investigação.</string>
+    <string name="api_incomplete_credentials">O login salvo está incompleto. Reconecte sua Conta do Google.</string>
+    <string name="api_device_bound">Este login precisa de chaves vinculadas ao dispositivo. Use o login do Google.</string>
+    <string name="api_enter_token">Insira o token de login da configuração do Google.</string>
+    <string name="api_download_too_large">O download é maior do que o esperado.</string>
+    <string name="api_download_bad_redirect">O Google redirecionou o download para um endereço que este app não aceita.</string>
+    <string name="job_keep_copy_failed">Não foi possível manter a cópia local.</string>
+</resources>

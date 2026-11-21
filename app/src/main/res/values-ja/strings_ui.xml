@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared / main screen -->
+    <!-- Toolbar action and dialog title for the signed-in Google account. -->
+    <string name="main_account_menu">Google アカウント</string>
+    <!-- Bottom navigation labels. -->
+    <string name="main_nav_backup">バックアップ</string>
+    <string name="main_nav_activity">アクティビティ</string>
+    <string name="main_nav_storage">ストレージ</string>
+    <string name="main_nav_settings">設定</string>
+    <string name="main_cancel">キャンセル</string>
+    <string name="main_back">戻る</string>
+    <string name="main_close">閉じる</string>
+    <string name="main_ok">OK</string>
+    <string name="main_later">後で</string>
+    <string name="main_not_now">後で</string>
+    <string name="main_continue">続行</string>
+    <string name="main_app_settings">アプリの設定</string>
+    <!-- Button and accessibility label for connecting a Google account. -->
+    <string name="main_connect_account">Google アカウントを接続</string>
+    <!-- Accessibility description of a picker button. %1$s is the picker name (for example "Theme"), %2$s is the selected option. -->
+    <string name="main_picker_description">%1$s: %2$s</string>
+    <string name="main_read_failed">バックアップの記録を読み取れませんでした</string>
+    <string name="main_perm_title">元のファイルを完全な状態で保持</string>
+    <string name="main_perm_message">フォルダのバックアップで新しいファイルを検出できるよう、すべての写真と動画へのアクセスを許可してください。メディアの位置情報へのアクセスを許可すると、元のファイルに埋め込まれた位置情報が保持されます。</string>
+
+    <!-- Google Photos backup prompts -->
+    <string name="main_gp_off_title">Google フォトのバックアップはオフになっていますか？</string>
+    <string name="main_gp_off_message">このスマートフォンのバックアップを行うアプリは Photos Unlimited のみにしてください。</string>
+    <string name="main_gp_off_yes">はい、オフです</string>
+    <string name="main_gp_off_no">まだです</string>
+    <string name="main_gp_prompt_title">Google フォトのバックアップをオフにしてください</string>
+    <string name="main_gp_prompt_plain">Photos Unlimited がこのスマートフォンをバックアップしています。Google フォトのバックアップもオンになっている場合、同じ写真が先にアップロードされ、そのコピーがストレージを使用する可能性があります。\n\nGoogle フォトを開いて、バックアップをオフにしてください。</string>
+    <string name="main_gp_open">Google フォトを開く</string>
+    <string name="main_gp_already_off">すでにオフです</string>
+    <string name="main_gp_unavailable">このスマートフォンでは Google フォトを利用できません。</string>
+    <string name="main_gp_manual_hint">Google フォトでプロフィール写真を開き、[バックアップ] を開いてオフにしてください。</string>
+    <!-- %1$d is the number of items, %2$s is the file name of the most recent one. -->
+    <plurals name="main_gp_prompt_evidence">
+        <item quantity="other">Google フォトのバックアップがまだオンのようです。Photos Unlimited が処理する前に、新しい %1$d 件（直近は「%2$s」）が別のアプリによってすでにアップロードされていました。そのコピーがストレージを使用する可能性があります。\n\nGoogle フォトを開いて、バックアップをオフにしてください。</item>
+    </plurals>
+
+    <!-- Backup screen -->
+    <string name="backup_heading">バックアップ</string>
+    <string name="backup_subtitle">元の写真と動画。</string>
+    <string name="backup_checking">バックアップの状況を確認しています…</string>
+    <string name="backup_back_up_now">今すぐバックアップ</string>
+    <string name="backup_loading_counts">デバイスのバックアップ記録を読み込んでいます…</string>
+    <string name="backup_folders">バックアップするフォルダ</string>
+    <!-- Two-line row. %1$s is the list of chosen folder names, or the text of backup_choose_folders. -->
+    <string name="backup_folders_row">バックアップするフォルダ\n%1$s</string>
+    <string name="backup_choose_folders">フォルダを選択</string>
+    <string name="backup_save_folders">フォルダを保存</string>
+    <string name="backup_recent_activity">最近のアクティビティ</string>
+    <string name="backup_open_google_photos">Google フォトを開く</string>
+    <string name="backup_originals_stay">元のファイルはスマートフォンに残ります。</string>
+    <!-- Item counts: %1$d uploaded, %2$d already in the library, %3$d waiting, %4$d need attention. Two lines. -->
+    <string name="backup_counts">アップロード済み %1$d 件 · ライブラリに保存済み %2$d 件\n待機中 %3$d 件</string>
+    <string name="backup_counts_attention">アップロード済み %1$d 件 · ライブラリに保存済み %2$d 件\n待機中 %3$d 件 · 要対応 %4$d 件</string>
+    <!-- Upload progress. %1$s is the size sent so far and %2$s the total size (for example "3 MB"). -->
+    <string name="backup_progress_label">%1$s / %2$s · 現在のファイル</string>
+    <string name="backup_preparing_status">バックアップを準備しています…</string>
+    <string name="backup_start_failed">Android でバックアップを開始できませんでした。アプリを開き直して、もう一度お試しください。</string>
+    <string name="backup_finding_folders">写真と動画のフォルダを検索しています…</string>
+    <string name="backup_no_folders">写真や動画のフォルダはまだ見つかっていません。</string>
+    <string name="backup_folders_failed">フォルダを読み取れませんでした。写真と動画の権限を確認してください。</string>
+    <!-- Row in the folder chooser. %1$s is the folder name, %2$d the number of items in it. -->
+    <plurals name="backup_folder_label">
+        <item quantity="other">%1$s · %2$d 件</item>
+    </plurals>
+    <!-- Status card on the Backup screen: title, description and the label of its main button. -->
+    <string name="backup_title_connect">アカウントを接続</string>
+    <string name="backup_desc_connect">バックアップ先の Google フォト ライブラリを選択してください。</string>
+    <string name="backup_title_media">メディアへのアクセスを許可</string>
+    <string name="backup_desc_media">写真、動画、メディアの位置情報へのアクセスを許可すると、元のファイルを完全な状態で保持できます。</string>
+    <string name="backup_action_permissions">権限を確認</string>
+    <string name="backup_title_folders">フォルダを選択</string>
+    <string name="backup_desc_folders">バックアップする写真と動画を選択してください。</string>
+    <string name="backup_title_running">バックアップ中</string>
+    <string name="backup_title_checking">フォルダを確認しています</string>
+    <string name="backup_title_pausing">バックアップを一時停止しています…</string>
+    <string name="backup_desc_preparing">バックアップを準備しています…</string>
+    <string name="backup_action_pause">バックアップを一時停止</string>
+    <string name="backup_title_attention">バックアップに対応が必要です</string>
+    <string name="backup_action_reconnect">アカウントを再接続</string>
+    <string name="backup_title_paused">バックアップは一時停止中です</string>
+    <string name="backup_title_waiting">バックアップを待機中</string>
+    <string name="backup_action_settings">バックアップの設定</string>
+    <string name="backup_title_some_attention">対応が必要なアイテムがあります</string>
+    <string name="backup_desc_some_attention">アクティビティを開いて、アップロードに失敗したアイテムと再試行を確認してください。</string>
+    <string name="backup_action_activity">アクティビティを確認</string>
+    <string name="backup_title_scheduled">バックアップを予約済み</string>
+    <string name="backup_desc_scheduled">条件が整うと、Android がバックグラウンドで処理を実行します。今すぐ開始することもできます。</string>
+    <string name="backup_title_up_to_date">最新の状態です</string>
+    <!-- %1$s is a relative time such as "5 minutes ago". -->
+    <string name="backup_desc_up_to_date">選択したフォルダはバックアップ済みです。最終確認: %1$s</string>
+    <string name="backup_waiting_internet">インターネット接続を待機しています。</string>
+    <string name="backup_waiting_unmetered">従量制ではない接続（通常は Wi-Fi）を待機しています。</string>
+    <string name="backup_waiting_charging">スマートフォンの充電を待機しています。</string>
+
+    <!-- Activity screen -->
+    <string name="activity_heading">アクティビティ</string>
+    <string name="activity_subtitle">このデバイスの最近のバックアップ記録。</string>
+    <string name="activity_retry">失敗したアイテムを再試行</string>
+    <string name="activity_empty">確認済みのアップロードとキューに入っているアイテムがここに表示されます。</string>
+
+    <!-- Storage screen -->
+    <string name="storage_heading">ストレージ</string>
+    <string name="storage_subtitle">Google フォトのインベントリ · プレビュー</string>
+    <string name="storage_no_scan">スキャン未実施</string>
+    <string name="storage_no_results">結果はまだありません</string>
+    <string name="storage_usage_unknown">使用量は不明</string>
+    <string name="storage_caption">スキャンしたアイテムで報告されたストレージ使用量</string>
+    <string name="storage_scan_prompt">メタデータを読み取って、ストレージを使用している写真と動画を探します。</string>
+    <string name="storage_scan">Google フォトをスキャン</string>
+    <string name="storage_pause_scan">スキャンを一時停止</string>
+    <string name="storage_refresh_scan">スキャンを更新</string>
+    <string name="storage_continue_scan">スキャンを続行</string>
+    <string name="storage_scan_note">読み取り専用のスキャンです。Google がアイテムやストレージの詳細を省略する場合があります。「不明」は 0 ではありません。この合計には Drive と Gmail は含まれず、アカウントの合計と異なる場合があります。</string>
+    <!-- Scan summary, two lines. All four are item counts. -->
+    <string name="storage_summary">スキャン済み %1$d 件 · ストレージ使用 %2$d 件\n不明 %3$d 件 · 0 と報告 %4$d 件</string>
+    <!-- Scan status. %1$d is the number of pages read, %2$s is a status message from the scanner. Two lines. -->
+    <plurals name="storage_status_finished">
+        <item quantity="other">完了 · %1$d ページ\n%2$s</item>
+    </plurals>
+    <plurals name="storage_status_partial">
+        <item quantity="other">一部の結果 · %1$d ページ\n%2$s</item>
+    </plurals>
+    <!-- %1$s is a status message from the scanner. -->
+    <string name="storage_status_finished_nopages">完了\n%1$s</string>
+    <string name="storage_cache_failed">ローカルのスキャン キャッシュを読み取れませんでした。もう一度お試しください。</string>
+    <!-- Filters. -->
+    <string name="storage_filter_status">ストレージの状態</string>
+    <string name="storage_filter_all">スキャンしたすべてのアイテム</string>
+    <string name="storage_filter_using">ストレージを使用中</string>
+    <string name="storage_filter_unknown">ストレージ使用量が不明</string>
+    <!-- Also used as the "reduced quality" tag on an item. -->
+    <string name="storage_filter_reduced">画質を下げたコピー</string>
+    <string name="storage_filter_media">メディアの種類</string>
+    <string name="storage_media_all">すべてのメディア</string>
+    <string name="storage_media_photos">写真</string>
+    <string name="storage_media_videos">動画</string>
+    <string name="storage_fresh_scan">最初からスキャン</string>
+    <string name="storage_sort_note">報告された使用量が大きい順</string>
+    <string name="storage_select_items">アイテムを選択</string>
+    <string name="storage_done_selecting">選択を完了</string>
+    <string name="storage_select_all">対象のアイテムをすべて選択</string>
+    <string name="storage_tap_to_select">アイテムをタップして選択します</string>
+    <!-- %1$d is the number of selected items, %2$s the total size to be freed. -->
+    <string name="storage_selected_info">%1$d 件選択中 · %2$s を解放</string>
+    <string name="storage_previous">前へ</string>
+    <string name="storage_next">次へ</string>
+    <string name="storage_no_matches">一致するスキャン済みアイテムはありません</string>
+    <!-- %1$d and %2$d are the first and last item number shown (for example "Items 1–50"). -->
+    <string name="storage_range">アイテム %1$d～%2$d · 使用容量が大きい順</string>
+    <string name="storage_empty_start">スキャンを開始して、Google フォト ライブラリのメタデータを読み取ります。</string>
+    <!-- "Storage unknown" refers to the filter option of that name. -->
+    <string name="storage_empty_none_charged">この表示には、ストレージ使用量が報告されているアイテムはありません。集計データのないアイテムは「ストレージ使用量が不明」で確認してください。</string>
+    <string name="storage_empty_no_match">これらのフィルタに一致するアイテムはありません。</string>
+    <!-- %1$s is the reason, already translated. -->
+    <string name="storage_cant_select">選択できません: %1$s</string>
+    <string name="storage_type_video">動画</string>
+    <string name="storage_type_photo">写真</string>
+    <string name="storage_type_media">メディア</string>
+    <!-- Item info line. %1$s is the media type, %2$s the file size (for example "3 MB"). -->
+    <string name="storage_item_info">%1$s · ファイル サイズ %2$s</string>
+    <!-- %1$s is the media type. -->
+    <string name="storage_item_info_nosize">%1$s · ファイル サイズは不明</string>
+    <!-- Tags appended to an item info line, separated by " · ". -->
+    <string name="storage_flag_trash">ゴミ箱内</string>
+    <string name="storage_flag_archived">アーカイブ済み</string>
+    <string name="storage_flag_shared">共有済み</string>
+    <string name="storage_flag_edited">編集済み</string>
+    <string name="storage_usage_unknown_row">ストレージ使用量は不明</string>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="storage_reported">報告されたストレージ使用量 %1$s</string>
+    <!-- Item details dialog header. %1$s is the media type, %2$s the file size or storage_size_unknown, %3$s the storage usage or storage_use_unknown. -->
+    <string name="storage_detail_header">%1$s · %2$s\n%3$s\n\n</string>
+    <string name="storage_size_unknown">サイズ不明</string>
+    <string name="storage_use_unknown">ストレージ使用量は不明</string>
+    <string name="storage_fresh_title">最初からスキャンしますか？</string>
+    <string name="storage_fresh_message">このアプリのキャッシュされたインベントリを置き換えます。写真と動画はそのまま残ります。</string>
+    <string name="storage_scan_again">再スキャン</string>
+    <string name="storage_pause_freeup_first">スキャンする前に「空き容量を増やす」を一時停止してください。</string>
+    <string name="storage_pause_freeup">先に「空き容量を増やす」を一時停止してください。</string>
+    <string name="storage_pause_scan_first">先に現在のスキャンを一時停止してください。</string>
+    <string name="storage_start_failed">Android でスキャンを開始できませんでした。アプリを開き直して、もう一度お試しください。</string>
+
+    <!-- Free up storage -->
+    <string name="freeup_title">空き容量を増やす</string>
+    <string name="freeup_button">空き容量を増やす</string>
+    <plurals name="freeup_button_count">
+        <item quantity="other">%d 件の空き容量を増やす</item>
+    </plurals>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="freeup_button_size">%1$s の空き容量を増やす</string>
+    <string name="freeup_replace_original">元のファイルで置き換え</string>
+    <string name="freeup_pause">一時停止</string>
+    <string name="freeup_resume">再開</string>
+    <string name="freeup_finish_now">今すぐ完了</string>
+    <string name="freeup_remove_copies">完了したコピーを削除</string>
+    <string name="freeup_review_files">以前のファイルを確認</string>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="freeup_freed">最近のアイテムで %1$s を解放しました。</string>
+    <string name="freeup_idle">待機中です。</string>
+    <plurals name="freeup_unfinished">
+        <item quantity="other">%d 件が未完了です。安全に続行するには再開してください。</item>
+    </plurals>
+    <!-- Keep the folder path Pictures/Photos Unlimited/Pending upload as is. -->
+    <plurals name="freeup_only_on_phone">
+        <item quantity="other">⚠ %d 件は、再アップロードされるまでこのスマートフォンにしかありません。完了するまで、アプリをアンインストールしたり、アプリのストレージを消去したりしないでください。コピーは Pictures/Photos Unlimited/Pending upload にあります。</item>
+    </plurals>
+    <plurals name="freeup_leftovers">
+        <item quantity="other">以前から残っている %d 件（以前のインストールなど）が Pictures/Photos Unlimited/Pending upload で待機しています。Google フォトにないものは、「今すぐ完了」でアップロードされます。</item>
+    </plurals>
+    <plurals name="freeup_review">
+        <item quantity="other">Pictures/Photos Unlimited/Pending upload にある %d 件のファイルは、このインストールで保存されたものではありません。アップロードする前に確認してください。</item>
+    </plurals>
+    <plurals name="freeup_other_account">
+        <item quantity="other">待機中の %d 件のファイルは、別の Google アカウントのものです。完了するには、そのアカウントを接続してください。</item>
+    </plurals>
+    <plurals name="freeup_cleanup">
+        <item quantity="other">以前のインストールで完了した %d 件のコピーはすでに Google フォトにあり、このスマートフォンから削除できます。</item>
+    </plurals>
+    <!-- Job list row. %1$s is the file name, %2$s the job state. -->
+    <string name="freeup_row_title">%1$s · %2$s</string>
+    <!-- %1$s is a size, %2$s a status message. -->
+    <string name="freeup_row_detail">%1$s · %2$s</string>
+    <!-- Job states. -->
+    <string name="freeup_state_waiting">待機中</string>
+    <string name="freeup_state_saved">元のファイルを保存済み</string>
+    <string name="freeup_state_trash">ゴミ箱内</string>
+    <string name="freeup_state_uploading">コピーをアップロード中</string>
+    <string name="freeup_state_verifying">検証中</string>
+    <string name="freeup_state_freed">解放済み</string>
+    <string name="freeup_state_charged">まだ容量を使用中</string>
+    <string name="freeup_state_failed">変更なし</string>
+    <string name="freeup_state_attention">要対応</string>
+    <!-- Item details dialog. %1$s is the reason, already translated. -->
+    <string name="freeup_detail_cant">このアイテムのストレージは解放できません: %1$s</string>
+    <string name="freeup_detail_explain">「空き容量を増やす」は、このアプリでアップロードしたコピーで置き換えます。元のファイルをダウンロードして Google のチェックサムと照合し、Google フォトから削除したうえで、埋め込まれたメタデータ（日付、位置情報、カメラの詳細）をそのままにして再アップロードします。説明、お気に入り、アーカイブは復元されます。</string>
+    <string name="freeup_detail_lost">失われるもの: アルバムへの登録、共有アルバムのコピーとコメント、人物と顔のグループ、Google フォト内で行った日付や位置情報の変更。</string>
+    <string name="freeup_detail_edited">このアイテムは Google フォトで編集されています。編集前の元のファイルのみが保持されます。</string>
+    <!-- Batch confirmation dialog. %1$s is a size, %2$d the number of items. -->
+    <plurals name="freeup_batch_title">
+        <item quantity="other">%2$d 件から %1$s の空き容量を増やしますか？</item>
+    </plurals>
+    <string name="freeup_batch_body">各アイテムをダウンロード（またはこのスマートフォンで検出）して Google のチェックサムと照合し、Google フォトから削除したうえで、再アップロードします。埋め込まれたメタデータはそのまま保持され、説明、お気に入り、アーカイブは復元されます。アルバム、共有されたコピー、コメント、顔のグループ、Google フォト内で行った編集は失われます。</string>
+    <plurals name="freeup_batch_edited">
+        <item quantity="other">%d 件は Google フォトで編集されています。元のファイルのみが保持されます。</item>
+    </plurals>
+    <plurals name="freeup_batch_reduced">
+        <item quantity="other">%d 件は画質を下げたコピーです。元のファイルがまだこのスマートフォンにある場合にのみ置き換えられます。</item>
+    </plurals>
+    <string name="freeup_batch_footer">このスマートフォン上の写真は保持されます。別のアプリが削除した場合は元に戻されます。置き換えたファイルが引き続きストレージを使用する場合、実行は自動的に停止します。完了するまで、スマートフォンを Wi-Fi に接続したままにしてください。</string>
+    <string name="freeup_delete_reupload">削除して再アップロード</string>
+    <plurals name="freeup_queued">
+        <item quantity="other">%d 件をキューに追加しました。</item>
+    </plurals>
+    <plurals name="freeup_skipped">
+        <item quantity="other">この表示の %d 件は空き容量を増やせないため、スキップしました。</item>
+    </plurals>
+    <string name="freeup_gp_title">先に Google フォトのバックアップをオフにしてください</string>
+    <string name="freeup_gp_message">Google フォトのバックアップがオンの間、Google フォトは、クラウドから削除された写真のこのスマートフォン上のコピーをすべて削除します。「空き容量を増やす」で置き換える写真も含まれます。\n\nバックアップをオフにしてから、この画面に戻ってください。このアカウントで Google フォトにログインし、バックアップをオンにしている他のスマートフォンやタブレットでも、コピーが削除されます。</string>
+    <string name="freeup_gp_its_off">オフにしました</string>
+    <string name="freeup_confirm_title">削除して再アップロードしますか？</string>
+    <string name="freeup_confirm_message">コピーをアップロードする前に、元のファイルが Google フォトから削除されます。このアイテムが「解放済み」と表示されるまで、スマートフォンを Wi-Fi に接続したままにしてください。削除後に何らかの問題が起きた場合でも、検証済みのコピーはこのアプリに残り、アップロードが再試行されます。このスマートフォン上の写真は保持されます。別のアプリが削除した場合は元に戻されます。</string>
+    <string name="freeup_already_queued">このアイテムはすでに処理中です。</string>
+    <string name="freeup_scan_running">ストレージのスキャンを実行中です。スキャンを一時停止すると、「空き容量を増やす」が開始されます。</string>
+    <string name="freeup_start_failed">Android でタスクを開始できませんでした。アプリを開き直して、もう一度お試しください。</string>
+    <!-- Review of leftover files. Keep the folder path Pictures/Photos Unlimited/Pending upload as is. -->
+    <string name="freeup_review_title">これらのファイルを Google フォトにアップロードしますか？</string>
+    <!-- %1$s is a bulleted list of file names and sizes. -->
+    <string name="freeup_review_message">これらのファイルは Pictures/Photos Unlimited/Pending upload にありますが、このインストールで保存されたものではありません。多くの場合、「空き容量を増やす」の実行中にアプリが再インストールされたことが原因です。見覚えのあるファイルのみアップロードしてください。事前にギャラリーで確認できます。各ファイルは、アップロード前にチェックサムで検証されます。\n\n%1$s</string>
+    <!-- One bullet in the list. %1$s is a file name, %2$s a size. -->
+    <string name="freeup_review_item">• %1$s（%2$s）</string>
+    <!-- %1$d is the number of files not listed. -->
+    <string name="freeup_review_more">…ほか %1$d 件</string>
+    <string name="freeup_review_upload">アップロード</string>
+    <string name="freeup_delete_request_failed">Android で削除リクエストを開けませんでした。代わりにギャラリーから削除してください。</string>
+
+    <!-- Settings screen -->
+    <string name="settings_heading">設定</string>
+    <string name="settings_subtitle">バックアップを生活に合わせましょう。</string>
+    <string name="settings_section_backup">バックアップ</string>
+    <string name="settings_automatic">自動バックアップ</string>
+    <!-- Two-line label: title, then a short hint. -->
+    <string name="settings_unmetered">従量制ではないネットワークのみ\n通常は Wi-Fi</string>
+    <string name="settings_charging">充電中のみ</string>
+    <!-- Two-line label: title, then a short hint. -->
+    <string name="settings_gp_off_row">Google フォトのバックアップをオフにする\n2 つのアプリが同じ写真をアップロードしないようにします</string>
+    <string name="settings_section_appearance">表示</string>
+    <string name="settings_theme">テーマ</string>
+    <string name="settings_theme_system">システムに合わせる</string>
+    <string name="settings_theme_light">ライト</string>
+    <string name="settings_theme_dark">ダーク</string>
+    <string name="settings_wallpaper">壁紙の色</string>
+    <string name="settings_section_account">アカウントとアプリ</string>
+    <!-- Two-line label. %1$s is the account email address. -->
+    <string name="settings_account_row">Google アカウント\n%1$s</string>
+    <string name="settings_permissions">写真と動画の権限</string>
+    <string name="settings_about">アプリ情報とオープンソースのクレジット</string>
+    <string name="settings_diagnostic">アカウントの詳細診断</string>
+
+    <!-- Account dialog -->
+    <string name="account_title">Google アカウント</string>
+    <string name="account_refresh_photo">プロフィール写真を更新</string>
+    <string name="account_reconnect">再接続</string>
+    <string name="account_disconnect">接続解除</string>
+    <!-- Accessibility label of the toolbar account button. %1$s is the account email address. -->
+    <string name="account_description">Google アカウント: %1$s</string>
+    <string name="account_profile_refreshed">プロフィールを更新しました。</string>
+    <string name="account_pause_first">アカウントを変更する前に、バックアップ、ストレージのスキャン、「空き容量を増やす」を一時停止してください。</string>
+    <string name="account_finish_title">先に「空き容量を増やす」を完了してください</string>
+    <plurals name="account_unfinished">
+        <item quantity="other">%d 件は Google フォトから削除されており、再アップロードされるまでこのスマートフォンにしかありません。「ストレージ」を開いて [再開] をタップし、そのあとでアカウントを変更してください。</item>
+    </plurals>
+    <string name="account_disconnect_title">アカウントの接続を解除しますか？</string>
+    <string name="account_disconnect_message">アップロードとスキャンを停止し、保存されたログイン情報とキャッシュされたストレージのインベントリを削除します。ローカルのファイルと Google フォト ライブラリはそのまま残ります。</string>
+    <!-- Status line shown on the Backup screen after disconnecting. -->
+    <string name="account_disconnected_status">アカウントの接続を解除しました。</string>
+
+    <!-- About dialog -->
+    <string name="about_title">Photos Unlimited について</string>
+    <!-- %1$s is the app version, %2$s is the license text (English). -->
+    <string name="about_text">Photos Unlimited %1$s\n\n独立した Android 用アップローダーです。Google とは提携していません。\n\nこのアプリでアップロードを行う場合は、公式の Google フォト アプリでバックアップをオフにしてください。元のファイルはスマートフォンに残ります。アップロードが受理されても、ストレージの対象外になる証拠にはなりません。既存のライブラリのアイテムは、「空き容量を増やす」で置き換えない限り、現在の集計がそのまま維持されます。\n\nストレージのスキャンでは Google フォトのメタデータを読み取ります。Drive と Gmail は含まれません。集計がないアイテムは「不明」と表示されます。「空き容量を増やす」は、バイト単位で同一のコピーがこのスマートフォンに保存された後にのみ、選択したアイテムを Google フォトから削除し、そのコピーを再アップロードします。\n\nプロトコルは xob0t 氏の GPMC と gotohp を基に改変しています。\n\n%2$s</string>
+    <string name="about_failed">クレジットを読み取れませんでした。</string>
+
+
+    <!-- Sign-in screen -->
+    <string name="signin_status">Google ログイン · accounts.google.com</string>
+    <string name="signin_help">スマートフォンにすでにあるアカウントを試すか、下からログインしてください。スマートフォンのアカウントを使うオプションは診断テストで、まだバックアップには接続されません。</string>
+    <string name="signin_test_account">このスマートフォンのアカウントをテスト</string>
+    <string name="signin_use_token">ブラウザのセットアップ トークンを使用</string>
+    <string name="signin_ssl_error">Google のセキュアな接続を検証できませんでした。</string>
+    <string name="signin_connecting">Google フォト ライブラリに接続しています…</string>
+    <!-- Status line shown on the Backup screen right after sign-in. -->
+    <string name="signin_connected_status">アカウントを接続しました。フォルダを選択して、最初のバックアップを開始してください。</string>
+    <string name="signin_connect_failed">接続できませんでした。新しいブラウザのセットアップ トークンをお試しください。</string>
+    <string name="signin_token_hint">Google セットアップ トークン</string>
+    <!-- Keep accounts.google.com/EmbeddedSetup and oauth_token untranslated. -->
+    <string name="signin_token_help">パソコンで accounts.google.com/EmbeddedSetup にアクセスしてログインします。ブラウザのデベロッパー ツールで [Application/Storage] → [Cookies] → accounts.google.com を開き、oauth_token の値のみをコピーします。それをスマートフォンのここに入力してください。\n\nこのトークンは他人に知られないようにしてください。アカウントにアクセスできるため、チャットなどで送信しないでください。</string>
+    <string name="signin_browser_setup">ブラウザでセットアップ</string>
+    <string name="signin_connect">接続</string>
+    <string name="signin_open_setup">セットアップ ページを開く</string>
+
+    <!-- Account test (diagnostic) screen -->
+    <string name="probe_title">スマートフォンのアカウントをテスト</string>
+    <string name="probe_help">まず、基本的な Google アクセスのテストを開始してください。成功したら、フォトへのアクセスをテストします。確認が表示されたら、このスマートフォンにすでにあるアカウントを選択してください。\n\n同意とアカウントの確認は Google が行います。この診断では、写真のアップロードや自動バックアップの接続は行われません。</string>
+    <string name="probe_test_photos">フォトへのアクセスをテスト</string>
+    <string name="probe_test_basic">基本的な Google アクセスをテスト</string>
+    <string name="probe_copy">診断結果をコピー</string>
+    <!-- Label of the clipboard entry. -->
+    <string name="probe_clip_label">アカウント テスト</string>
+    <string name="probe_copied">コピーしました: メールアドレス、パスワード、トークンは含まれません</string>
+    <string name="probe_ready">テストの準備ができました。</string>
+    <string name="probe_restored">以前の結果を復元しました。中断されたテストは再開してください。</string>
+    <!-- Title shown by Android\'s account chooser. -->
+    <string name="probe_chooser_title">フォトへのアクセスのテストに使用するアカウントを選択</string>
+    <string name="probe_choosing">Android のアカウント選択画面でアカウントを選択してください…</string>
+    <string name="probe_requesting_photos">Google Play 開発者サービスを通じてフォトへのアクセスをリクエストしています…</string>
+    <string name="probe_requesting_basic">Google Play 開発者サービスを通じて基本的なアカウント アクセスをリクエストしています…</string>
+    <string name="probe_continue_google">Google の認可画面で続行してください…</string>
+    <string name="probe_checking_photos">トークンを発行しました。フォト サービスへのアクセスを確認しています…</string>
+    <!-- %1$s is a status sentence. %2$s and %3$s are diagnostic result codes (not translated). -->
+    <string name="probe_status">%1$s\n\nフォト: %2$s\n基本: %3$s</string>
+    <!-- Settings → Appearance: language menu. The other choices are each language's own name. -->
+    <string name="settings_language">言語</string>
+    <string name="settings_language_system">システムのデフォルト</string>
+</resources>

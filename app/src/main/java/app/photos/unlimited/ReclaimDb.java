@@ -42,9 +42,20 @@ public final class ReclaimDb extends SQLiteOpenHelper implements ReclaimEngine.J
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     // Never drop this journal: it records deleted originals and their only copies.
     if (oldVersion < 1 || oldVersion > 3) throw new IllegalStateException("Unknown reclaim schema");
-    if (oldVersion < 2) db.execSQL("ALTER TABLE jobs ADD COLUMN reduced INTEGER NOT NULL DEFAULT 0");
-    if (oldVersion < 3) db.execSQL("ALTER TABLE jobs ADD COLUMN phone TEXT NOT NULL DEFAULT ''");
-    db.execSQL("ALTER TABLE jobs ADD COLUMN motion INTEGER NOT NULL DEFAULT 0");
+    // Each column is added only if it is missing, so an upgrade that runs twice (two helpers
+    // opening the journal at once right after an app update) is harmless. A future version must
+    // raise the bound above and add its own "if (oldVersion < N)" step the same way.
+    if (oldVersion < 2) addColumn(db, "reduced", "INTEGER NOT NULL DEFAULT 0");
+    if (oldVersion < 3) addColumn(db, "phone", "TEXT NOT NULL DEFAULT ''");
+    if (oldVersion < 4) addColumn(db, "motion", "INTEGER NOT NULL DEFAULT 0");
+  }
+
+  private static void addColumn(SQLiteDatabase db, String column, String definition) {
+    try (Cursor c = db.rawQuery("PRAGMA table_info(jobs)", null)) {
+      int name = c.getColumnIndexOrThrow("name");
+      while (c.moveToNext()) if (column.equals(c.getString(name))) return;
+    }
+    db.execSQL("ALTER TABLE jobs ADD COLUMN " + column + " " + definition);
   }
 
   /** Adds a job unless one is already active or finished for that item. */
@@ -52,7 +63,7 @@ public final class ReclaimDb extends SQLiteOpenHelper implements ReclaimEngine.J
     ReclaimEngine.Job existing = job(job.account, job.key);
     if (existing != null && existing.state != ReclaimEngine.State.FAILED) return false;
     job.state = ReclaimEngine.State.QUEUED;
-    job.message = "Waiting to start";
+    job.message = Text.get(R.string.job_waiting);
     job.updated = System.currentTimeMillis();
     ContentValues v = values(job);
     v.put("created", job.updated);

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Profile lookup failure. %1$s is a fixed diagnostic label such as AUTH_HTTP_403. -->
+    <string name="profile_failed">无法加载您的 Google 个人资料照片 (%1$s)。备份不受影响。</string>
+    <!-- Update card on the Backup screen. %1$s is a version such as 1.1.0. -->
+    <string name="update_title">有可用的新版本 %1$s</string>
+    <string name="update_body">请直接覆盖安装到当前应用上，不要先卸载 Photos Unlimited。如果 Android 不允许安装，请继续使用当前版本。</string>
+    <string name="update_blocked_body">请先完成“释放空间”再更新。在“释放空间”重新上传之前，部分照片仅保存在这部手机上。</string>
+    <string name="update_download">下载最新版本</string>
+    <string name="update_whats_new">新功能</string>
+    <string name="update_not_now">以后再说</string>
+    <string name="update_open_free_up">打开“释放空间”</string>
+    <!-- Settings toggle for the daily update check. -->
+    <string name="update_setting">检查更新</string>
+    <string name="update_setting_summary">应用打开期间，每天向 GitHub 查询一次最新版本。GitHub 能看到您的 IP 地址。</string>
+    <string name="no_browser">未找到浏览器</string>
+    <!-- Backup status line, shown on the Backup screen. -->
+    <string name="backup_status_connect">请关联您的 Google 账号以开始备份。</string>
+    <string name="backup_status_choose_folders">请至少选择一个要备份的文件夹。</string>
+    <string name="backup_status_waiting_conditions">正在等待满足您选择的网络和充电条件。</string>
+    <string name="backup_status_allow_location">请允许访问媒体位置信息，以便上传完整的原始文件。</string>
+    <string name="backup_status_checking_folders">正在检查所选文件夹…</string>
+    <string name="backup_too_large">文件超出 Google 的单个文件上传大小限制。</string>
+    <!-- %1$s is a file name. -->
+    <string name="backup_checking_file">正在检查 %1$s</string>
+    <string name="backup_file_changed">文件已更改；正在等待文件稳定后再处理。</string>
+    <!-- %1$s is a file name. -->
+    <string name="backup_uploading_file">正在上传 %1$s</string>
+    <string name="backup_status_sign_in_expired">登录已过期。请重新关联您的 Google 账号，然后继续备份。</string>
+    <string name="backup_local_missing">本地文件已不可用。</string>
+    <string name="backup_status_media_changed">媒体访问权限已更改。请先检查权限，再继续备份。</string>
+    <string name="backup_status_paused_queue">备份已暂停。待上传的文件会保留在队列中。</string>
+    <plurals name="backup_status_attention">
+        <item quantity="other">有 %1$d 个项目需要处理。请查看近期记录。</item>
+    </plurals>
+    <string name="backup_status_more_queued">还有更多文件在排队。备份将自动继续。</string>
+    <string name="backup_status_up_to_date">所选文件夹已是最新状态。</string>
+    <string name="backup_status_paused_resume">备份已暂停。条件允许时将自动继续。</string>
+    <string name="backup_status_stopped">备份意外停止。请重新打开应用并重试。</string>
+    <string name="backup_error_timeout">连接超时。将自动重试。</string>
+    <string name="backup_error_offline">无法连接。将自动重试。</string>
+    <string name="backup_error_tls">无法与 Google 建立安全连接。</string>
+    <string name="backup_error_unconfirmed">无法确认上传结果。将自动重试。</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_backup">备份进度</string>
+    <string name="backup_notification_preparing">正在准备备份…</string>
+    <!-- Notification button. -->
+    <string name="action_pause">暂停</string>
+    <!-- Activity list: state of one file. -->
+    <string name="history_uploaded">已上传</string>
+    <string name="history_existing">已在 Google 相册中</string>
+    <string name="history_uploading">正在上传</string>
+    <string name="history_waiting">等待中</string>
+    <string name="backup_status_initial">请选择账号和要备份的文件夹。</string>
+    <string name="account_saved_unavailable">已保存的登录信息不可用。请重新关联您的 Google 账号。</string>
+    <string name="account_save_failed">无法安全地保存您的账号。</string>
+    <string name="media_need_full_access">请允许访问所有照片和视频，以便发现并备份文件夹。</string>
+    <string name="media_library_unavailable">Android 媒体库不可用。</string>
+    <string name="media_permission_changed">媒体权限已更改。请允许访问所有照片和视频。</string>
+    <string name="media_phone_copy_check_failed">无法检查手机上的副本。</string>
+    <string name="media_restore_failed">Android 无法恢复手机上的副本。</string>
+    <string name="media_need_location">请允许访问媒体位置信息，以保留完整的原始文件。</string>
+    <string name="media_original_unavailable">原始媒体文件不可用。请检查照片和媒体位置信息权限。</string>
+    <string name="api_no_credentials">Google 未返回可用的账号凭据。</string>
+    <string name="api_file_empty">文件为空。</string>
+    <string name="api_no_session">Google 未创建上传会话。</string>
+    <string name="api_file_changed">文件在上传期间发生了更改；将重新检查。</string>
+    <string name="api_bad_receipt">Google 返回了无效的上传回执。</string>
+    <string name="api_unconfirmed">上传未获确认。下次尝试时将检查是否有重复项。</string>
+    <string name="api_renew_sign_in">需要重新登录 Google。</string>
+    <string name="api_needs_browser">Google 要求重新登录。请重新关联您的账号。</string>
+    <string name="api_droidguard">Google 拒绝了设备验证。此登录方式目前不可用。</string>
+    <string name="api_rejected">Google 拒绝了此次登录。请尝试获取新的 Google 设置令牌。</string>
+    <!-- %1$d is an HTTP status code such as 404. -->
+    <string name="api_download_http">下载时 Google 返回了 HTTP %1$d。</string>
+    <!-- %1$d is an HTTP status code such as 401. -->
+    <string name="api_upload_http_auth">Google 返回了 HTTP %1$d。如果问题持续出现，请重新关联您的账号。</string>
+    <!-- %1$d is an HTTP status code such as 500. -->
+    <string name="api_upload_http">Google 返回了 HTTP %1$d。上传未获确认。</string>
+    <!-- %1$s is a host name. -->
+    <string name="api_bad_host">下载地址不是 Google 媒体主机：%1$s</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_reclaim">释放空间</string>
+    <string name="reclaim_notification_title">正在释放 Google 相册存储空间</string>
+    <string name="reclaim_preparing">正在准备…</string>
+    <plurals name="reclaim_finishing_leftovers">
+        <item quantity="other">正在完成之前遗留的 %1$d 个项目…</item>
+    </plurals>
+    <!-- Ongoing warning notification. Keep the folder path unchanged. -->
+    <plurals name="reclaim_only_on_phone">
+        <item quantity="other">在重新上传之前，%1$d 个项目仅保存在这部手机上。请打开应用完成上传。副本保存在 Pictures/Photos Unlimited/Pending upload 中。</item>
+    </plurals>
+    <string name="reclaim_dont_uninstall">暂时不要卸载 Photos Unlimited</string>
+    <string name="reclaim_stopped_charged">已停止：某个替换项仍占用存储空间。其余项目未做任何更改。</string>
+    <!-- %1$s is a file name. -->
+    <string name="reclaim_stopped_attention">已停止：%1$s 需要处理。其余项目未做任何更改。</string>
+    <string name="reclaim_checking_phone">正在检查照片是否仍在这部手机上…</string>
+    <string name="reclaim_finished">已完成。</string>
+    <plurals name="reclaim_still_in_progress">
+        <item quantity="other">仍有 %1$d 个项目在处理中。请打开“存储空间”继续。</item>
+    </plurals>
+    <string name="reclaim_paused">已暂停。继续后，已开始处理的项目将继续进行。</string>
+    <string name="reclaim_reconnect">请重新关联您的 Google 账号，以继续释放存储空间。</string>
+    <!-- %1$s is an error message. -->
+    <string name="reclaim_google_stopped">Google 相册已中止此次运行：%1$s</string>
+    <!-- %1$s is an error message. -->
+    <string name="reclaim_interrupted">已中断：%1$s 请继续以完成。</string>
+    <string name="reclaim_unexpected">运行意外停止。已开始处理的项目将安全地继续。</string>
+    <string name="reclaim_wait_scan">正在等待存储空间扫描完成。</string>
+    <!-- Free up: state of an item that hasn’t started. -->
+    <string name="job_waiting">等待开始</string>
+    <!-- Why an item can’t be freed. Shown after “Can’t free this item’s storage:”. -->
+    <string name="why_not_reported">Google 未报告其存储空间用量。</string>
+    <string name="why_free">它不占用存储空间。</string>
+    <string name="why_trash">它在回收站中。</string>
+    <string name="why_shared">它是他人与您共享的内容，不属于您。</string>
+    <string name="why_locked">它在密码锁定的文件夹中。</string>
+    <string name="why_alternate">它是另一个项目的备用版本。</string>
+    <string name="why_type">仅支持照片和视频。</string>
+    <string name="why_no_dedup">Google 未报告替换该项目所需的标识符。</string>
+    <string name="why_no_size">Google 未报告其文件大小。</string>
+    <string name="why_no_checksum">Google 未报告原始文件的校验和，因此无法验证下载的文件。</string>
+    <!-- Free up: progress and result messages for one item. -->
+    <string name="job_paused_next_run">已暂停；此项目将在下次运行时继续。</string>
+    <string name="job_trashing">正在将原始文件移到回收站</string>
+    <string name="job_wait_trash">正在等待 Google 确认原始文件已在回收站中。</string>
+    <string name="job_deleting">正在永久删除原始文件</string>
+    <string name="job_missing_ids">缺少安全替换所需的校验和或标识符。</string>
+    <string name="job_checking_record">正在检查 Google 上的原始文件记录</string>
+    <string name="job_same_bytes">媒体库中的另一个项目与其字节完全相同；删除其中一个可能会同时移除两者。</string>
+    <!-- %1$s is the reason, such as “It’s in the trash.” -->
+    <string name="job_not_replaced">未替换：%1$s</string>
+    <string name="job_item_changed">该项目在选择之后发生了更改。未做任何更改。</string>
+    <string name="job_no_space">这部手机的可用空间不足，无法保存临时副本。未做任何更改。</string>
+    <string name="job_checking_local">正在检查这部手机上的匹配文件</string>
+    <string name="job_found_local">已在这部手机上找到原始文件并通过验证</string>
+    <!-- %1$s is a technical download path such as 1.5.2.5. -->
+    <string name="job_downloading">正在下载原始文件 (%1$s)</string>
+    <!-- %1$s is a technical download path; %2$s is an error message. -->
+    <string name="job_candidate_failed">候选项 %1$s 失败：%2$s</string>
+    <!-- %1$s is a technical download path such as 1.5.2.5. -->
+    <string name="job_downloaded">原始文件已保存并通过验证 (%1$s)</string>
+    <string name="job_wait_deleted">Google 仍显示已删除的原始文件。请等待后再上传。</string>
+    <string name="job_already_uploaded">替换文件已上传</string>
+    <string name="job_uploading_copy">正在上传已保存的副本</string>
+    <string name="job_matched_deleted">Google 将此次上传与已删除的原始文件匹配。本地副本已保留。</string>
+    <string name="job_uploaded_waiting">已上传；正在等待 Google 的存储空间报告</string>
+    <string name="job_checking_replacement">正在检查替换文件的存储空间用量</string>
+    <string name="job_wait_replacement">正在等待 Google 报告替换文件的存储空间用量。</string>
+    <string name="job_restoring_details">正在恢复说明、收藏和归档状态</string>
+    <string name="job_done">已替换；现在不占用存储空间</string>
+    <string name="job_restoring_phone">Google 相册已移除手机上的副本；正在恢复</string>
+    <string name="job_copy_missing">已保存的副本缺失或已更改。未再进行其他操作。</string>
+    <string name="job_copy_changed_restoring">已保存的副本已更改；正在从回收站恢复原始文件</string>
+    <string name="job_copy_changed_restored">已保存的副本已更改，因此已从回收站恢复原始文件。</string>
+    <string name="job_trashed">原始文件已移到回收站</string>
+    <string name="job_deleted">原始文件已删除；正在上传已保存的副本</string>
+    <string name="job_trash_unconfirmed">Google 未确认移到回收站；原始文件已恢复，未删除任何内容。</string>
+    <string name="job_gone">Google 已不再显示此项目。请刷新存储空间扫描。</string>
+    <string name="job_reduced_no_original">Google 仅保留了压缩副本，且在这部手机上未找到原始文件。未做任何更改。</string>
+    <!-- %1$s is a technical download path; %2$d is a size in bytes; %3$s is “matches” or “differs” (the next two strings). -->
+    <string name="job_candidate_mismatch">候选项 %1$s 不是原始文件（%2$d 字节，校验和%3$s）</string>
+    <string name="job_checksum_matches">一致</string>
+    <string name="job_checksum_differs">不一致</string>
+    <string name="job_no_download">Google 未提供此项目的下载。</string>
+    <string name="job_no_match">没有任何下载文件与 Google 记录的原始文件校验和一致。未做任何更改。</string>
+    <string name="job_still_has_original">删除后 Google 仍保留着原始文件，因此未上传任何内容。请检查 Google 相册回收站；已验证的副本保存在此应用中。</string>
+    <string name="job_replacement_missing">Google 未报告替换文件。已验证的副本保存在 Pictures/Photos Unlimited/Pending upload 中。</string>
+    <string name="job_replacement_mismatch">Google 上的替换文件记录与已保存的副本不一致，该副本保存在 Pictures/Photos Unlimited/Pending upload 中。</string>
+    <string name="job_reduced_again">Google 再次将替换文件存储为压缩副本。原始文件保存在此应用中。</string>
+    <string name="job_still_charged">替换文件仍占用存储空间。本地副本已保留；继续之前，请检查 Pixel 上传配置。</string>
+    <string name="job_copy_changed_after">原始文件被移除后，已保存的副本发生了更改。请检查 Google 相册回收站。</string>
+    <string name="job_separate_video">这张 Live Photo 的视频保存在单独的文件中，无法验证，因此替换会丢失动态效果。未做任何更改。</string>
+    <!-- %1$s is the item’s previous message; this sentence is appended to it. -->
+    <string name="job_phone_copy_removed">%1$s 手机上的副本已被其他应用移除。</string>
+    <!-- %1$s is the item’s previous message; this sentence is appended to it. -->
+    <string name="job_phone_copy_restored">%1$s Google 相册移除手机上的副本后，该副本已恢复。</string>
+    <!-- Notification channel name in Android settings. -->
+    <string name="channel_scan">存储空间扫描</string>
+    <string name="scan_notification_title">正在扫描 Google 相册</string>
+    <!-- Notification button. -->
+    <string name="scan_pause">暂停扫描</string>
+    <string name="scan_reading">正在读取存储空间元数据…</string>
+    <plurals name="scan_pages_checked">
+        <item quantity="other">已检查 %1$d 页 · 只读扫描</item>
+    </plurals>
+    <!-- Keep codes in parentheses, such as (SCAN_PAUSED_LIMIT), unchanged. -->
+    <string name="scan_paused_limit">扫描已暂停。请继续以读取其余项目。(SCAN_PAUSED_LIMIT)</string>
+    <string name="scan_timeout">扫描超时。结果不完整。请继续或重新开始。(SCAN_TIMEOUT)</string>
+    <string name="scan_paused">扫描已暂停。准备好后请继续。</string>
+    <!-- %1$s is a fixed code such as SCAN_SIGN_IN. -->
+    <string name="scan_reconnect">请重新关联您的 Google 账号以继续扫描。(%1$s)</string>
+    <!-- %1$s is a fixed code such as SCAN_HTTP_500. -->
+    <string name="scan_google_failed">Google 相册无法完成扫描。您可以继续或重新开始。(%1$s)</string>
+    <!-- %1$s is a fixed code such as SCAN_FORMAT_PAGE. -->
+    <string name="scan_interrupted">扫描被中断，或元数据格式不可用。结果不完整。请继续或重新开始。(%1$s)</string>
+    <!-- %1$s is a fixed code. -->
+    <string name="scan_stopped">扫描已停止。结果不完整。请尝试继续扫描。(%1$s)</string>
+    <string name="scan_ready">可以开始扫描</string>
+    <string name="scan_scanning">正在扫描 Google 相册…</string>
+    <string name="scan_finished">扫描完成</string>
+    <string name="scan_checking_recent">正在检查近期更改…</string>
+    <!-- %1$s is a fixed code such as SCAN_FORMAT_PAGE_SHAPE_NONE_F4_D. -->
+    <string name="scan_finished_skipped">扫描完成（已跳过 %1$s）</string>
+    <!-- Advanced account diagnostic: what a test result means. -->
+    <string name="probe_photos_accepted">Google 已颁发令牌，并接受了相册查询。这是个好迹象。上传、存储空间计量和后台令牌续期仍需测试。</string>
+    <string name="probe_basic_token">Google 已颁发基本账号令牌。这只检查授权路径，不检查相册访问权限。</string>
+    <string name="probe_not_registered">Google 要求为此应用及其签名证书进行 OAuth 注册。此结果无法说明注册后是否会允许相册权限。</string>
+    <string name="probe_configuration">Google 报告了应用配置问题。请检查此软件包和签名证书的 Android OAuth 注册信息。这并不能说明是否允许访问相册。</string>
+    <string name="probe_api_unavailable">此设备上无法使用 Google 的授权 API。</string>
+    <string name="probe_method_unsupported">提供方拒绝了此授权方式。</string>
+    <string name="probe_scope_not_granted">Google 的结果中未包含所请求的权限。未进行相册查询。</string>
+    <string name="probe_scope_rejected">Google 拒绝了此应用所请求的权限。</string>
+    <string name="probe_http_401">已颁发令牌，但相册服务拒绝了其身份验证。</string>
+    <string name="probe_http_403">已颁发令牌，但相册服务拒绝了查询。仅凭此结果无法确定原因。</string>
+    <string name="probe_reauth">Google 要求进行账号验证或重新登录。</string>
+    <string name="probe_canceled">请求已取消或被拒绝。无法就相册访问权限得出结论。</string>
+    <string name="probe_retry_later">测试未能完成。请稍后重试。</string>
+    <string name="probe_no_authenticator">此设备上无法使用 Google 账号服务。</string>
+    <string name="probe_denied">Android 或账号提供方拒绝了此请求。</string>
+    <string name="probe_interrupted">测试已中断。请重新开始。</string>
+    <string name="probe_default">测试未能确认相册访问权限。请复制诊断结果以便调查。</string>
+    <string name="api_incomplete_credentials">已保存的登录信息不完整。请重新关联您的 Google 账号。</string>
+    <string name="api_device_bound">此登录方式需要与设备绑定的密钥。请改用 Google 登录。</string>
+    <string name="api_enter_token">请输入 Google 设置中的登录令牌。</string>
+    <string name="api_download_too_large">下载的文件比预期的大。</string>
+    <string name="api_download_bad_redirect">Google 将下载重定向到了本应用不接受的地址。</string>
+    <string name="job_keep_copy_failed">无法保留本地副本。</string>
+</resources>

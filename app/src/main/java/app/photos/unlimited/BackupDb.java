@@ -211,10 +211,10 @@ public final class BackupDb extends SQLiteOpenHelper {
       while (c.moveToNext()) {
         String state =
             switch (c.getString(1)) {
-              case "done" -> "Uploaded";
-              case "existing" -> "Already in Google Photos";
-              case "running" -> "Uploading";
-              default -> c.getString(2) == null ? "Waiting" : c.getString(2);
+              case "done" -> Text.get(R.string.history_uploaded);
+              case "existing" -> Text.get(R.string.history_existing);
+              case "running" -> Text.get(R.string.history_uploading);
+              default -> c.getString(2) == null ? Text.get(R.string.history_waiting) : c.getString(2);
             };
         result.add(c.getString(0) + "\n" + state);
       }

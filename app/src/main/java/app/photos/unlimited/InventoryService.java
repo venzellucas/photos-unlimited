@@ -30,7 +30,7 @@ public final class InventoryService extends Service {
     getSystemService(NotificationManager.class)
         .createNotificationChannel(
             new NotificationChannel(
-                "inventory", "Storage scan", NotificationManager.IMPORTANCE_LOW));
+                "inventory", getString(R.string.channel_scan), NotificationManager.IMPORTANCE_LOW));
   }
 
   private Notification notification(String text) {
@@ -48,13 +48,13 @@ public final class InventoryService extends Service {
             PendingIntent.FLAG_IMMUTABLE);
     return new Notification.Builder(this, "inventory")
         .setSmallIcon(R.drawable.ic_storage)
-        .setContentTitle("Scanning Google Photos")
+        .setContentTitle(getString(R.string.scan_notification_title))
         .setContentText(text)
         .setContentIntent(open)
         .setOnlyAlertOnce(true)
         .setOngoing(true)
         .setProgress(0, 0, true)
-        .addAction(new Notification.Action.Builder(null, "Pause scan", pause).build())
+        .addAction(new Notification.Action.Builder(null, getString(R.string.scan_pause), pause).build())
         .build();
   }
 
@@ -64,7 +64,7 @@ public final class InventoryService extends Service {
       stop.set(true);
       return START_NOT_STICKY;
     }
-    startForeground(7401, notification("Reading storage metadata…"));
+    startForeground(7401, notification(getString(R.string.scan_reading)));
     if (!BUSY.compareAndSet(false, true)) return START_NOT_STICKY;
     if (!LibrarySync.tryLock()) {
       BUSY.set(false);
@@ -105,41 +105,41 @@ public final class InventoryService extends Service {
               System.currentTimeMillis() + 8 * 60 * 1000L,
               scan ->
                   getSystemService(NotificationManager.class)
-                      .notify(7401, notification(scan.pages() + " pages checked · Read-only scan")));
+                      .notify(
+                          7401,
+                          notification(
+                              getResources()
+                                  .getQuantityString(
+                                      R.plurals.scan_pages_checked, scan.pages(), scan.pages()))));
       if (current.cursor().stage() != LibraryProtocol.Stage.DONE)
         db.message(
             account,
             generation,
-            "Scan paused. Continue to read the remaining items. (SCAN_PAUSED_LIMIT)");
+            getString(R.string.scan_paused_limit));
     } catch (java.net.SocketTimeoutException e) {
       setMessage(
           account,
           generation,
-          "The scan timed out. Results are partial. Continue or start over. (SCAN_TIMEOUT)");
+          getString(R.string.scan_timeout));
     } catch (InterruptedIOException e) {
-      setMessage(account, generation, "Scan paused. Continue when you’re ready.");
+      setMessage(account, generation, getString(R.string.scan_paused));
     } catch (PhotosApi.ApiException e) {
       setMessage(
           account,
           generation,
           e.signIn
-              ? "Reconnect your Google account to continue the scan. (" + label(e) + ")"
-              : "Google Photos could not complete the scan. You can continue or start over. ("
-                  + label(e)
-                  + ")");
+              ? getString(R.string.scan_reconnect, label(e))
+              : getString(R.string.scan_google_failed, label(e)));
     } catch (IOException e) {
       setMessage(
           account,
           generation,
-          "Scan interrupted or metadata format unavailable. Results are partial. Continue or start"
-              + " over. ("
-              + label(e)
-              + ")");
+          getString(R.string.scan_interrupted, label(e)));
     } catch (Exception e) {
       setMessage(
           account,
           generation,
-          "The scan stopped. Results are partial. Try continuing the scan. (" + label(e) + ")");
+          getString(R.string.scan_stopped, label(e)));
     } finally {
       scanningAccount = "";
       LibrarySync.unlock();

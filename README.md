@@ -1,5 +1,8 @@
 # Photos Unlimited
 
+**English** · [Português (Brasil)](README.pt-BR.md) · [Español](README.es.md) ·
+[简体中文](README.zh-Hans.md) · [日本語](README.ja.md)
+
 A small, independent Android uploader for a Google Photos library. Choose folders,
 back up original photos and videos, and keep using the official Google Photos app
 to browse and edit your library.
@@ -26,6 +29,8 @@ update not signed with this key. Each release also lists the APK's checksum in
   and a cached Google profile photo when available.
 - Scan Google Photos metadata to inspect reported storage usage, with filters for
   media type and charged or unknown storage. This feature is an experimental preview.
+- Use the app in English, Português (Brasil), Español, 简体中文 or 日本語. It follows
+  the phone's language; choose another in Settings → **Language**.
 
 No root, custom ROM, microG, API key, or Photos Unlimited server is required.
 
@@ -167,6 +172,14 @@ handling, confirmed uploads, interruption, persisted queues, account separation,
 metadata pagination, appearance, and profile-cache isolation. Test credentials and
 network responses are synthetic. Light/dark and large-text screens were inspected.
 These checks do not prove live quota exemption or complete library accounting.
+
+## Translations
+
+The app, this README and the website are available in English, Brazilian Portuguese,
+Spanish, Simplified Chinese and Japanese. The translations were made with a language
+model and may lag behind the English text, which is the reference. Corrections are
+welcome as pull requests: app text is in `app/src/main/res/values-*/strings*.xml`,
+and the translated READMEs and site pages sit next to the English ones.
 
 ## Credits and license
 

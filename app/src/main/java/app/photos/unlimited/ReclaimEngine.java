@@ -209,25 +209,25 @@ public final class ReclaimEngine {
     LibraryProtocol.Extra x = item.extra();
     // A reduced copy is worth replacing with the original even when it is free (pre-2021).
     if (x.quality() != LibraryProtocol.Quality.REDUCED) {
-      if (item.charged() == null) return "Google hasn’t reported its storage use.";
-      if (item.charged() <= 0) return "It doesn’t use storage.";
+      if (item.charged() == null) return Text.get(R.string.why_not_reported);
+      if (item.charged() <= 0) return Text.get(R.string.why_free);
     }
-    if (item.trash()) return "It’s in the trash.";
-    if (item.origin() != 0 && item.origin() != 1) return "It’s shared with you, not yours.";
-    if (x.locked()) return "It’s in the Locked Folder.";
-    if (!x.canonical()) return "It’s an alternate version of another item.";
-    if (item.type() != 1 && item.type() != 2) return "Only photos and videos are supported.";
+    if (item.trash()) return Text.get(R.string.why_trash);
+    if (item.origin() != 0 && item.origin() != 1) return Text.get(R.string.why_shared);
+    if (x.locked()) return Text.get(R.string.why_locked);
+    if (!x.canonical()) return Text.get(R.string.why_alternate);
+    if (item.type() != 1 && item.type() != 2) return Text.get(R.string.why_type);
     if (!x.hashKnown())
-      return "Google didn’t report the original’s checksum, so a download can’t be verified.";
-    if (x.dedup().isEmpty()) return "Google didn’t report the identifier needed to replace it.";
-    if (item.size() == null || item.size() <= 0) return "Google didn’t report its file size.";
+      return Text.get(R.string.why_no_checksum);
+    if (x.dedup().isEmpty()) return Text.get(R.string.why_no_dedup);
+    if (item.size() == null || item.size() <= 0) return Text.get(R.string.why_no_size);
     return null;
   }
 
   /** Runs one job until it finishes, must wait for Google, or the deadline passes. */
   public Job run(Job job, long deadline) throws IOException {
     while (!job.state.terminal()) {
-      if (clock.now() > deadline) throw new Later("Paused; this item will continue next run.");
+      if (clock.now() > deadline) throw new Later(Text.get(R.string.job_paused_next_run));
       try {
         advance(job);
       } catch (Later | InterruptedIOException e) {
@@ -245,9 +245,9 @@ public final class ReclaimEngine {
       case QUEUED -> download(job);
       case DOWNLOADED -> {
         if (!verifyLocal(job)) return;
-        save(job, State.TRASHING, "Moving the original to the trash");
+        save(job, State.TRASHING, Text.get(R.string.job_trashing));
         remote.trash(job.dedup);
-        save(job, State.TRASHED, "Original moved to the trash");
+        save(job, State.TRASHED, Text.get(R.string.job_trashed));
       }
       case TRASHING -> {
         if (!localOk(job)) {
@@ -255,7 +255,7 @@ public final class ReclaimEngine {
           return;
         }
         remote.trash(job.dedup);
-        save(job, State.TRASHED, "Original moved to the trash");
+        save(job, State.TRASHED, Text.get(R.string.job_trashed));
       }
       case TRASHED -> {
         if (!localOk(job)) {
@@ -270,17 +270,16 @@ public final class ReclaimEngine {
           if (job.attempts + 1 >= MAX_TRASH_CHECKS) {
             undo(job);
             if (job.state == State.FAILED)
-              save(job, State.FAILED, "Google didn’t confirm the move to trash; the original was"
-                  + " restored and nothing was deleted.");
+              save(job, State.FAILED, Text.get(R.string.job_trash_unconfirmed));
             return;
           }
           job.attempts++;
           journal.save(job);
-          throw new Later("Waiting for Google to confirm the original is in the trash.");
+          throw new Later(Text.get(R.string.job_wait_trash));
         }
-        save(job, State.DELETING, "Deleting the original permanently");
+        save(job, State.DELETING, Text.get(R.string.job_deleting));
         remote.delete(job.dedup);
-        save(job, State.DELETED, "Original deleted; uploading the saved copy");
+        save(job, State.DELETED, Text.get(R.string.job_deleted));
       }
       case DELETING -> {
         if (!localOk(job)) {
@@ -288,7 +287,7 @@ public final class ReclaimEngine {
           return;
         }
         remote.delete(job.dedup);
-        save(job, State.DELETED, "Original deleted; uploading the saved copy");
+        save(job, State.DELETED, Text.get(R.string.job_deleted));
       }
       case DELETED -> upload(job);
       case UPLOADED -> verify(job);
@@ -298,32 +297,32 @@ public final class ReclaimEngine {
 
   private void download(Job job) throws IOException {
     if (job.sha1 == null || job.sha1.length != 20 || job.dedup.isEmpty() || job.size <= 0) {
-      fail(job, "Missing the checksum or identifier needed for a safe replacement.");
+      fail(job, Text.get(R.string.job_missing_ids));
       return;
     }
-    events.step(job, "Checking Google’s record of the original");
+    events.step(job, Text.get(R.string.job_checking_record));
     String owner = remote.find(job.sha1);
     if (owner.isEmpty()) {
-      fail(job, "Google no longer reports this item. Refresh the storage scan.");
+      fail(job, Text.get(R.string.job_gone));
       return;
     }
     if (!owner.equals(job.key)) {
-      fail(job, "Another library item has identical bytes; deleting one could remove both.");
+      fail(job, Text.get(R.string.job_same_bytes));
       return;
     }
     // Jobs can wait in the queue: decide again on Google's current record of the item.
     LibraryProtocol.Item fresh = remote.lookup(job.key);
     if (fresh == null) {
-      fail(job, "Google no longer reports this item. Refresh the storage scan.");
+      fail(job, Text.get(R.string.job_gone));
       return;
     }
     String why = ineligible(fresh);
     if (why != null) {
-      fail(job, "Not replaced: " + why);
+      fail(job, Text.get(R.string.job_not_replaced, why));
       return;
     }
     if (!MessageDigest.isEqual(fresh.extra().sha1(), job.sha1)) {
-      fail(job, "The item changed since it was selected. Nothing was changed.");
+      fail(job, Text.get(R.string.job_item_changed));
       return;
     }
     job.dedup = fresh.extra().dedup();
@@ -332,16 +331,16 @@ public final class ReclaimEngine {
     job.archived = fresh.archived();
     job.motion = fresh.extra().motion();
     job.reduced = fresh.extra().quality() == LibraryProtocol.Quality.REDUCED;
-    if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("No space for the local copy");
+    if (!dir.isDirectory() && !dir.mkdirs()) throw new UserFacingException(Text.get(R.string.job_no_space));
     if (dir.getUsableSpace() < job.size + SPACE_MARGIN) {
-      fail(job, "Not enough free space on this phone for a temporary copy. Nothing was changed.");
+      fail(job, Text.get(R.string.job_no_space));
       return;
     }
     File part = new File(dir, PARTIAL + fileName(job));
     File done = new File(dir, fileName(job));
     // The phone's own copy saves a download, and for Storage saver items it is the only original.
     for (Local local : remote.localOriginals(job)) {
-      events.step(job, "Checking " + local.label() + " on this phone");
+      events.step(job, Text.get(R.string.job_checking_local));
       byte[] digest;
       try {
         // A reduced item's reported size is the compressed copy's, not the original's.
@@ -354,17 +353,17 @@ public final class ReclaimEngine {
         continue;
       }
       if ((job.reduced || part.length() == job.size) && MessageDigest.isEqual(digest, job.sha1)) {
-        if (!part.renameTo(done)) throw new IOException("Could not keep the local copy");
+        if (!part.renameTo(done)) throw new UserFacingException(Text.get(R.string.job_keep_copy_failed));
         if (job.motion && !hasEmbeddedVideo(done)) {
           done.delete();
-          fail(job, SEPARATE_VIDEO);
+          fail(job, Text.get(R.string.job_separate_video));
           return;
         }
         remote.staged(done);
         job.file = done.getAbsolutePath();
         job.size = done.length();
         job.phone = local.ref();
-        save(job, State.DOWNLOADED, "Original found on this phone and verified");
+        save(job, State.DOWNLOADED, Text.get(R.string.job_found_local));
         return;
       }
       part.delete();
@@ -372,8 +371,7 @@ public final class ReclaimEngine {
     if (job.reduced) {
       fail(
           job,
-          "Google keeps only a reduced copy, and the original wasn’t found on this phone."
-              + " Nothing was changed.");
+          Text.get(R.string.job_reduced_no_original));
       return;
     }
     List<PhotosApi.Link> links = remote.downloadLinks(job.key);
@@ -381,7 +379,7 @@ public final class ReclaimEngine {
     int tried = 0;
     for (PhotosApi.Link link : links) {
       tried++;
-      events.step(job, "Downloading the original (" + link.path() + ")");
+      events.step(job, Text.get(R.string.job_downloading, link.path()));
       byte[] digest;
       try {
         digest =
@@ -392,37 +390,38 @@ public final class ReclaimEngine {
         throw e;
       } catch (IOException e) {
         part.delete();
-        events.step(job, "Candidate " + link.path() + " failed: " + e.getMessage());
+        events.step(job, Text.get(R.string.job_candidate_failed, link.path(), Text.reason(e)));
         continue;
       }
       if (part.length() == job.size && MessageDigest.isEqual(digest, job.sha1)) {
-        if (!part.renameTo(done)) throw new IOException("Could not keep the local copy");
+        if (!part.renameTo(done)) throw new UserFacingException(Text.get(R.string.job_keep_copy_failed));
         if (job.motion && !hasEmbeddedVideo(done)) {
           done.delete();
-          fail(job, SEPARATE_VIDEO);
+          fail(job, Text.get(R.string.job_separate_video));
           return;
         }
         remote.staged(done);
         job.file = done.getAbsolutePath();
-        save(job, State.DOWNLOADED, "Original saved and verified (" + link.path() + ")");
+        save(job, State.DOWNLOADED, Text.get(R.string.job_downloaded, link.path()));
         return;
       }
       events.step(
           job,
-          "Candidate "
-              + link.path()
-              + " is not the original ("
-              + part.length()
-              + " bytes, checksum "
-              + (MessageDigest.isEqual(digest, job.sha1) ? "matches" : "differs")
-              + ")");
+          Text.get(
+              R.string.job_candidate_mismatch,
+              link.path(),
+              part.length(),
+              Text.get(
+                  MessageDigest.isEqual(digest, job.sha1)
+                      ? R.string.job_checksum_matches
+                      : R.string.job_checksum_differs)));
       part.delete();
     }
     fail(
         job,
         tried == 0
-            ? "Google offered no download for this item."
-            : "No download matched Google’s checksum of the original. Nothing was changed.");
+            ? Text.get(R.string.job_no_download)
+            : Text.get(R.string.job_no_match));
   }
 
   private void upload(Job job) throws IOException {
@@ -433,54 +432,51 @@ public final class ReclaimEngine {
       if (job.attempts + 1 >= MAX_DELETE_CHECKS) {
         stop(
             job,
-            "Google still has the original after deletion, so nothing was uploaded. Check"
-                + " Google Photos trash; the verified copy is kept in this app.");
+            Text.get(R.string.job_still_has_original));
         return;
       }
       job.attempts++;
       journal.save(job);
-      throw new Later("Google still reports the deleted original. Waiting before uploading.");
+      throw new Later(Text.get(R.string.job_wait_deleted));
     }
     if (!present.isEmpty()) {
       // Same bytes under a new key: our earlier upload committed before the app stopped.
       job.newKey = present;
-      save(job, State.UPLOADED, "Replacement already uploaded");
+      save(job, State.UPLOADED, Text.get(R.string.job_already_uploaded));
       return;
     }
-    events.step(job, "Uploading the saved copy");
+    events.step(job, Text.get(R.string.job_uploading_copy));
     String key = remote.upload(job, file, (bytes, total) -> events.bytes(job, bytes, total));
     if (key.isEmpty() || key.equals(job.key)) {
-      stop(job, "Google matched the upload to the deleted original. The local copy is kept.");
+      stop(job, Text.get(R.string.job_matched_deleted));
       return;
     }
     job.newKey = key;
-    save(job, State.UPLOADED, "Uploaded; waiting for Google’s storage report");
+    save(job, State.UPLOADED, Text.get(R.string.job_uploaded_waiting));
   }
 
   private void verify(Job job) throws IOException {
-    events.step(job, "Checking the replacement’s storage use");
+    events.step(job, Text.get(R.string.job_checking_replacement));
     LibraryProtocol.Item item = remote.lookup(job.newKey);
     if (item == null || item.charged() == null) {
       if (job.attempts + 1 >= MAX_VERIFY_CHECKS) {
-        stop(job, "Google hasn’t reported the replacement. The verified copy is kept in"
-            + " Pictures/Photos Unlimited/Pending upload.");
+        stop(job, Text.get(R.string.job_replacement_missing));
         return;
       }
       job.attempts++;
       journal.save(job);
-      throw new Later("Waiting for Google to report the replacement’s storage use.");
+      throw new Later(Text.get(R.string.job_wait_replacement));
     }
     // The replacement must be exactly our bytes and live before the copy may go.
     if (item.trash()
         || !MessageDigest.isEqual(item.extra().sha1(), job.sha1)
         || (item.size() != null && item.size() != job.size)) {
-      stop(job, "Google’s record of the replacement doesn’t match the saved copy, which is kept"
-          + " in Pictures/Photos Unlimited/Pending upload.");
+      stop(job, Text.get(R.string.job_replacement_mismatch));
       return;
     }
     job.newCharged = item.charged();
     String dedup = item.extra().dedup().isEmpty() ? job.dedup : item.extra().dedup();
-    events.step(job, "Restoring caption, favorite, and archive");
+    events.step(job, Text.get(R.string.job_restoring_details));
     if (!job.caption.isEmpty() && !job.caption.equals(item.extra().caption()))
       remote.setCaption(dedup, job.caption);
     if (job.favorite && !item.extra().favorite()) remote.setFavorite(dedup);
@@ -489,20 +485,18 @@ public final class ReclaimEngine {
       save(
           job,
           State.ATTENTION,
-          "Google stored the replacement as a reduced copy again. The original is kept in this"
-              + " app.");
+          Text.get(R.string.job_reduced_again));
       return;
     }
     if (job.newCharged == 0) {
-      save(job, State.DONE, "Replaced; now uses no storage");
+      save(job, State.DONE, Text.get(R.string.job_done));
       // Keep the copy until the phone file is checked; see guard().
       if (job.phone.isEmpty()) new File(job.file).delete();
     } else {
       save(
           job,
           State.CHARGED,
-          "The replacement still uses storage. The local copy is kept; check the Pixel upload"
-              + " profile before continuing.");
+          Text.get(R.string.job_still_charged));
     }
   }
 
@@ -523,12 +517,12 @@ public final class ReclaimEngine {
       if (!copy.isFile() || !MessageDigest.isEqual(sha1(copy), job.sha1)) {
         String before = job.message;
         job.phone = "";
-        save(job, job.state, before + " The phone copy was removed by another app.");
+        save(job, job.state, Text.get(R.string.job_phone_copy_removed, before));
         return;
       }
-      events.step(job, "Google Photos removed the phone copy; restoring it");
+      events.step(job, Text.get(R.string.job_restoring_phone));
       remote.restorePhoneCopy(job.phone, copy);
-      job.message += " Phone copy restored after Google Photos removed it.";
+      job.message = Text.get(R.string.job_phone_copy_restored, job.message);
     }
     job.phone = "";
     if (job.state == State.DONE) copy.delete();
@@ -546,7 +540,7 @@ public final class ReclaimEngine {
 
   private boolean verifyLocal(Job job) throws IOException {
     if (localOk(job)) return true;
-    stop(job, "The saved copy is missing or changed. Nothing more was done.");
+    stop(job, Text.get(R.string.job_copy_missing));
     return false;
   }
 
@@ -555,15 +549,15 @@ public final class ReclaimEngine {
    * knowing the original by its hash proves the restore had something to restore.
    */
   private void undo(Job job) throws IOException {
-    events.step(job, "The saved copy changed; restoring the original from the trash");
+    events.step(job, Text.get(R.string.job_copy_changed_restoring));
     remote.restore(job.dedup);
     if (remote.find(job.sha1).equals(job.key))
-      save(job, State.FAILED, "The saved copy changed, so the original was restored from trash.");
+      save(job, State.FAILED, Text.get(R.string.job_copy_changed_restored));
     else
       save(
           job,
           State.ATTENTION,
-          "The saved copy changed after the original was removed. Check Google Photos trash.");
+          Text.get(R.string.job_copy_changed_after));
   }
 
   private void fail(Job job, String message) throws IOException {
@@ -583,9 +577,7 @@ public final class ReclaimEngine {
     events.step(job, message);
   }
 
-  static final String SEPARATE_VIDEO =
-      "This Live Photo keeps its video in a separate file that can’t be verified, so replacing it"
-          + " would lose the motion. Nothing was changed.";
+
 
   /**
    * True when the file carries its own video: Android Motion Photos (Pixel MotionPhoto and legacy

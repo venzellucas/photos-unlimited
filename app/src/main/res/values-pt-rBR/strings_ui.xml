@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared / main screen -->
+    <!-- Toolbar action and dialog title for the signed-in Google account. -->
+    <string name="main_account_menu">Conta do Google</string>
+    <!-- Bottom navigation labels. -->
+    <string name="main_nav_backup">Backup</string>
+    <string name="main_nav_activity">Atividade</string>
+    <string name="main_nav_storage">Espaço</string>
+    <string name="main_nav_settings">Configurações</string>
+    <string name="main_cancel">Cancelar</string>
+    <string name="main_back">Voltar</string>
+    <string name="main_close">Fechar</string>
+    <string name="main_ok">OK</string>
+    <string name="main_later">Depois</string>
+    <string name="main_not_now">Agora não</string>
+    <string name="main_continue">Continuar</string>
+    <string name="main_app_settings">Configurações do app</string>
+    <!-- Button and accessibility label for connecting a Google account. -->
+    <string name="main_connect_account">Conectar conta do Google</string>
+    <!-- Accessibility description of a picker button. %1$s is the picker name (for example "Theme"), %2$s is the selected option. -->
+    <string name="main_picker_description">%1$s: %2$s</string>
+    <string name="main_read_failed">Não foi possível ler os registros de backup</string>
+    <string name="main_perm_title">Manter os originais completos</string>
+    <string name="main_perm_message">Permita o acesso a todas as fotos e vídeos para que o backup de pastas descubra novos arquivos. O acesso ao local da mídia preserva a localização incorporada nos seus originais.</string>
+
+    <!-- Google Photos backup prompts -->
+    <string name="main_gp_off_title">O backup do Google Fotos está desativado?</string>
+    <string name="main_gp_off_message">O Photos Unlimited deve ser o único app fazendo backup deste smartphone.</string>
+    <string name="main_gp_off_yes">Sim, está desativado</string>
+    <string name="main_gp_off_no">Ainda não</string>
+    <string name="main_gp_prompt_title">Desative o backup do Google Fotos</string>
+    <string name="main_gp_prompt_plain">O Photos Unlimited está fazendo backup deste smartphone. Se o backup do Google Fotos também estiver ativado, ele envia as mesmas fotos primeiro, e as cópias dele podem usar seu armazenamento.\n\nAbra o Google Fotos e desative o Backup.</string>
+    <string name="main_gp_open">Abrir o Google Fotos</string>
+    <string name="main_gp_already_off">Já está desativado</string>
+    <string name="main_gp_unavailable">O Google Fotos não está disponível neste smartphone.</string>
+    <string name="main_gp_manual_hint">No Google Fotos, abra sua foto de perfil, depois Backup, e desative-o.</string>
+    <!-- %1$d is the number of items, %2$s is the file name of the most recent one. -->
+    <plurals name="main_gp_prompt_evidence">
+        <item quantity="one">O Google Fotos parece ainda estar fazendo backup: %1$d novo item, mais recentemente “%2$s”, já havia sido enviado por outro app antes que o Photos Unlimited chegasse a ele. Essa cópia pode usar seu armazenamento.\n\nAbra o Google Fotos e desative o Backup.</item>
+        <item quantity="many">O Google Fotos parece ainda estar fazendo backup: %1$d novos itens, mais recentemente “%2$s”, já haviam sido enviados por outro app antes que o Photos Unlimited chegasse a eles. Essas cópias podem usar seu armazenamento.\n\nAbra o Google Fotos e desative o Backup.</item>
+        <item quantity="other">O Google Fotos parece ainda estar fazendo backup: %1$d novos itens, mais recentemente “%2$s”, já haviam sido enviados por outro app antes que o Photos Unlimited chegasse a eles. Essas cópias podem usar seu armazenamento.\n\nAbra o Google Fotos e desative o Backup.</item>
+    </plurals>
+
+    <!-- Backup screen -->
+    <string name="backup_heading">Backup</string>
+    <string name="backup_subtitle">Fotos e vídeos originais.</string>
+    <string name="backup_checking">Verificando o status do backup…</string>
+    <string name="backup_back_up_now">Fazer backup agora</string>
+    <string name="backup_loading_counts">Carregando os registros de backup do dispositivo…</string>
+    <string name="backup_folders">Pastas do backup</string>
+    <!-- Two-line row. %1$s is the list of chosen folder names, or the text of backup_choose_folders. -->
+    <string name="backup_folders_row">Pastas do backup\n%1$s</string>
+    <string name="backup_choose_folders">Escolher pastas</string>
+    <string name="backup_save_folders">Salvar pastas</string>
+    <string name="backup_recent_activity">Atividade recente</string>
+    <string name="backup_open_google_photos">Abrir o Google Fotos</string>
+    <string name="backup_originals_stay">Os arquivos originais permanecem no seu smartphone.</string>
+    <!-- Item counts: %1$d uploaded, %2$d already in the library, %3$d waiting, %4$d need attention. Two lines. -->
+    <string name="backup_counts">%1$d enviados · %2$d já na biblioteca\n%3$d aguardando</string>
+    <string name="backup_counts_attention">%1$d enviados · %2$d já na biblioteca\n%3$d aguardando · %4$d precisam de atenção</string>
+    <!-- Upload progress. %1$s is the size sent so far and %2$s the total size (for example "3 MB"). -->
+    <string name="backup_progress_label">%1$s / %2$s · Arquivo atual</string>
+    <string name="backup_preparing_status">Preparando o backup…</string>
+    <string name="backup_start_failed">O Android não conseguiu iniciar o backup. Abra o app novamente e tente de novo.</string>
+    <string name="backup_finding_folders">Procurando pastas de fotos e vídeos…</string>
+    <string name="backup_no_folders">Nenhuma pasta de fotos ou vídeos encontrada ainda.</string>
+    <string name="backup_folders_failed">Não foi possível ler as pastas. Verifique as permissões de fotos e vídeos.</string>
+    <!-- Row in the folder chooser. %1$s is the folder name, %2$d the number of items in it. -->
+    <plurals name="backup_folder_label">
+        <item quantity="one">%1$s · %2$d item</item>
+        <item quantity="many">%1$s · %2$d itens</item>
+        <item quantity="other">%1$s · %2$d itens</item>
+    </plurals>
+    <!-- Status card on the Backup screen: title, description and the label of its main button. -->
+    <string name="backup_title_connect">Conecte sua conta</string>
+    <string name="backup_desc_connect">Escolha a biblioteca do Google Fotos para o seu backup.</string>
+    <string name="backup_title_media">Permitir acesso à mídia</string>
+    <string name="backup_desc_media">O acesso a fotos, vídeos e ao local da mídia preserva os originais completos.</string>
+    <string name="backup_action_permissions">Revisar permissões</string>
+    <string name="backup_title_folders">Escolha suas pastas</string>
+    <string name="backup_desc_folders">Selecione as fotos e os vídeos dos quais você quer fazer backup.</string>
+    <string name="backup_title_running">Fazendo backup</string>
+    <string name="backup_title_checking">Verificando suas pastas</string>
+    <string name="backup_title_pausing">Pausando o backup…</string>
+    <string name="backup_desc_preparing">Preparando seu backup…</string>
+    <string name="backup_action_pause">Pausar backup</string>
+    <string name="backup_title_attention">O backup precisa de atenção</string>
+    <string name="backup_action_reconnect">Reconectar conta</string>
+    <string name="backup_title_paused">O backup está pausado</string>
+    <string name="backup_title_waiting">Aguardando para fazer backup</string>
+    <string name="backup_action_settings">Configurações de backup</string>
+    <string name="backup_title_some_attention">Alguns itens precisam de atenção</string>
+    <string name="backup_desc_some_attention">Abra Atividade para revisar uploads malsucedidos e novas tentativas.</string>
+    <string name="backup_action_activity">Revisar atividade</string>
+    <string name="backup_title_scheduled">Backup programado</string>
+    <string name="backup_desc_scheduled">O Android executará o trabalho em segundo plano quando as condições permitirem. Você também pode iniciar agora.</string>
+    <string name="backup_title_up_to_date">Tudo atualizado</string>
+    <!-- %1$s is a relative time such as "5 minutes ago". -->
+    <string name="backup_desc_up_to_date">O backup das pastas selecionadas está feito. Última verificação: %1$s.</string>
+    <string name="backup_waiting_internet">Aguardando uma conexão com a Internet.</string>
+    <string name="backup_waiting_unmetered">Aguardando uma conexão sem limite de dados, geralmente Wi-Fi.</string>
+    <string name="backup_waiting_charging">Aguardando o carregamento do smartphone.</string>
+
+    <!-- Activity screen -->
+    <string name="activity_heading">Atividade</string>
+    <string name="activity_subtitle">Registros de backup recentes deste dispositivo.</string>
+    <string name="activity_retry">Tentar novamente os itens malsucedidos</string>
+    <string name="activity_empty">Seus uploads confirmados e os itens na fila aparecerão aqui.</string>
+
+    <!-- Storage screen -->
+    <string name="storage_heading">Armazenamento</string>
+    <string name="storage_subtitle">Inventário do Google Fotos · Prévia</string>
+    <string name="storage_no_scan">Nenhuma verificação ainda</string>
+    <string name="storage_no_results">Nenhum resultado ainda</string>
+    <string name="storage_usage_unknown">Uso desconhecido</string>
+    <string name="storage_caption">Armazenamento informado usado pelos itens verificados</string>
+    <string name="storage_scan_prompt">Leia os metadados para encontrar fotos e vídeos que usam armazenamento.</string>
+    <string name="storage_scan">Verificar o Google Fotos</string>
+    <string name="storage_pause_scan">Pausar verificação</string>
+    <string name="storage_refresh_scan">Atualizar verificação</string>
+    <string name="storage_continue_scan">Continuar verificação</string>
+    <string name="storage_scan_note">Verificação somente leitura. O Google pode omitir itens ou detalhes de armazenamento. Desconhecido não é zero. Este total exclui o Drive e o Gmail e pode diferir do total da sua conta.</string>
+    <!-- Scan summary, two lines. All four are item counts. -->
+    <string name="storage_summary">%1$d verificados · %2$d usando armazenamento\n%3$d desconhecidos · %4$d informados como zero</string>
+    <!-- Scan status. %1$d is the number of pages read, %2$s is a status message from the scanner. Two lines. -->
+    <plurals name="storage_status_finished">
+        <item quantity="one">Concluído · %1$d página\n%2$s</item>
+        <item quantity="many">Concluído · %1$d páginas\n%2$s</item>
+        <item quantity="other">Concluído · %1$d páginas\n%2$s</item>
+    </plurals>
+    <plurals name="storage_status_partial">
+        <item quantity="one">Resultados parciais · %1$d página\n%2$s</item>
+        <item quantity="many">Resultados parciais · %1$d páginas\n%2$s</item>
+        <item quantity="other">Resultados parciais · %1$d páginas\n%2$s</item>
+    </plurals>
+    <!-- %1$s is a status message from the scanner. -->
+    <string name="storage_status_finished_nopages">Concluído\n%1$s</string>
+    <string name="storage_cache_failed">Não foi possível ler o cache local da verificação. Tente novamente.</string>
+    <!-- Filters. -->
+    <string name="storage_filter_status">Status do armazenamento</string>
+    <string name="storage_filter_all">Todos os itens verificados</string>
+    <string name="storage_filter_using">Usando armazenamento</string>
+    <string name="storage_filter_unknown">Armazenamento desconhecido</string>
+    <!-- Also used as the "reduced quality" tag on an item. -->
+    <string name="storage_filter_reduced">Qualidade reduzida</string>
+    <string name="storage_filter_media">Tipo de mídia</string>
+    <string name="storage_media_all">Todas as mídias</string>
+    <string name="storage_media_photos">Fotos</string>
+    <string name="storage_media_videos">Vídeos</string>
+    <string name="storage_fresh_scan">Iniciar uma nova verificação</string>
+    <string name="storage_sort_note">Maior armazenamento informado primeiro</string>
+    <string name="storage_select_items">Selecionar itens</string>
+    <string name="storage_done_selecting">Concluir seleção</string>
+    <string name="storage_select_all">Selecionar todos os elegíveis</string>
+    <string name="storage_tap_to_select">Toque nos itens para selecioná-los</string>
+    <!-- %1$d is the number of selected items, %2$s the total size to be freed. -->
+    <string name="storage_selected_info">%1$d selecionados · %2$s a liberar</string>
+    <string name="storage_previous">Anterior</string>
+    <string name="storage_next">Próxima</string>
+    <string name="storage_no_matches">Nenhum item verificado correspondente</string>
+    <!-- %1$d and %2$d are the first and last item number shown (for example "Items 1–50"). -->
+    <string name="storage_range">Itens %1$d–%2$d · Maior uso de armazenamento primeiro</string>
+    <string name="storage_empty_start">Inicie uma verificação para ler os metadados da sua biblioteca do Google Fotos.</string>
+    <!-- "Storage unknown" refers to the filter option of that name. -->
+    <string name="storage_empty_none_charged">Nenhum item com uso de armazenamento informado nesta visualização. Confira Armazenamento desconhecido para ver itens sem dados de contabilização.</string>
+    <string name="storage_empty_no_match">Nenhum item corresponde a estes filtros.</string>
+    <!-- %1$s is the reason, already translated. -->
+    <string name="storage_cant_select">Não é possível selecionar: %1$s</string>
+    <string name="storage_type_video">Vídeo</string>
+    <string name="storage_type_photo">Foto</string>
+    <string name="storage_type_media">Mídia</string>
+    <!-- Item info line. %1$s is the media type, %2$s the file size (for example "3 MB"). -->
+    <string name="storage_item_info">%1$s · Tamanho do arquivo: %2$s</string>
+    <!-- %1$s is the media type. -->
+    <string name="storage_item_info_nosize">%1$s · Tamanho do arquivo desconhecido</string>
+    <!-- Tags appended to an item info line, separated by " · ". -->
+    <string name="storage_flag_trash">Na Lixeira</string>
+    <string name="storage_flag_archived">Arquivado</string>
+    <string name="storage_flag_shared">Compartilhado</string>
+    <string name="storage_flag_edited">Editado</string>
+    <string name="storage_usage_unknown_row">Uso de armazenamento desconhecido</string>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="storage_reported">%1$s de armazenamento informado</string>
+    <!-- Item details dialog header. %1$s is the media type, %2$s the file size or storage_size_unknown, %3$s the storage usage or storage_use_unknown. -->
+    <string name="storage_detail_header">%1$s · %2$s\n%3$s\n\n</string>
+    <string name="storage_size_unknown">tamanho desconhecido</string>
+    <string name="storage_use_unknown">Uso de armazenamento desconhecido</string>
+    <string name="storage_fresh_title">Iniciar uma nova verificação?</string>
+    <string name="storage_fresh_message">Substitui o inventário em cache deste app. Suas fotos e seus vídeos permanecem onde estão.</string>
+    <string name="storage_scan_again">Verificar novamente</string>
+    <string name="storage_pause_freeup_first">Pause o Liberar espaço antes de verificar.</string>
+    <string name="storage_pause_freeup">Pause o Liberar espaço primeiro.</string>
+    <string name="storage_pause_scan_first">Pause a verificação atual primeiro.</string>
+    <string name="storage_start_failed">O Android não conseguiu iniciar a verificação. Abra o app novamente e tente de novo.</string>
+
+    <!-- Free up storage -->
+    <string name="freeup_title">Liberar espaço</string>
+    <string name="freeup_button">Liberar</string>
+    <plurals name="freeup_button_count">
+        <item quantity="one">Liberar %d item</item>
+        <item quantity="many">Liberar %d itens</item>
+        <item quantity="other">Liberar %d itens</item>
+    </plurals>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="freeup_button_size">Liberar %1$s</string>
+    <string name="freeup_replace_original">Substituir pelo original</string>
+    <string name="freeup_pause">Pausar</string>
+    <string name="freeup_resume">Retomar</string>
+    <string name="freeup_finish_now">Concluir agora</string>
+    <string name="freeup_remove_copies">Remover cópias concluídas</string>
+    <string name="freeup_review_files">Revisar arquivos de antes</string>
+    <!-- %1$s is a size, for example "3 MB". -->
+    <string name="freeup_freed">%1$s liberados nos itens recentes.</string>
+    <string name="freeup_idle">Inativo.</string>
+    <plurals name="freeup_unfinished">
+        <item quantity="one">%d item não concluído. Retome para continuar com segurança.</item>
+        <item quantity="many">%d itens não concluídos. Retome para continuar com segurança.</item>
+        <item quantity="other">%d itens não concluídos. Retome para continuar com segurança.</item>
+    </plurals>
+    <!-- Keep the folder path Pictures/Photos Unlimited/Pending upload as is. -->
+    <plurals name="freeup_only_on_phone">
+        <item quantity="one">⚠ %d item está somente neste smartphone até ser enviado novamente. Não desinstale o app nem limpe o armazenamento dele até que isso termine. As cópias estão em Pictures/Photos Unlimited/Pending upload.</item>
+        <item quantity="many">⚠ %d itens estão somente neste smartphone até serem enviados novamente. Não desinstale o app nem limpe o armazenamento dele até que isso termine. As cópias estão em Pictures/Photos Unlimited/Pending upload.</item>
+        <item quantity="other">⚠ %d itens estão somente neste smartphone até serem enviados novamente. Não desinstale o app nem limpe o armazenamento dele até que isso termine. As cópias estão em Pictures/Photos Unlimited/Pending upload.</item>
+    </plurals>
+    <plurals name="freeup_leftovers">
+        <item quantity="one">%d item de antes (por exemplo, de uma instalação anterior) está aguardando em Pictures/Photos Unlimited/Pending upload. Concluir agora o envia se o Google Fotos não o tiver.</item>
+        <item quantity="many">%d itens de antes (por exemplo, de uma instalação anterior) estão aguardando em Pictures/Photos Unlimited/Pending upload. Concluir agora envia os que o Google Fotos não tiver.</item>
+        <item quantity="other">%d itens de antes (por exemplo, de uma instalação anterior) estão aguardando em Pictures/Photos Unlimited/Pending upload. Concluir agora envia os que o Google Fotos não tiver.</item>
+    </plurals>
+    <plurals name="freeup_review">
+        <item quantity="one">%d arquivo em Pictures/Photos Unlimited/Pending upload não foi salvo por esta instalação. Revise-o antes que qualquer coisa seja enviada.</item>
+        <item quantity="many">%d arquivos em Pictures/Photos Unlimited/Pending upload não foram salvos por esta instalação. Revise-os antes que qualquer coisa seja enviada.</item>
+        <item quantity="other">%d arquivos em Pictures/Photos Unlimited/Pending upload não foram salvos por esta instalação. Revise-os antes que qualquer coisa seja enviada.</item>
+    </plurals>
+    <plurals name="freeup_other_account">
+        <item quantity="one">%d arquivo em espera pertence a outra Conta do Google. Conecte essa conta para concluí-lo.</item>
+        <item quantity="many">%d arquivos em espera pertencem a outra Conta do Google. Conecte essa conta para concluí-los.</item>
+        <item quantity="other">%d arquivos em espera pertencem a outra Conta do Google. Conecte essa conta para concluí-los.</item>
+    </plurals>
+    <plurals name="freeup_cleanup">
+        <item quantity="one">%d cópia concluída de uma instalação anterior já está no Google Fotos e pode ser removida deste smartphone.</item>
+        <item quantity="many">%d cópias concluídas de uma instalação anterior já estão no Google Fotos e podem ser removidas deste smartphone.</item>
+        <item quantity="other">%d cópias concluídas de uma instalação anterior já estão no Google Fotos e podem ser removidas deste smartphone.</item>
+    </plurals>
+    <!-- Job list row. %1$s is the file name, %2$s the job state. -->
+    <string name="freeup_row_title">%1$s · %2$s</string>
+    <!-- %1$s is a size, %2$s a status message. -->
+    <string name="freeup_row_detail">%1$s · %2$s</string>
+    <!-- Job states. -->
+    <string name="freeup_state_waiting">Aguardando</string>
+    <string name="freeup_state_saved">Original salvo</string>
+    <string name="freeup_state_trash">Na Lixeira</string>
+    <string name="freeup_state_uploading">Enviando cópia</string>
+    <string name="freeup_state_verifying">Verificando</string>
+    <string name="freeup_state_freed">Liberado</string>
+    <string name="freeup_state_charged">Ainda ocupa espaço</string>
+    <string name="freeup_state_failed">Não alterado</string>
+    <string name="freeup_state_attention">Precisa de atenção</string>
+    <!-- Item details dialog. %1$s is the reason, already translated. -->
+    <string name="freeup_detail_cant">Não é possível liberar o armazenamento deste item: %1$s</string>
+    <string name="freeup_detail_explain">O Liberar espaço o substitui por uma cópia enviada por este app: o arquivo original é baixado e comparado com o checksum do Google, excluído do Google Fotos e depois enviado novamente com os metadados incorporados (data, local, detalhes da câmera) intactos. Legenda, favorito e arquivamento são restaurados.</string>
+    <string name="freeup_detail_lost">Perdidos: participação em álbuns, cópias e comentários de álbuns compartilhados, pessoas e agrupamentos de rostos, e quaisquer alterações de data ou local feitas dentro do Google Fotos.</string>
+    <string name="freeup_detail_edited">Este item foi editado no Google Fotos; somente o original sem edições é mantido.</string>
+    <!-- Batch confirmation dialog. %1$s is a size, %2$d the number of items. -->
+    <plurals name="freeup_batch_title">
+        <item quantity="one">Liberar %1$s de %2$d item?</item>
+        <item quantity="many">Liberar %1$s de %2$d itens?</item>
+        <item quantity="other">Liberar %1$s de %2$d itens?</item>
+    </plurals>
+    <string name="freeup_batch_body">Cada item é baixado (ou encontrado neste smartphone) e comparado com o checksum do Google, excluído do Google Fotos e enviado novamente. Os metadados incorporados permanecem intactos; legenda, favorito e arquivamento são restaurados. Álbuns, cópias compartilhadas, comentários, grupos de rostos e edições feitas dentro do Google Fotos são perdidos.</string>
+    <plurals name="freeup_batch_edited">
+        <item quantity="one">%d item foi editado no Google Fotos; somente o original é mantido.</item>
+        <item quantity="many">%d itens foram editados no Google Fotos; somente os originais são mantidos.</item>
+        <item quantity="other">%d itens foram editados no Google Fotos; somente os originais são mantidos.</item>
+    </plurals>
+    <plurals name="freeup_batch_reduced">
+        <item quantity="one">%d item é uma cópia de qualidade reduzida. Ele só é substituído se o original ainda estiver neste smartphone.</item>
+        <item quantity="many">%d itens são cópias de qualidade reduzida. Eles só são substituídos se o original ainda estiver neste smartphone.</item>
+        <item quantity="other">%d itens são cópias de qualidade reduzida. Eles só são substituídos se o original ainda estiver neste smartphone.</item>
+    </plurals>
+    <string name="freeup_batch_footer">As fotos neste smartphone são mantidas; se outro app remover uma delas, ela é colocada de volta. A execução é interrompida automaticamente se uma substituição ainda usar armazenamento. Mantenha o smartphone no Wi-Fi até a conclusão.</string>
+    <string name="freeup_delete_reupload">Excluir e enviar novamente</string>
+    <plurals name="freeup_queued">
+        <item quantity="one">%d item na fila.</item>
+        <item quantity="many">%d itens na fila.</item>
+        <item quantity="other">%d itens na fila.</item>
+    </plurals>
+    <plurals name="freeup_skipped">
+        <item quantity="one">%d item nesta visualização não pode ser liberado e foi ignorado.</item>
+        <item quantity="many">%d itens nesta visualização não podem ser liberados e foram ignorados.</item>
+        <item quantity="other">%d itens nesta visualização não podem ser liberados e foram ignorados.</item>
+    </plurals>
+    <string name="freeup_gp_title">Desative primeiro o backup do Google Fotos</string>
+    <string name="freeup_gp_message">Enquanto o backup do Google Fotos estiver ativado, o Google Fotos exclui a cópia deste smartphone de toda foto removida da nuvem, inclusive as que o Liberar espaço substitui.\n\nDesative o backup dele e volte aqui. Outros smartphones ou tablets conectados a esta conta com o backup do Google Fotos ativado também excluiriam as cópias deles.</string>
+    <string name="freeup_gp_its_off">Está desativado</string>
+    <string name="freeup_confirm_title">Excluir e enviar novamente?</string>
+    <string name="freeup_confirm_message">O original é excluído do Google Fotos antes de a cópia ser enviada. Mantenha o smartphone no Wi-Fi até este item mostrar Liberado. Se algo falhar após a exclusão, a cópia verificada permanece neste app e o upload é repetido. As fotos neste smartphone são mantidas; se outro app remover uma delas, ela é colocada de volta.</string>
+    <string name="freeup_already_queued">Este item já está sendo processado.</string>
+    <string name="freeup_scan_running">A verificação de armazenamento está em andamento. O Liberar espaço começa depois que você pausá-la.</string>
+    <string name="freeup_start_failed">O Android não conseguiu iniciar a tarefa. Abra o app novamente e tente de novo.</string>
+    <!-- Review of leftover files. Keep the folder path Pictures/Photos Unlimited/Pending upload as is. -->
+    <string name="freeup_review_title">Enviar estes arquivos para o Google Fotos?</string>
+    <!-- %1$s is a bulleted list of file names and sizes. -->
+    <string name="freeup_review_message">Estes arquivos estão em Pictures/Photos Unlimited/Pending upload, mas não foram salvos por esta instalação, geralmente porque o app foi reinstalado durante o Liberar espaço. Envie-os somente se você os reconhecer; você pode conferi-los antes na sua galeria. Cada arquivo é comparado com o checksum dele antes do envio.\n\n%1$s</string>
+    <!-- One bullet in the list. %1$s is a file name, %2$s a size. -->
+    <string name="freeup_review_item">• %1$s (%2$s)</string>
+    <!-- %1$d is the number of files not listed. -->
+    <string name="freeup_review_more">…e mais %1$d</string>
+    <string name="freeup_review_upload">Enviar</string>
+    <string name="freeup_delete_request_failed">O Android não conseguiu abrir a solicitação de exclusão. Remova-os da galeria.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_heading">Configurações</string>
+    <string name="settings_subtitle">Adapte o backup à sua rotina.</string>
+    <string name="settings_section_backup">Backup</string>
+    <string name="settings_automatic">Backup automático</string>
+    <!-- Two-line label: title, then a short hint. -->
+    <string name="settings_unmetered">Somente redes sem limite de dados\nGeralmente Wi-Fi</string>
+    <string name="settings_charging">Somente durante o carregamento</string>
+    <!-- Two-line label: title, then a short hint. -->
+    <string name="settings_gp_off_row">Desativar o backup do Google Fotos\nEvite que dois apps enviem as mesmas fotos</string>
+    <string name="settings_section_appearance">Aparência</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Seguir o sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Escuro</string>
+    <string name="settings_wallpaper">Cores do plano de fundo</string>
+    <string name="settings_section_account">Conta e app</string>
+    <!-- Two-line label. %1$s is the account email address. -->
+    <string name="settings_account_row">Conta do Google\n%1$s</string>
+    <string name="settings_permissions">Permissões de fotos e vídeos</string>
+    <string name="settings_about">Sobre e créditos de código aberto</string>
+    <string name="settings_diagnostic">Diagnóstico avançado da conta</string>
+
+    <!-- Account dialog -->
+    <string name="account_title">Conta do Google</string>
+    <string name="account_refresh_photo">Atualizar foto do perfil</string>
+    <string name="account_reconnect">Reconectar</string>
+    <string name="account_disconnect">Desconectar</string>
+    <!-- Accessibility label of the toolbar account button. %1$s is the account email address. -->
+    <string name="account_description">Conta do Google: %1$s</string>
+    <string name="account_profile_refreshed">Perfil atualizado.</string>
+    <string name="account_pause_first">Pause o backup, a verificação de armazenamento e o Liberar espaço antes de trocar de conta.</string>
+    <string name="account_finish_title">Conclua primeiro o Liberar espaço</string>
+    <plurals name="account_unfinished">
+        <item quantity="one">%d item foi removido do Google Fotos e está somente neste smartphone até ser enviado novamente. Abra Armazenamento e toque em Retomar; depois, troque de conta.</item>
+        <item quantity="many">%d itens foram removidos do Google Fotos e estão somente neste smartphone até serem enviados novamente. Abra Armazenamento e toque em Retomar; depois, troque de conta.</item>
+        <item quantity="other">%d itens foram removidos do Google Fotos e estão somente neste smartphone até serem enviados novamente. Abra Armazenamento e toque em Retomar; depois, troque de conta.</item>
+    </plurals>
+    <string name="account_disconnect_title">Desconectar a conta?</string>
+    <string name="account_disconnect_message">Interrompe os uploads e a verificação, e remove o login salvo e o inventário de armazenamento em cache. Seus arquivos locais e sua biblioteca do Google Fotos permanecem onde estão.</string>
+    <!-- Status line shown on the Backup screen after disconnecting. -->
+    <string name="account_disconnected_status">Conta desconectada.</string>
+
+    <!-- About dialog -->
+    <string name="about_title">Sobre o Photos Unlimited</string>
+    <!-- %1$s is the app version, %2$s is the license text (English). -->
+    <string name="about_text">Photos Unlimited %1$s\n\nApp independente de upload para Android. Sem vínculo com o Google.\n\nDesative o backup no app oficial do Google Fotos quando este app cuidar dos uploads. Os arquivos originais permanecem no seu smartphone. A aceitação de um upload não é prova de isenção de armazenamento. Os itens já existentes na biblioteca mantêm a contabilização atual, a menos que você os substitua com o Liberar espaço.\n\nAs verificações de armazenamento leem os metadados do Google Fotos; Drive e Gmail não estão incluídos. A contabilização ausente é exibida como desconhecida. O Liberar espaço exclui do Google Fotos os itens que você escolher somente depois que uma cópia idêntica byte a byte for salva neste smartphone, e então envia essa cópia novamente.\n\nProtocolo adaptado do GPMC e do gotohp, de xob0t.\n\n%2$s</string>
+    <string name="about_failed">Não foi possível ler os créditos.</string>
+
+
+    <!-- Sign-in screen -->
+    <string name="signin_status">Login do Google · accounts.google.com</string>
+    <string name="signin_help">Tente a conta que já está no seu smartphone ou faça login abaixo. A opção de conta do smartphone é um teste de diagnóstico; ela ainda não conecta o backup.</string>
+    <string name="signin_test_account">Testar conta neste smartphone</string>
+    <string name="signin_use_token">Usar token de configuração do navegador</string>
+    <string name="signin_ssl_error">Não foi possível verificar a conexão segura do Google.</string>
+    <string name="signin_connecting">Conectando à sua biblioteca do Google Fotos…</string>
+    <!-- Status line shown on the Backup screen right after sign-in. -->
+    <string name="signin_connected_status">Conta conectada. Escolha as pastas e inicie seu primeiro backup.</string>
+    <string name="signin_connect_failed">Não foi possível conectar. Tente um novo token de configuração do navegador.</string>
+    <string name="signin_token_hint">Token de configuração do Google</string>
+    <!-- Keep accounts.google.com/EmbeddedSetup and oauth_token untranslated. -->
+    <string name="signin_token_help">Em um computador, acesse accounts.google.com/EmbeddedSetup e faça login. Nas ferramentas para desenvolvedores do navegador → Application/Storage → Cookies → accounts.google.com, copie somente o valor de oauth_token. Insira-o aqui no seu smartphone.\n\nMantenha este token em sigilo. Ele dá acesso à conta; nunca o envie em um chat.</string>
+    <string name="signin_browser_setup">Configuração pelo navegador</string>
+    <string name="signin_connect">Conectar</string>
+    <string name="signin_open_setup">Abrir página de configuração</string>
+
+    <!-- Account test (diagnostic) screen -->
+    <string name="probe_title">Testar a conta do smartphone</string>
+    <string name="probe_help">Comece com o teste básico de acesso ao Google. Se ele funcionar, teste o acesso ao Fotos. Escolha a conta que já está neste smartphone quando solicitado.\n\nO Google cuida do consentimento e da verificação da conta. Este diagnóstico não envia fotos nem conecta o backup automático.</string>
+    <string name="probe_test_photos">Testar acesso ao Fotos</string>
+    <string name="probe_test_basic">Testar acesso básico ao Google</string>
+    <string name="probe_copy">Copiar resultado do diagnóstico</string>
+    <!-- Label of the clipboard entry. -->
+    <string name="probe_clip_label">Teste de conta</string>
+    <string name="probe_copied">Copiado: sem e-mail, senha ou tokens</string>
+    <string name="probe_ready">Pronto para testar.</string>
+    <string name="probe_restored">Resultados anteriores restaurados. Reinicie um teste interrompido.</string>
+    <!-- Title shown by Android\'s account chooser. -->
+    <string name="probe_chooser_title">Escolha uma conta para o teste de acesso ao Fotos</string>
+    <string name="probe_choosing">Escolha uma conta no seletor de contas do Android…</string>
+    <string name="probe_requesting_photos">Solicitando acesso ao Fotos pelos serviços do Google Play…</string>
+    <string name="probe_requesting_basic">Solicitando acesso básico à conta pelos serviços do Google Play…</string>
+    <string name="probe_continue_google">Continue na tela de autorização do Google…</string>
+    <string name="probe_checking_photos">Token emitido. Verificando o acesso ao serviço do Fotos…</string>
+    <!-- %1$s is a status sentence. %2$s and %3$s are diagnostic result codes (not translated). -->
+    <string name="probe_status">%1$s\n\nFotos: %2$s\nBásico: %3$s</string>
+    <!-- Settings → Appearance: language menu. The other choices are each language's own name. -->
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_system">Padrão do sistema</string>
+</resources>

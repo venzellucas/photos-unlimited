@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f9ff">
+  <title>Photos Unlimited — Android 向け オリジナル写真バックアップ</title>
+  <meta name="description" content="元の写真や動画を Google フォトにバックアップします。フォルダを選び、アップロードの実行タイミングを管理しながら、使い慣れた Google フォト アプリをそのまま使えます。Android 向けの無料のオープンソースです。">
+  <link rel="canonical" href="https://venzellucas.github.io/photos-unlimited/ja/">
+  <link rel="alternate" hreflang="en" href="https://venzellucas.github.io/photos-unlimited/">
+  <link rel="alternate" hreflang="pt-BR" href="https://venzellucas.github.io/photos-unlimited/pt-BR/">
+  <link rel="alternate" hreflang="es" href="https://venzellucas.github.io/photos-unlimited/es/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://venzellucas.github.io/photos-unlimited/zh-Hans/">
+  <link rel="alternate" hreflang="ja" href="https://venzellucas.github.io/photos-unlimited/ja/">
+  <link rel="alternate" hreflang="x-default" href="https://venzellucas.github.io/photos-unlimited/">
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Photos Unlimited — Android 向け オリジナル写真バックアップ">
+  <meta property="og:description" content="あなたのフォルダ、あなたの元データ。Google フォト専用の Android アップローダーです。">
+  <meta property="og:url" content="https://venzellucas.github.io/photos-unlimited/ja/">
+  <meta property="og:image" content="https://venzellucas.github.io/photos-unlimited/media/backup-dark.png">
+  <link rel="stylesheet" href="../style.css">
+  <script type="application/json" id="site-text">{"screens":{"backup":{"label":"バックアップ","description":"「アカウントを接続」が表示されています"},"activity":{"label":"アクティビティ","description":"アップロード履歴が空の状態です"},"storage":{"label":"ストレージ","description":"アカウント接続前のライブラリ スキャンのプレビューが表示されています"},"settings":{"label":"設定","description":"バックアップの設定とテーマの操作が表示されています"}},"themes":{"dark":"ダーク","light":"ライト"},"alt":"アプリの{theme}{screen}画面。{description}","label":"{screen}、{theme}テーマ","caption":"実際のアプリ · {label}"}</script>
+  <script src="../site.js" defer></script>
+</head>
+<body>
+<svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M7 18H6a5 5 0 0 1-.5-10A7 7 0 0 1 19 7.5a5.5 5.5 0 0 1-.5 11H17M12 20V9m-4 4 4-4 4 4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 17v4h14v-4"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V5h6l2 2h10v13H3Z"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-6 5 6"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M3 6h6m4 0h8M3 12h12m4 0h2M3 18h2m4 0h12M9 3v6m6 0v6M5 15v6"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 5-6 7 6 7m8-14 6 7-6 7M14 3l-4 18"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v2m0 18v2M1 12h2m18 0h2M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></symbol>
+</defs></svg>
+<a class="skip" href="#main">コンテンツへ移動</a>
+<header class="site-header"><div class="wrap nav-row">
+  <a class="brand" href="./"><img src="../icon.svg" width="38" height="38" alt=""><span>Photos Unlimited</span></a>
+  <nav aria-label="メイン ナビゲーション"><a href="#features">機能</a><a href="#app">アプリ</a><a href="https://github.com/venzellucas/photos-unlimited/blob/main/README.ja.md">GitHub <span aria-hidden="true">↗</span></a></nav>
+  <a class="button compact" href="#download">アプリを入手 <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg></a>
+  <details class="lang"><summary aria-label="言語: 日本語"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><span>日本語</span></summary><ul><li><a href="../" hreflang="en" lang="en">English</a></li><li><a href="../pt-BR/" hreflang="pt-BR" lang="pt-BR">Português (Brasil)</a></li><li><a href="../es/" hreflang="es" lang="es">Español</a></li><li><a href="../zh-Hans/" hreflang="zh-Hans" lang="zh-Hans">简体中文</a></li><li><a href="../ja/" hreflang="ja" lang="ja" aria-current="page">日本語</a></li></ul></details>
+</div></header>
+<main id="main">
+<section class="wrap hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <a class="release-badge" href="https://github.com/venzellucas/photos-unlimited/releases/latest"><span class="status-dot" aria-hidden="true"></span> 最新リリース <span aria-hidden="true">↗</span></a>
+    <h1 id="hero-title">大切な思い出を、<br><span>そのままの画質で<br class="hero-break">バックアップ。</span></h1>
+    <p class="hero-description">元の写真や動画を、Android スマートフォンから Google フォトへ。アップロードする対象とタイミングを自分で選べます。</p>
+    <div class="hero-actions"><a class="button" href="https://github.com/venzellucas/photos-unlimited/releases/latest/download/Photos-Unlimited.apk"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Android 版をダウンロード</a><a class="button secondary" href="https://github.com/venzellucas/photos-unlimited/blob/main/README.ja.md">ソースを見る <svg class="icon" aria-hidden="true"><use href="#i-code"/></svg></a></div>
+    <p class="hero-meta">Android 13 以降 <span>·</span> 無料・オープンソース</p>
+    <p class="hero-note">試験的なアップローダーです。ストレージの計上は Google が決定するため、容量の対象外になることは保証されません。</p>
+  </div>
+  <figure class="backup-visual" aria-label="選択した写真と動画のフォルダが Google フォトに直接アップロードされる様子を示すイラスト">
+    <div class="visual-top"><span><svg class="icon" aria-hidden="true"><use href="#i-photo"/></svg> カメラロールから</span><span class="original-pill">元の画質</span></div>
+    <div class="photo-grid" aria-hidden="true">
+      <div class="landscape mountain"><svg viewBox="0 0 240 190"><defs><linearGradient id="sky-a" x2="0" y2="1"><stop stop-color="#b9d8f8"/><stop offset="1" stop-color="#e8e7e8"/></linearGradient></defs><path fill="url(#sky-a)" d="M0 0h240v190H0z"/><circle fill="#fff2bd" cx="183" cy="43" r="23"/><path fill="#8d9bab" d="m-10 159 98-132 95 132"/><path fill="#e9edf2" d="m59 67 29-40 34 46-23-8-15 10-10-13Z"/><path fill="#536f7e" d="m90 167 94-111 91 111"/><path fill="#cbd7dd" d="m155 91 29-35 30 37-20-7-10 13-15-10Z"/><path fill="#497875" d="M0 143q70-10 119 15t121-8v40H0Z"/><path fill="#365653" d="m0 185 50-26 47 13 52-13 91 25v6H0Z"/></svg><span>山.jpg</span></div>
+      <div class="landscape coast"><svg viewBox="0 0 240 190"><defs><linearGradient id="sea-a" x2="0" y2="1"><stop stop-color="#67b4c5"/><stop offset="1" stop-color="#afd9d1"/></linearGradient></defs><path fill="#c5e0ec" d="M0 0h240v190H0z"/><path fill="url(#sea-a)" d="M0 57h240v133H0z"/><path fill="#f4dfb9" d="M240 45q-28 49-89 78T34 190h206Z"/><path fill="none" stroke="#eef5e9" stroke-width="8" d="M233 56q-35 49-91 70T29 187"/><path fill="none" stroke="#e4f4f0" stroke-width="2" d="m22 93 43-4m21-14 54 2M40 130l35-6"/></svg><span>海岸.jpg</span></div>
+      <div class="landscape sunset"><svg viewBox="0 0 240 190"><defs><linearGradient id="sunset-a" x2="0" y2="1"><stop stop-color="#d9b4ca"/><stop offset=".6" stop-color="#f0b8a0"/><stop offset="1" stop-color="#f7d1a1"/></linearGradient></defs><path fill="url(#sunset-a)" d="M0 0h240v190H0z"/><circle fill="#fff0c9" cx="121" cy="97" r="25"/><path fill="#718794" d="M0 117q61-13 121 0t119-6v79H0Z"/><path fill="none" stroke="#d3bdaf" stroke-width="4" d="M88 132h61m-44 13h32m-21 12h10"/><path fill="#425c6c" d="m0 168 52-16 36 7 45-8 107 21v18H0Z"/></svg><span>夕暮れ.mp4 <b>▶</b></span></div>
+      <div class="landscape plant"><svg viewBox="0 0 240 190"><path fill="#e1e6d5" d="M0 0h240v190H0z"/><path fill="#d0dac5" d="M0 143h240v47H0z"/><path fill="none" stroke="#58765a" stroke-width="5" d="M124 144V33m0 65L78 62m46 61 48-44"/><path fill="#789773" d="M122 73Q78 62 89 24q38 8 33 49"/><path fill="#6a8969" d="M122 103q-51-2-58-44 42-6 58 44"/><path fill="#8fa985" d="M125 86q-5-52 34-57 9 45-34 57"/><path fill="#5e8163" d="M127 125q9-51 54-52 0 42-54 52"/><path fill="#b98268" d="m93 135 9 43h45l10-43Z"/><path fill="#c7947c" d="M90 134h69v10H90Z"/></svg><span>自宅.jpg</span></div>
+    </div>
+    <div class="folder-chips"><span><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg> カメラ</span><span><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg> 動画</span><span class="add-folder" aria-hidden="true">+</span></div>
+    <div class="transfer-line"><span></span><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><span></span></div>
+    <div class="destination"><div class="destination-icon"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg></div><div><strong>あなたの Google フォト ライブラリ</strong><small>使い慣れたアプリで閲覧・編集できます</small></div><svg class="icon arrow-icon" aria-hidden="true"><use href="#i-arrow"/></svg></div>
+    <figcaption>イメージ用のファイルです · アップロードは Google に直接送信されます</figcaption>
+  </figure>
+</section>
+<section class="wrap quick-facts" aria-label="アプリの要件"><span><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> root 権限は不要</span><span><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> microG は不要</span><span><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> カスタム ROM は不要</span><span><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg> オープンソース</span></section>
+<section class="wrap section" id="features" aria-labelledby="features-title">
+  <div class="section-heading"><p class="eyebrow">専用のアップローダー</p><h2 id="features-title">写真のバックアップを、<br>もっと自分でコントロール。</h2><p>アップロードは Photos Unlimited にお任せください。ライブラリに対するそれ以外の操作は、これまでどおり Google フォトで行えます。</p></div>
+  <div class="feature-grid">
+    <article class="feature-card blue"><div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-photo"/></svg></div><h3>元のファイルをそのまま</h3><p>元の写真や動画のバイト列をアップロードします。メディアの位置情報の権限により、埋め込まれた位置情報も保持されます。ファイルはスマートフォンに残ります。</p><span class="feature-tag">写真 + 動画</span></article>
+    <article class="feature-card green"><div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-tune"/></svg></div><h3>バックアップのルールは自分で決める</h3><p>フォルダを選び、アップロードを従量制でないネットワークに限定したり、充電中まで待機したりできます。必要なときはいつでも手動でバックアップを実行できます。</p><span class="feature-tag">ペースは自分次第</span></article>
+    <article class="feature-card lavender"><div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></div><h3>アカウントへ直接</h3><p>写真は Google に直接送信されます。サインイン情報は端末上で暗号化されます。間に Photos Unlimited のアカウント サーバーはありません。</p><span class="feature-tag">端末上での管理</span></article>
+  </div>
+</section>
+<section class="app-section" id="app" aria-labelledby="app-title"><div class="wrap app-grid">
+  <div class="app-copy"><p class="eyebrow">Android のために作りました</p><h2 id="app-title">使い慣れた操作画面。<br>目的に絞った機能。</h2><p class="app-intro">ネイティブの Material コントロール、壁紙の色、ライトモードとダークモードに対応。メニューを探し回らなくても、必要な機能が見つかります。</p>
+    <div class="screen-tabs" role="tablist" aria-label="アプリの画面を見る">
+      <button type="button" role="tab" id="tab-backup" aria-selected="true" aria-controls="screen-panel" data-screen="backup"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><span>バックアップ<small>接続し、フォルダを選んで、アップロードを開始します。</small></span><svg class="icon tab-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <button type="button" role="tab" id="tab-activity" aria-selected="false" aria-controls="screen-panel" tabindex="-1" data-screen="activity"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span>アクティビティ<small>アップロード、既存のものとの一致、再試行を確認します。</small></span><svg class="icon tab-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <button type="button" role="tab" id="tab-storage" aria-selected="false" aria-controls="screen-panel" tabindex="-1" data-screen="storage"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg><span>ストレージ <b class="preview-label">プレビュー</b><small>ライブラリのスキャンから、報告された使用量を確認します。</small></span><svg class="icon tab-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <button type="button" role="tab" id="tab-settings" aria-selected="false" aria-controls="screen-panel" tabindex="-1" data-screen="settings"><svg class="icon" aria-hidden="true"><use href="#i-tune"/></svg><span>設定<small>バックアップの設定を行い、自分好みにカスタマイズします。</small></span><svg class="icon tab-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+    </div>
+  </div>
+  <div class="screen-panel" id="screen-panel" role="tabpanel" aria-labelledby="tab-backup" tabindex="0">
+    <div class="screenshot-frame"><img id="app-screenshot" src="../media/backup-dark.png" width="720" height="1280" loading="lazy" alt="アプリのダークテーマのバックアップ画面。「アカウントを接続」が表示されています"></div>
+    <div class="appearance-control" id="appearance-control" role="group" aria-label="バックアップ画面の外観"><button type="button" data-appearance="light" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg> ライト</button><button type="button" data-appearance="dark" aria-pressed="true"><span aria-hidden="true">◐</span> ダーク</button></div>
+    <p class="screen-caption" id="screen-caption">実際のアプリ · バックアップ、ダークテーマ</p>
+    <noscript><p>画面プレビューを切り替えるには、JavaScript を有効にしてください。</p></noscript>
+  </div>
+</div></section>
+<section class="wrap section setup-section" aria-labelledby="setup-title"><div class="section-heading"><p class="eyebrow">はじめましょう</p><h2 id="setup-title">最初のバックアップまで 3 ステップ。</h2></div>
+  <ol class="setup-steps"><li><span class="step-number">1</span><h3>アカウントを接続</h3><p>アプリ内の Google のセットアップの流れに沿って進めます。埋め込み型のログインが機能しない場合は、ブラウザのセットアップ トークンによる代替手段を使えます。</p></li><li><span class="step-number">2</span><h3>フォルダを選択</h3><p>写真、動画、メディアの位置情報へのフルアクセスを許可します。バックアップするフォルダを選ぶと、その既存のファイルも含まれます。</p></li><li><span class="step-number">3</span><h3>バックアップを開始</h3><p>公式の Google フォト アプリで自動バックアップをオフにしてから、Photos Unlimited で<strong>今すぐバックアップ</strong>をタップします。</p></li></ol>
+  <p class="scheduling-note">バックグラウンドのタイミングは Android が管理します。ネットワーク、充電、バッテリー、アイドルの設定により、自動アップロードが遅れることがあります。</p>
+</section>
+<section class="wrap download-wrap" id="download" aria-labelledby="download-title"><div class="download-card">
+  <div class="download-icon"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg></div><div class="download-copy"><p class="eyebrow">無料・オープンソース</p><h2 id="download-title">最初のバックアップの<br>準備はできましたか?</h2><p>署名済みの Android APK をダウンロードして、バックアップする対象を選びましょう。</p><div class="download-actions"><a class="button" href="https://github.com/venzellucas/photos-unlimited/releases/latest/download/Photos-Unlimited.apk"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> APK をダウンロード</a><a href="https://github.com/venzellucas/photos-unlimited/releases/latest">リリースノート <span aria-hidden="true">↗</span></a></div><p class="download-meta">Android 13 以降</p></div>
+  <aside class="install-note"><strong>すでにアプリをお使いですか?</strong><p>現在のバージョンの上にインストールすると、サインイン情報、フォルダの選択、アップロード履歴が保持されます。</p><p>バージョン 1.1 以降では、新しいバージョンが公開されるとアプリが通知します(設定 → アップデートを確認)。Android から、ブラウザからのインストールを許可するよう求められる場合があります。</p><a href="https://github.com/venzellucas/photos-unlimited/releases/latest/download/SHA256SUMS.txt">チェックサムをダウンロード <span aria-hidden="true">↗</span></a></aside>
+</div></section>
+<section class="wrap section faq-section" aria-labelledby="faq-title"><div><p class="eyebrow">知っておきたいこと</p><h2 id="faq-title">インストールの前に<br>知っておいてほしいこと。</h2><p>これは独立系アプリの初期リリースです。あらかじめ次の点をご理解ください。</p></div><div class="faq-list">
+  <details><summary>ストレージは本当に無制限ですか?<span aria-hidden="true">+</span></summary><p>このアプリは非公開のモバイル プロトコルを使用し、Pixel のアップロード プロファイルで元の画質での扱いを要求します。受理するかどうかや容量の計上は Google が管理しているため、アップロードが受理されても、ストレージの対象外になることは保証されません。頼る前に、新しいサンプルのアップロードと実際のストレージ使用量を確認してください。既存の一致する項目は、その計上が維持されます。</p></details>
+  <details><summary>以前のアップロードが使っているストレージを空けられますか?<span aria-hidden="true">+</span></summary><p>はい、「空き容量を増やす」機能で可能です。各項目の元のファイルは、Google 自身のチェックサムとバイト単位で照合され、端末に保管されたうえで、項目が削除されて再びアップロードされます。そのため、日付や位置情報などの埋め込みメタデータはそのまま保たれます。先に Google フォトのバックアップをオフにしてください。アルバム、顔、Google フォト内で行った編集は保持されません。まずは少数の項目から試してください。</p></details>
+  <details><summary>アカウントとファイルはどうなりますか?<span aria-hidden="true">+</span></summary><p>アプリはファイルを Google に直接送信し、サインイン情報は Android のアプリ非公開ストレージ内で暗号化して保持します。これは Android のバックアップの対象外です。プロフィール写真と、任意のストレージ一覧はローカルにキャッシュされます。アプリを開いている間は 1 日に 1 回、GitHub に新しいバージョンがあるかどうかを問い合わせます。これはオフにできます。プロジェクトが所有するアカウント サーバーや分析用 SDK はありません。<a href="https://github.com/venzellucas/photos-unlimited/blob/main/PRIVACY.md">プライバシーに関する注意</a>をお読みください。</p></details>
+  <details><summary>どのくらい信頼できますか?<span aria-hidden="true">+</span></summary><p>基本的なアップロードは、実際の端末で使用されています。各リリースは、自動テストと署名済みアップグレードのチェックに合格しています。バージョン 1.0.0 では、独立したセキュリティ レビューも受けました。実際のストレージ計上は完全には検証されていません。Google が非公開の方法を変更する可能性があります。転送が中断された場合は、そのファイルを最初からやり直します。モーション フォトには対応していますが、ペアになった iPhone のライブフォトは置き換えられません。</p></details>
+</div></section>
+</main>
+<footer class="site-footer"><div class="wrap footer-top"><a class="brand" href="./"><img src="../icon.svg" width="34" height="34" alt=""><span>Photos Unlimited</span></a><div class="footer-links"><a href="https://github.com/venzellucas/photos-unlimited/blob/main/README.ja.md">GitHub</a><a href="https://github.com/venzellucas/photos-unlimited/issues">問題を報告</a><a href="https://github.com/venzellucas/photos-unlimited/blob/main/PRIVACY.md">プライバシー</a><a href="https://github.com/venzellucas/photos-unlimited/blob/main/LICENSE">MIT ライセンス</a></div></div><div class="wrap footer-bottom"><p>独立したプロジェクトです。作者: <a href="https://github.com/venzellucas">@venzellucas</a>。</p><p>Google とは提携していません。製品名は、それぞれの所有者に帰属します。</p></div></footer>
+</body>
+</html>

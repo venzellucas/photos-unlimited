@@ -42,8 +42,7 @@ public final class MediaScanner {
       throws IOException {
     Map<String, Integer> counts = new TreeMap<>();
     if (!fullAccess())
-      throw new IOException(
-          "Allow access to all photos and videos to discover and back up folders.");
+      throw new UserFacingException(Text.get(R.string.media_need_full_access));
     for (String volume : MediaStore.getExternalVolumeNames(context)) {
       for (boolean video : new boolean[] {false, true}) {
         Uri base =
@@ -63,7 +62,8 @@ public final class MediaScanner {
             context
                 .getContentResolver()
                 .query(base, columns, "is_pending=0 AND is_trashed=0", null, null)) {
-          if (cursor == null) throw new IOException("Android's media library is unavailable.");
+          if (cursor == null)
+            throw new UserFacingException(Text.get(R.string.media_library_unavailable));
           while (cursor.moveToNext()) {
             PhotosApi.checkStopped(stop);
             String path = cursor.getString(2);
@@ -93,7 +93,7 @@ public final class MediaScanner {
             }
           }
         } catch (SecurityException e) {
-          throw new IOException("Media permission changed. Allow access to all photos and videos.");
+          throw new UserFacingException(Text.get(R.string.media_permission_changed));
         }
       }
     }
@@ -163,11 +163,11 @@ public final class MediaScanner {
         context
             .getContentResolver()
             .query(Uri.parse(address), new String[] {MediaStore.MediaColumns._ID}, null, null)) {
-      if (c == null) throw new IOException("Android's media library is unavailable.");
+      if (c == null) throw new UserFacingException(Text.get(R.string.media_library_unavailable));
       return c.moveToFirst();
     } catch (RuntimeException e) {
       // Unknown is not "deleted": a later check decides, so no duplicate gets restored.
-      throw new IOException("Couldn’t check the phone copy.");
+      throw new UserFacingException(Text.get(R.string.media_phone_copy_check_failed));
     }
   }
 
@@ -197,10 +197,10 @@ public final class MediaScanner {
           (video ? "Movies" : "Pictures") + "/Photos Unlimited/");
       uri = context.getContentResolver().insert(collection, values);
     }
-    if (uri == null) throw new IOException("Android could not restore the phone copy");
+    if (uri == null) throw new UserFacingException(Text.get(R.string.media_restore_failed));
     try (InputStream in = new FileInputStream(source);
         OutputStream out = context.getContentResolver().openOutputStream(uri)) {
-      if (out == null) throw new IOException("Android could not restore the phone copy");
+      if (out == null) throw new UserFacingException(Text.get(R.string.media_restore_failed));
       in.transferTo(out);
     } catch (IOException | RuntimeException e) {
       context.getContentResolver().delete(uri, null, null);
@@ -214,7 +214,7 @@ public final class MediaScanner {
 
   public InputStream openOriginal(String address) throws IOException {
     if (!originalAccess())
-      throw new IOException("Allow media location access to preserve the complete original file.");
+      throw new UserFacingException(Text.get(R.string.media_need_location));
     try {
       InputStream stream =
           context
@@ -223,8 +223,7 @@ public final class MediaScanner {
       if (stream == null) throw new FileNotFoundException("Local file is unavailable");
       return stream;
     } catch (SecurityException | UnsupportedOperationException e) {
-      throw new IOException(
-          "Original media is unavailable. Check photo and media location permissions.");
+      throw new UserFacingException(Text.get(R.string.media_original_unavailable));
     }
   }
 }

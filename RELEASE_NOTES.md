@@ -1,3 +1,37 @@
+# Photos Unlimited 1.2.0
+
+The app now speaks five languages.
+
+- **Translations:** English, Português (Brasil), Español, 简体中文 and 日本語. The app
+  follows the phone's language and falls back to English; choose another in Settings →
+  **Language** or in Android's per-app language settings. Messages the app has already
+  saved, such as the last backup status, stay in the language they were written in until
+  they are replaced. The translations were made with a language model; corrections are
+  welcome as pull requests.
+- **README and website** are available in the same languages, with a language selector
+  at the top right of the site.
+- **Safer journal upgrades:** the Free up journal adds a database column only when it is
+  missing, so a future update can't fail on a column that already exists.
+
+## Install
+
+Android 13 or newer. Download `Photos-Unlimited.apk` and install it over your current
+version to keep your setup; from 1.1.0 the app also shows a card when a new version is
+out. Verify it with `SHA256SUMS.txt`. The signing certificate's SHA-256 fingerprint is
+`cbd14272c6aaa0568df8cc8be4ec10be9c6a2ebc0354eb202b5a05d8cda74bce`.
+
+## Known limits
+
+Unchanged from 1.1.0. Simplified Chinese only: a phone set to Traditional Chinese shows
+English. Diagnostic labels such as `SCAN_FORMAT_PAGE_…` stay in English in every
+language, so they can be quoted in bug reports.
+
+## Validation
+
+81 JVM tests and 31 Android instrumentation tests passed; lint had no errors. On a test
+emulator, the main screens were checked in each language, switching the language changed
+new messages and back, and an in-place signed upgrade from 1.1.0 kept the settings.
+
 # Photos Unlimited 1.1.0
 
 Fixes for large libraries and the profile photo, plus a way to hear about new versions.

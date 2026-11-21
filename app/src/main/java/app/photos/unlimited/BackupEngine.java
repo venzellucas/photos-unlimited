@@ -74,24 +74,24 @@ public final class BackupEngine {
       settings.failure("");
       String credentials = account.load(), email = account.email();
       if (credentials.isEmpty()) {
-        settings.status("Connect your Google account to start backing up.");
+        settings.status(Text.get(R.string.backup_status_connect));
         return false;
       }
       if (settings.folders().isEmpty()) {
-        settings.status("Choose at least one folder to back up.");
+        settings.status(Text.get(R.string.backup_status_choose_folders));
         return false;
       }
       if (!allowed(context, settings)) {
-        settings.status("Waiting for your selected network and charging conditions.");
+        settings.status(Text.get(R.string.backup_status_waiting_conditions));
         return false;
       }
       MediaScanner scanner = new MediaScanner(context);
       if (!scanner.originalAccess()) {
-        settings.status("Allow media location access to upload complete original files.");
+        settings.status(Text.get(R.string.backup_status_allow_location));
         return false;
       }
-      settings.status("Checking selected folders…");
-      notify.status("Checking selected folders…", 0, 0);
+      settings.status(Text.get(R.string.backup_status_checking_folders));
+      notify.status(Text.get(R.string.backup_status_checking_folders), 0, 0);
       db.recover(email);
       scanner.scan(db, email, settings.folders(), stop);
       PhotosApi api = new PhotosApi(credentials, stop);
@@ -104,7 +104,7 @@ public final class BackupEngine {
         try {
           if (!allowed(context, settings)) {
             db.release(item);
-            settings.status("Waiting for your selected network and charging conditions.");
+            settings.status(Text.get(R.string.backup_status_waiting_conditions));
             return false;
           }
           if (!account.email().equals(email)) {
@@ -114,11 +114,10 @@ public final class BackupEngine {
           long max =
               item.mime().startsWith("video/") ? 10L * 1024 * 1024 * 1024 : 200L * 1024 * 1024;
           if (item.size() > max)
-            throw new PhotosApi.ApiException(
-                "File exceeds Google's individual upload size limit.", false, true);
-          settings.status("Checking " + item.name());
+            throw new PhotosApi.ApiException(Text.get(R.string.backup_too_large), false, true);
+          settings.status(Text.get(R.string.backup_checking_file, item.name()));
           transferring[0] = false;
-          notify.status("Checking " + item.name(), 0, item.size());
+          notify.status(Text.get(R.string.backup_checking_file, item.name()), 0, item.size());
           MessageDigest hash = PhotosApi.sha1();
           long size = 0;
           try (InputStream in = scanner.openOriginal(item.uri())) {
@@ -131,7 +130,7 @@ public final class BackupEngine {
             }
           }
           if (size != item.size())
-            throw new IOException("File changed; waiting for a stable copy.");
+            throw new UserFacingException(Text.get(R.string.backup_file_changed));
           byte[] digest = hash.digest();
           String existing = api.find(digest);
           if (!existing.isEmpty()) {
@@ -143,7 +142,7 @@ public final class BackupEngine {
             db.complete(item, existing, true);
             continue;
           }
-          settings.status("Uploading " + item.name());
+          settings.status(Text.get(R.string.backup_uploading_file, item.name()));
           transferring[0] = true;
           long[] lastPolicyCheck = {0};
           String key =
@@ -158,7 +157,7 @@ public final class BackupEngine {
                       lastPolicyCheck[0] = System.currentTimeMillis();
                       if (!settings.enabled() || !allowed(context, settings)) stop.set(true);
                     }
-                    notify.status("Uploading " + current.name(), bytes, total);
+                    notify.status(Text.get(R.string.backup_uploading_file, current.name()), bytes, total);
                   });
           db.complete(item, key, false);
         } catch (InterruptedIOException e) {
@@ -169,17 +168,17 @@ public final class BackupEngine {
           if (e.signIn) {
             settings.failure("auth");
             settings.enabled(false);
-            settings.status("Sign-in expired. Reconnect your Google account, then resume backup.");
+            settings.status(Text.get(R.string.backup_status_sign_in_expired));
             return false;
           }
         } catch (FileNotFoundException e) {
-          db.fail(item, "Local file is no longer available.", true);
+          db.fail(item, Text.get(R.string.backup_local_missing), true);
         } catch (IOException e) {
           db.fail(item, safeMessage(e), false);
         } catch (SecurityException e) {
           db.release(item);
           settings.failure("media");
-          settings.status("Media access changed. Review permissions before resuming.");
+          settings.status(Text.get(R.string.backup_status_media_changed));
           return false;
         }
       }
@@ -187,19 +186,15 @@ public final class BackupEngine {
       Map<String, Integer> counts = db.counts(email, settings.folders());
       int failures = counts.getOrDefault("error", 0) + counts.getOrDefault("blocked", 0);
       if (stop.get() || !settings.enabled())
-        settings.status("Backup paused. Pending files are kept in the queue.");
+        settings.status(Text.get(R.string.backup_status_paused_queue));
       else if (failures > 0)
-        settings.status(
-            failures
-                + " item"
-                + (failures == 1 ? " needs" : "s need")
-                + " attention. See recent activity.");
+        settings.status(Text.plural(R.plurals.backup_status_attention, failures, failures));
       else if (db.pending(email, settings.folders()))
-        settings.status("More files are queued. Backup will continue automatically.");
-      else settings.status("Selected folders are up to date.");
+        settings.status(Text.get(R.string.backup_status_more_queued));
+      else settings.status(Text.get(R.string.backup_status_up_to_date));
       return settings.enabled() && db.pending(email, settings.folders());
     } catch (InterruptedIOException e) {
-      settings.status("Backup paused. It will resume when conditions allow.");
+      settings.status(Text.get(R.string.backup_status_paused_resume));
       return settings.enabled();
     } catch (IOException e) {
       settings.failure(e instanceof PhotosApi.ApiException auth && auth.signIn ? "auth" : "other");
@@ -207,7 +202,7 @@ public final class BackupEngine {
       return false;
     } catch (Exception e) {
       settings.failure("other");
-      settings.status("Backup stopped unexpectedly. Reopen the app and retry.");
+      settings.status(Text.get(R.string.backup_status_stopped));
       return false;
     } finally {
       CURRENT.compareAndSet(stop, null);
@@ -220,20 +215,13 @@ public final class BackupEngine {
   static String safeMessage(IOException e) {
     // Network exception details may contain private URLs; never persist raw transport diagnostics.
     if (e instanceof java.net.SocketTimeoutException)
-      return "Connection timed out. Will retry automatically.";
+      return Text.get(R.string.backup_error_timeout);
     if (e instanceof java.net.UnknownHostException || e instanceof java.net.ConnectException)
-      return "Connection unavailable. Will retry automatically.";
+      return Text.get(R.string.backup_error_offline);
     if (e instanceof javax.net.ssl.SSLException)
-      return "Could not establish a secure Google connection.";
-    String message = e.getMessage();
-    if (message != null
-        && (message.startsWith("File ")
-            || message.startsWith("Google ")
-            || message.startsWith("Upload ")
-            || message.startsWith("Allow ")
-            || message.startsWith("Original ")
-            || message.startsWith("Your saved ")
-            || message.startsWith("Android's "))) return message;
-    return "Upload could not be confirmed. Will retry automatically.";
+      return Text.get(R.string.backup_error_tls);
+    // Only messages written for the user, already translated, are kept.
+    if (e instanceof UserFacingException && e.getMessage() != null) return e.getMessage();
+    return Text.get(R.string.backup_error_unconfirmed);
   }
 }
