@@ -25,7 +25,7 @@ The 1.1 concept has four parts:
 
 - **(a) Update awareness.** Once a day the app asks GitHub for the latest release. If a newer version exists, the app shows a notice with a button that hands the user to Android's normal installer through the browser. There is no self-install and no `REQUEST_INSTALL_PACKAGES`. A setting turns the check off.
 - **(b) Profile photo bug.** "Refresh profile photo" always fails, and the avatar always shows the initial letter.
-- **(c) Translations.** Move all user-visible text into Android string resources. Translate into pt-BR (reviewed by the developer), es, zh-CN and ja (machine translated and machine checked). Follow the system language, with a per-app override. Translate the README and add a language switcher to the website.
+- **(c) Translations.** Move all user-visible text into Android string resources. Translate into pt-BR, es, zh-CN and ja (machine translated and machine checked). Follow the system language, with a per-app override. Translate the README and add a language switcher to the website.
 - **(d) Gap check.** Compare the repository with well-maintained open-source Android projects and pick what is worth adding.
 
 The target users are non-technical phone owners worldwide, including VPN users in China. The core value of 1.1 is that users learn about safety fixes, see the account they connected, and can read the app in their own language. All of this must stay within the hard rules: a simple UI and website, and safety warnings that are never wrong or stale in any language.
@@ -91,7 +91,7 @@ The design doc must settle this.
 **B2. Machine-translated safety text cannot meet "never wrong or stale" as described.**
 Raised by all reviewers except codebase-details, which treated it as a lint concern.
 
-The developer can verify only pt-BR. "Machine checked" is not defined, and a second machine can repeat the first machine's mistakes. Android lint's `MissingTranslation` check finds missing keys, but not a translation that is out of date after the English changed. Specific hazards:
+No person reviews the translations. "Machine checked" is not defined, and a second machine can repeat the first machine's mistakes. Android lint's `MissingTranslation` check finds missing keys, but not a translation that is out of date after the English changed. Specific hazards:
 
 - **"charged"** (meaning "counts toward Google storage") will be machine-translated as billed, or as battery charging. The app already has an "Only while charging" setting. The state label "Still charged" (`MainActivity.java:1063`) is at risk (comprehension).
 - **"Free up storage"** is close to Google Photos' own "Free up space", which deletes *phone* copies, the opposite action. In pt-BR, es, zh and ja the two feature names may be translated with the same words (comprehension).
@@ -225,7 +225,7 @@ After a reboot or an update, nothing posts that warning again until the user ope
 **M4. Android developer verification and Brazil (unverified).**
 Raised by comprehension, design, structural, implementation-readiness and inventive-catalyst.
 
-Several reviewers recall that Google announced blocking installs from unregistered developers on certified devices. They recall Brazil in the first wave from around September 2026, and that it probably covers updates. pt-BR is the developer's own reviewed language and a main target. If enforcement is active, "Download latest version" sends Brazilian users into a blocked or long, frightening install flow that the app, README and site never explain.
+Several reviewers recall that Google announced blocking installs from unregistered developers on certified devices. They recall Brazil in the first wave from around September 2026, and that it probably covers updates. pt-BR is a main target. If enforcement is active, "Download latest version" sends Brazilian users into a blocked or long, frightening install flow that the app, README and site never explain.
 
 This is not a request to change the developer's decision. The request:
 1. Check the current enforcement status, and test an install on a certified phone set to the Brazil region.
@@ -455,9 +455,8 @@ Once 1.1 is installed, every later release must stay readable by it:
 6. **Language set and gate:**
    - Who signs off on es, zh-Hans and ja safety strings, and what "machine checked" means (back-translation by a different model, plus device screenshots).
    - Whether English fallback for a stale safety string is the accepted rule.
-   - Whether es can be proofread by the pt-BR speaker.
 
-   zoom-out recommends shipping only en and pt-BR until a named native reviewer exists for each other language.
+   zoom-out recommends shipping only en until a named native reviewer exists for each language.
 7. **Qualifiers:** `values-pt` or `values-pt-rBR`; `values-b+zh+Hans` or `values-zh-rCN`. Confirm that Traditional Chinese falls back to English.
 8. **Translated docs:** none (rely on browser translation), short summary READMEs only, or short READMEs plus generated site pages.
 9. **Profile photo:** is removing the network avatar an acceptable outcome if Google refuses the scopes? Decide this in advance.
@@ -472,5 +471,5 @@ Once 1.1 is installed, every later release must stay readable by it:
 3. **Update button:** direct APK download from a stable asset name (e.g. `Photos-Unlimited.apk` on every release), plus a small "What's new" link to the release page. Button hidden while any reclaim job is unsafe (`unsafeAll() > 0`).
 4. **Profile photo:** diagnose live first with fixed failure-stage labels. If Google refuses the profile scopes, drop the network avatar and keep the initial letter.
 5. **Repository hygiene (part d):** SECURITY.md, one bug template, one CI workflow, check-publication.py UTF-8 + email pattern, published signing-certificate fingerprint. Accepted by default.
-6. **Translation scope:** decided — translate the app fully in 1.2: en-US, pt-BR (author-reviewed), es, zh-Hans, ja. es/zh-Hans/ja safety strings go through the glossary, an independent back-translation check, and a hash lock; a stale safety string falls back to English. README and website in the same five languages after the app strings settle. A "Request a translation" issue template invites native reviewers later.
+6. **Translation scope:** decided — translate the app fully in 1.2: en-US, pt-BR, es, zh-Hans, ja, all made by a language model with no human review (author, 2026-11-21). es/zh-Hans/ja safety strings go through the glossary, an independent back-translation check, and a hash lock; a stale safety string falls back to English. README and website in the same five languages after the app strings settle. A "Request a translation" issue template invites native reviewers later.
 7. Technical choices (API vs redirect, resource qualifiers, ReclaimDb migration approach, release contract) are delegated to the drafter.

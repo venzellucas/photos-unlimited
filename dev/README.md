@@ -36,6 +36,10 @@ The 1.1 design went through the full process. The files are `concepts_brief.md`,
 `implementation_readiness_report*.md` and `goldfish_review_report*.md`. `backlog.md` lists ideas
 that were never started.
 
+`concepts_brief.md` was written before the 1.2 decisions were made. Where it differs from the
+checklists, the checklists record what was built. In particular, every translation was made by a
+language model, and no person reviewed any of them.
+
 ## How to continue
 
 - **Build.** JDK 21 and the Android SDK with platform 37. See [Build](../README.md#build) in the main README.
