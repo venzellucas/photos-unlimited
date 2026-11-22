@@ -1,0 +1,346 @@
+<div id="photos-unlimited-design" aria-label="Photos Unlimited interactive design preview with sample data">
+  <style>
+    #photos-unlimited-design { width: 100%; }
+    #photos-unlimited-design .pu-stage { padding: 20px 0; display: grid; justify-items: center; gap: 12px; }
+    #photos-unlimited-design .pu-caption { font: 400 12px/18px system-ui, sans-serif; color: light-dark(#535954, #b6beb7); }
+    #photos-unlimited-design .pu-app {
+      --pu-surface: light-dark(#F6FBF5,#101511); --pu-container: light-dark(#EAF0E9,#1C221D);
+      --pu-container-high: light-dark(#E2E9E1,#272D28); --pu-on-surface: light-dark(#171D19,#E0E4DD);
+      --pu-muted: light-dark(#414943,#C1C9C0); --pu-primary: light-dark(#326B54,#99D5B6);
+      --pu-on-primary: light-dark(#FFFFFF,#003824); --pu-primary-container: light-dark(#B5F1D1,#18513C);
+      --pu-on-primary-container: light-dark(#002114,#B5F1D1); --pu-outline: light-dark(#717973,#8B938A);
+      --pu-error-container: light-dark(#FFDAD6,#93000A); --pu-on-error-container: light-dark(#410002,#FFDAD6);
+      font: 400 16px/24px Roboto, "Segoe UI", system-ui, sans-serif; letter-spacing: .1px;
+      width: 100%; max-width: 412px; box-sizing: border-box; border-radius: 32px;
+      border: 1px solid var(--pu-outline); background: var(--pu-surface); color: var(--pu-on-surface);
+    }
+    #photos-unlimited-design .pu-app[data-palette="ocean"] {
+      --pu-surface: light-dark(#F8F9FF,#111318); --pu-container: light-dark(#EDF0F9,#1D2025);
+      --pu-container-high: light-dark(#E4E7F0,#282B30); --pu-on-surface: light-dark(#191C20,#E1E2E9);
+      --pu-muted: light-dark(#43474E,#C3C6CF); --pu-primary: light-dark(#365F91,#A6C8FF);
+      --pu-on-primary: light-dark(#FFFFFF,#003060); --pu-primary-container: light-dark(#D5E3FF,#1A4778);
+      --pu-on-primary-container: light-dark(#001B3D,#D5E3FF); --pu-outline: light-dark(#73777F,#8D9199);
+    }
+    #photos-unlimited-design .pu-app[data-appearance="light"] { color-scheme: light; }
+    #photos-unlimited-design .pu-app[data-appearance="dark"] { color-scheme: dark; }
+    #photos-unlimited-design .pu-app * { box-sizing: border-box; }
+    #photos-unlimited-design .pu-app [hidden] { display: none !important; }
+    #photos-unlimited-design .pu-app h1, #photos-unlimited-design .pu-app h2, #photos-unlimited-design .pu-app h3,
+    #photos-unlimited-design .pu-app p { margin: 0; }
+    #photos-unlimited-design .pu-app h1 { font-size: 28px; line-height: 36px; font-weight: 400; letter-spacing: -.4px; }
+    #photos-unlimited-design .pu-app h2 { font-size: 22px; line-height: 28px; font-weight: 500; letter-spacing: -.3px; }
+    #photos-unlimited-design .pu-app h3 { font-size: 14px; line-height: 20px; font-weight: 500; }
+    #photos-unlimited-design .pu-app button, #photos-unlimited-design .pu-app select { font: inherit; color: inherit; letter-spacing: inherit; }
+    #photos-unlimited-design .pu-app button { border: 0; background: transparent; padding: 0; }
+    #photos-unlimited-design .pu-app button:focus-visible, #photos-unlimited-design .pu-app input:focus-visible,
+    #photos-unlimited-design .pu-app select:focus-visible { outline: 3px solid var(--pu-primary); outline-offset: 3px; }
+    #photos-unlimited-design .pu-app button:disabled { opacity: .48; cursor: not-allowed; }
+    #photos-unlimited-design .pu-app svg { width: 24px; height: 24px; flex-shrink: 0; stroke-width: 1.8; }
+    #photos-unlimited-design .pu-statusbar { display: flex; justify-content: space-between; align-items: center; padding: 13px 24px 4px; font-size: 14px; font-weight: 500; }
+    #photos-unlimited-design .pu-status-icons { display: flex; gap: 6px; }
+    #photos-unlimited-design .pu-status-icons svg { width: 16px; height: 16px; }
+    #photos-unlimited-design .pu-toolbar { display: flex; align-items: center; gap: 10px; padding: 4px 16px 4px 20px; min-height: 64px; }
+    #photos-unlimited-design .pu-brand { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; font-size: 18px; line-height: 24px; font-weight: 500; }
+    #photos-unlimited-design .pu-brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; background: var(--pu-primary-container); color: var(--pu-on-primary-container); flex-shrink: 0; }
+    #photos-unlimited-design .pu-icon-button { min-width: 48px; min-height: 48px; display: inline-grid; place-items: center; border-radius: 50%; }
+    #photos-unlimited-design .pu-avatar { background: var(--pu-container-high); color: var(--pu-primary); border-radius: 50%; display: grid; place-items: center; width: 36px; height: 36px; font-size: 14px; font-weight: 500; }
+    #photos-unlimited-design .pu-main { padding: 10px 20px 22px; min-height: 608px; }
+    #photos-unlimited-design .pu-heading { margin-bottom: 22px; }
+    #photos-unlimited-design .pu-support { font-size: 14px; line-height: 20px; color: var(--pu-muted); }
+    #photos-unlimited-design .pu-heading .pu-support { margin-top: 4px; }
+    #photos-unlimited-design .pu-hero { padding: 24px; border-radius: 28px; background: var(--pu-primary-container); color: var(--pu-on-primary-container); }
+    #photos-unlimited-design .pu-hero[data-error="true"] { background: var(--pu-error-container); color: var(--pu-on-error-container); }
+    #photos-unlimited-design .pu-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    #photos-unlimited-design .pu-state-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; background: var(--pu-surface); color: var(--pu-primary); }
+    #photos-unlimited-design .pu-state-icon svg { width: 28px; height: 28px; }
+    #photos-unlimited-design .pu-hero .pu-support { color: inherit; }
+    #photos-unlimited-design .pu-hero .pu-state-description { margin-top: 8px; min-height: 40px; }
+    #photos-unlimited-design .pu-progress-area { margin-top: 22px; }
+    #photos-unlimited-design .pu-progress-label { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+    #photos-unlimited-design .pu-progress { display: block; width: 100%; height: 8px; border: 0; appearance: none; border-radius: 20px; background: var(--pu-surface); }
+    #photos-unlimited-design .pu-progress::-webkit-progress-bar { background: var(--pu-surface); border-radius: 20px; }
+    #photos-unlimited-design .pu-progress::-webkit-progress-value { background: var(--pu-primary); border-radius: 20px; }
+    #photos-unlimited-design .pu-progress::-moz-progress-bar { background: var(--pu-primary); border-radius: 20px; }
+    #photos-unlimited-design .pu-file-label { margin-top: 8px; font-size: 12px; line-height: 18px; overflow-wrap: anywhere; }
+    #photos-unlimited-design .pu-app .pu-primary-button { min-height: 48px; width: 100%; border-radius: 28px; background: var(--pu-primary); color: var(--pu-on-primary); font-size: 14px; font-weight: 500; line-height: 20px; padding: 12px 16px; display: flex; gap: 8px; align-items: center; justify-content: center; }
+    #photos-unlimited-design .pu-hero .pu-primary-button { margin-top: 24px; }
+    #photos-unlimited-design .pu-primary-button svg { width: 20px; height: 20px; }
+    #photos-unlimited-design .pu-counts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 22px 4px; }
+    #photos-unlimited-design .pu-counts strong { display: block; font-size: 22px; line-height: 28px; font-weight: 500; font-variant-numeric: tabular-nums; }
+    #photos-unlimited-design .pu-group { background: var(--pu-container); border-radius: 24px; overflow: clip; }
+    #photos-unlimited-design .pu-row { width: 100%; display: flex; align-items: center; gap: 16px; min-height: 76px; padding: 16px !important; text-align: left; }
+    #photos-unlimited-design .pu-row + .pu-row { border-top: 1px solid color-mix(in srgb, var(--pu-outline) 20%, transparent); }
+    #photos-unlimited-design .pu-row-text { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+    #photos-unlimited-design .pu-row-text > span { display: block; }
+    #photos-unlimited-design .pu-row-icon { color: var(--pu-primary); display: grid; place-items: center; flex-shrink: 0; }
+    #photos-unlimited-design .pu-chevron { width: 18px !important; height: 18px !important; color: var(--pu-muted); }
+    #photos-unlimited-design .pu-note { font-size: 12px; line-height: 18px; color: var(--pu-muted); margin-top: 16px !important; }
+    #photos-unlimited-design .pu-app .pu-text-button { display: flex; gap: 8px; align-items: center; justify-content: center; color: var(--pu-primary); min-height: 48px; font-size: 14px; font-weight: 500; padding: 12px 8px; }
+    #photos-unlimited-design .pu-app .pu-text-button.pu-full { width: 100%; margin-top: 8px; }
+    #photos-unlimited-design .pu-section-label { margin: 24px 4px 10px !important; color: var(--pu-muted); }
+    #photos-unlimited-design .pu-section-label:first-child { margin-top: 0 !important; }
+    #photos-unlimited-design .pu-switch { appearance: none; width: 52px; height: 32px; border-radius: 20px; border: 2px solid var(--pu-outline); background: var(--pu-container-high); position: relative; flex-shrink: 0; margin: 0; }
+    #photos-unlimited-design .pu-switch::after { content: ""; position: absolute; top: 6px; left: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--pu-outline); transition: transform 140ms ease; }
+    #photos-unlimited-design .pu-switch:checked { border-color: var(--pu-primary); background: var(--pu-primary); }
+    #photos-unlimited-design .pu-switch:checked::after { top: 2px; left: 2px; width: 24px; height: 24px; background: var(--pu-on-primary); transform: translateX(20px); }
+    #photos-unlimited-design .pu-check { width: 24px; height: 24px; margin: 0; accent-color: var(--pu-primary); flex-shrink: 0; }
+    #photos-unlimited-design .pu-select-row { align-items: stretch; flex-direction: column; gap: 10px; }
+    #photos-unlimited-design .pu-select-row select { width: 100%; min-height: 48px; padding: 10px 12px; background: var(--pu-surface); border: 1px solid var(--pu-outline); border-radius: 12px; font-size: 16px; }
+    #photos-unlimited-design .pu-navigation { display: flex; background: var(--pu-container); padding: 8px 12px 10px; border-radius: 0 0 31px 31px; }
+    #photos-unlimited-design .pu-nav-button { flex: 1; min-width: 0; min-height: 64px; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; color: var(--pu-muted); font-size: 12px !important; line-height: 16px !important; font-weight: 500 !important; }
+    #photos-unlimited-design .pu-nav-icon { width: 64px; max-width: 100%; height: 32px; display: grid; place-items: center; border-radius: 18px; }
+    #photos-unlimited-design .pu-nav-button[aria-current="page"] { color: var(--pu-on-surface); }
+    #photos-unlimited-design .pu-nav-button[aria-current="page"] .pu-nav-icon { background: var(--pu-primary-container); color: var(--pu-on-primary-container); }
+    #photos-unlimited-design .pu-activity-list { display: grid; gap: 4px; }
+    #photos-unlimited-design .pu-media { display: flex; gap: 14px; align-items: center; padding: 14px 0; }
+    #photos-unlimited-design .pu-media-thumb { width: 48px; height: 56px; flex-shrink: 0; display: grid; place-items: center; border-radius: 12px; background: var(--pu-container-high); color: var(--pu-muted); }
+    #photos-unlimited-design .pu-media-name { font-size: 14px; line-height: 20px; font-weight: 500; overflow-wrap: anywhere; }
+    #photos-unlimited-design .pu-media-state { font-size: 12px; line-height: 18px; color: var(--pu-muted); }
+    #photos-unlimited-design .pu-media-trailing { width: 20px !important; height: 20px !important; color: var(--pu-primary); }
+    #photos-unlimited-design .pu-attention { padding: 16px; border-radius: 20px; background: var(--pu-error-container); color: var(--pu-on-error-container); margin-bottom: 16px; }
+    #photos-unlimited-design .pu-attention .pu-text-button { color: inherit; }
+    #photos-unlimited-design .pu-folders-actions { margin-top: 24px; }
+    #photos-unlimited-design .pu-notice { margin: 0 20px 16px; padding: 12px 16px; border-radius: 16px; background: var(--pu-container-high); font-size: 14px; line-height: 20px; }
+    @media (max-width: 360px) {
+      #photos-unlimited-design .pu-main { padding-left: 16px; padding-right: 16px; }
+      #photos-unlimited-design .pu-hero { padding: 20px; }
+      #photos-unlimited-design .pu-row { gap: 12px; padding: 14px !important; }
+      #photos-unlimited-design .pu-brand { font-size: 16px; }
+      #photos-unlimited-design .pu-toolbar { padding-left: 16px; gap: 6px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #photos-unlimited-design .pu-switch::after { transition: none; }
+    }
+  </style>
+  <div class="pu-stage viz-dotted-background">
+    <article class="pu-app" data-appearance="system" data-palette="sage" aria-label="Photos Unlimited Android screen">
+      <div class="pu-statusbar" aria-hidden="true"><span>9:41</span><span class="pu-status-icons"><i data-lucide="wifi"></i><i data-lucide="signal"></i><i data-lucide="battery-full"></i></span></div>
+      <header class="pu-toolbar">
+        <button type="button" class="pu-icon-button cursor-interaction" data-action="back" aria-label="Back to Backup" hidden><i data-lucide="arrow-left" aria-hidden="true"></i></button>
+        <div class="pu-brand"><span class="pu-brand-mark"><i data-lucide="cloud-upload" aria-hidden="true"></i></span><span>Photos Unlimited</span></div>
+        <button type="button" class="pu-icon-button cursor-interaction" data-action="account" aria-label="Account and settings"><span class="pu-avatar"><i data-lucide="user-round" aria-hidden="true"></i></span></button>
+      </header>
+      <main class="pu-main">
+        <section data-screen="backup" aria-label="Backup">
+          <div class="pu-heading"><h1>Backup</h1><p class="pu-support">Original photos and videos.</p></div>
+          <div class="pu-hero" aria-label="Backup status" data-error="false">
+            <div class="pu-hero-top"><span class="pu-state-icon" data-role="state-icon"><i data-lucide="cloud-upload" aria-hidden="true"></i></span><span class="pu-support" data-role="queue">12 items left</span></div>
+            <div aria-live="polite" aria-atomic="true"><h2 data-role="state-title">Backing up</h2><p class="pu-support pu-state-description" data-role="state-description">Your originals are uploading to Google Photos.</p></div>
+            <div class="pu-progress-area" data-role="progress-area">
+              <div class="pu-progress-label"><span>Current video</span><span>75 / 120 MB</span></div>
+              <progress class="pu-progress" value="75" max="120" aria-label="Current video upload, 75 of 120 megabytes"></progress>
+              <p class="pu-file-label">VID_20261113_093821.mp4</p>
+            </div>
+            <button type="button" class="pu-primary-button cursor-interaction" data-action="primary"><i data-lucide="pause" aria-hidden="true"></i><span>Pause backup</span></button>
+          </div>
+          <div class="pu-counts" aria-label="Backup records for this device">
+            <div><strong data-role="uploaded-count">2,716</strong><span class="pu-support">Uploaded from this device</span></div>
+            <div><strong>84</strong><span class="pu-support">Already in your library</span></div>
+          </div>
+          <div class="pu-group">
+            <button type="button" class="pu-row cursor-interaction" data-action="folders"><span class="pu-row-icon"><i data-lucide="folder" aria-hidden="true"></i></span><span class="pu-row-text"><span>Backup folders</span><span class="pu-support" data-role="folder-summary">Camera, Screenshots</span></span><i class="pu-chevron" data-lucide="chevron-right" aria-hidden="true"></i></button>
+            <button type="button" class="pu-row cursor-interaction" data-action="activity"><span class="pu-row-icon"><i data-lucide="history" aria-hidden="true"></i></span><span class="pu-row-text"><span>Recent activity</span><span class="pu-support" data-role="activity-summary">Last upload just now</span></span><i class="pu-chevron" data-lucide="chevron-right" aria-hidden="true"></i></button>
+          </div>
+          <button type="button" class="pu-text-button pu-full cursor-interaction" data-action="photos"><i data-lucide="external-link" aria-hidden="true"></i>Open Google Photos</button>
+          <p class="pu-note">Original files stay on your phone.</p>
+        </section>
+        <section data-screen="activity" aria-label="Activity" hidden>
+          <div class="pu-heading"><h1>Activity</h1><p class="pu-support">Backup records from this device.</p></div>
+          <div class="pu-attention" data-role="attention" hidden><h3>1 video needs attention</h3><p class="pu-support" style="color: inherit">Its last upload was interrupted.</p><button type="button" class="pu-text-button cursor-interaction" data-action="retry"><i data-lucide="rotate-cw" aria-hidden="true"></i>Retry upload</button></div>
+          <h3 class="pu-section-label">Today</h3>
+          <div class="pu-activity-list">
+            <div class="pu-media"><span class="pu-media-thumb"><i data-lucide="video" aria-hidden="true"></i></span><div class="pu-row-text"><p class="pu-media-name">VID_20261113_093821.mp4</p><p class="pu-media-state" data-role="video-status">Uploading · 120 MB</p></div><i class="pu-media-trailing" data-lucide="cloud-upload" aria-hidden="true"></i></div>
+            <div class="pu-media"><span class="pu-media-thumb"><i data-lucide="image" aria-hidden="true"></i></span><div class="pu-row-text"><p class="pu-media-name">IMG_20261113_093709.jpg</p><p class="pu-media-state">Uploaded · 4.2 MB · Just now</p></div><i class="pu-media-trailing" data-lucide="check" aria-hidden="true"></i></div>
+            <div class="pu-media"><span class="pu-media-thumb"><i data-lucide="image" aria-hidden="true"></i></span><div class="pu-row-text"><p class="pu-media-name">IMG_20261113_093655.jpg</p><p class="pu-media-state">Uploaded · 3.8 MB · 1 min ago</p></div><i class="pu-media-trailing" data-lucide="check" aria-hidden="true"></i></div>
+            <div class="pu-media"><span class="pu-media-thumb"><i data-lucide="image" aria-hidden="true"></i></span><div class="pu-row-text"><p class="pu-media-name">Screenshot_20261113.png</p><p class="pu-media-state">Already in library · 2 min ago</p></div><i class="pu-media-trailing" data-lucide="cloud-check" aria-hidden="true"></i></div>
+          </div>
+          <p class="pu-note">“Already in library” means the file was found in Google Photos. It was not uploaded again.</p>
+        </section>
+        <section data-screen="settings" aria-label="Settings" hidden>
+          <div class="pu-heading"><h1>Settings</h1><p class="pu-support">Make backup fit your day.</p></div>
+          <h3 class="pu-section-label">Backup</h3>
+          <div class="pu-group">
+            <label class="pu-row cursor-interaction"><span class="pu-row-text"><span>Automatic backup</span><span class="pu-support">Back up new items in your folders</span></span><input class="pu-switch" type="checkbox" role="switch" data-setting="automatic" checked></label>
+            <label class="pu-row cursor-interaction"><span class="pu-row-text"><span>Unmetered networks only</span><span class="pu-support">Usually Wi-Fi</span></span><input class="pu-switch" type="checkbox" role="switch" data-setting="unmetered" checked></label>
+            <label class="pu-row cursor-interaction"><span class="pu-row-text"><span>Only while charging</span><span class="pu-support">Wait until plugged in</span></span><input class="pu-switch" type="checkbox" role="switch" data-setting="charging"></label>
+          </div>
+          <h3 class="pu-section-label">Appearance</h3>
+          <div class="pu-group">
+            <label class="pu-row pu-select-row"><span>Theme</span><select data-setting="appearance" aria-label="Theme"><option value="system">Follow system</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+            <label class="pu-row cursor-interaction"><span class="pu-row-text"><span>Wallpaper colors</span><span class="pu-support">Match your phone’s palette</span></span><input class="pu-switch" type="checkbox" role="switch" data-setting="dynamic" checked></label>
+          </div>
+          <h3 class="pu-section-label">Account</h3>
+          <div class="pu-group"><button type="button" class="pu-row cursor-interaction" data-action="account-detail"><span class="pu-row-icon"><i data-lucide="user-round" aria-hidden="true"></i></span><span class="pu-row-text"><span>Google account</span><span class="pu-support">demo@example.com</span></span><i class="pu-chevron" data-lucide="chevron-right" aria-hidden="true"></i></button><button type="button" class="pu-row cursor-interaction" data-action="about"><span class="pu-row-icon"><i data-lucide="info" aria-hidden="true"></i></span><span class="pu-row-text"><span>About Photos Unlimited</span><span class="pu-support">App information and credits</span></span><i class="pu-chevron" data-lucide="chevron-right" aria-hidden="true"></i></button></div>
+        </section>
+        <section data-screen="folders" aria-label="Backup folders" hidden>
+          <div class="pu-heading"><h1>Backup folders</h1><p class="pu-support">Choose which originals to upload.</p></div>
+          <div class="pu-group">
+            <label class="pu-row cursor-interaction"><span class="pu-row-icon"><i data-lucide="camera" aria-hidden="true"></i></span><span class="pu-row-text"><span>Camera</span><span class="pu-support">DCIM/Camera</span></span><input class="pu-check" type="checkbox" data-folder="Camera" checked></label>
+            <label class="pu-row cursor-interaction"><span class="pu-row-icon"><i data-lucide="scan-line" aria-hidden="true"></i></span><span class="pu-row-text"><span>Screenshots</span><span class="pu-support">Pictures/Screenshots</span></span><input class="pu-check" type="checkbox" data-folder="Screenshots" checked></label>
+            <label class="pu-row cursor-interaction"><span class="pu-row-icon"><i data-lucide="download" aria-hidden="true"></i></span><span class="pu-row-text"><span>Downloads</span><span class="pu-support">Download</span></span><input class="pu-check" type="checkbox" data-folder="Downloads"></label>
+            <label class="pu-row cursor-interaction"><span class="pu-row-icon"><i data-lucide="image" aria-hidden="true"></i></span><span class="pu-row-text"><span>Pictures</span><span class="pu-support">Pictures/Shared</span></span><input class="pu-check" type="checkbox" data-folder="Pictures"></label>
+          </div>
+          <p class="pu-note">Existing photos and videos in selected folders will also be included.</p>
+          <div class="pu-folders-actions"><button type="button" class="pu-primary-button cursor-interaction" data-action="save-folders">Save folders</button></div>
+        </section>
+      </main>
+      <p class="pu-notice" role="status" data-role="notice" hidden></p>
+      <nav class="pu-navigation" aria-label="Main navigation">
+        <button type="button" class="pu-nav-button cursor-interaction" data-nav="backup" aria-current="page"><span class="pu-nav-icon"><i data-lucide="cloud-upload" aria-hidden="true"></i></span><span>Backup</span></button>
+        <button type="button" class="pu-nav-button cursor-interaction" data-nav="activity"><span class="pu-nav-icon"><i data-lucide="history" aria-hidden="true"></i></span><span>Activity</span></button>
+        <button type="button" class="pu-nav-button cursor-interaction" data-nav="settings"><span class="pu-nav-icon"><i data-lucide="settings-2" aria-hidden="true"></i></span><span>Settings</span></button>
+      </nav>
+    </article>
+    <p class="pu-caption">Design preview · Sample data</p>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById("photos-unlimited-design");
+      const app = root.querySelector(".pu-app");
+      const one = selector => root.querySelector(selector);
+      const all = selector => Array.from(root.querySelectorAll(selector));
+      const state = { screen: "backup", appearance: "system", palette: "sage", scenario: "uploading", automatic: true, unmetered: true, charging: false, dynamic: true, folders: ["Camera", "Screenshots"] };
+      const scenarios = {
+        uploading: { title: "Backing up", description: "Your originals are uploading to Google Photos.", queue: "12 items left", icon: "cloud-upload", action: "Pause backup", actionIcon: "pause", video: "Uploading · 120 MB" },
+        complete: { title: "You’re up to date", description: "Your selected folders are backed up. Last checked 2 minutes ago.", queue: "All caught up", icon: "cloud-check", action: "Back up now", actionIcon: "refresh-cw", video: "Uploaded · 120 MB · 2 min ago" },
+        waiting: { title: "Waiting for a connection", description: "Backup will continue on an unmetered network, usually Wi-Fi.", queue: "12 items waiting", icon: "wifi", action: "Network settings", actionIcon: "settings-2", video: "Waiting for network · 120 MB" },
+        charging: { title: "Waiting for charging", description: "Backup will continue when your phone is plugged in.", queue: "12 items waiting", icon: "battery-charging", action: "Backup settings", actionIcon: "settings-2", video: "Waiting for charging · 120 MB" },
+        paused: { title: "Backup is paused", description: "Your uploaded items are in Google Photos. Resume when you’re ready.", queue: "12 items waiting", icon: "pause", action: "Back up now", actionIcon: "play", video: "Paused · 120 MB" },
+        attention: { title: "One item needs attention", description: "A video upload was interrupted. Review it and try again.", queue: "1 item to review", icon: "circle-alert", action: "Review item", actionIcon: "arrow-right", video: "Needs attention · 120 MB" },
+        scanning: { title: "Checking your folders", description: "Looking for new photos and videos to back up.", queue: "Checking", icon: "folder-search", action: "Pause backup", actionIcon: "pause", video: "Waiting · 120 MB" },
+        empty: { title: "Choose your folders", description: "Select the photos and videos you want to keep in Google Photos.", queue: "Setup", icon: "folder-plus", action: "Choose folders", actionIcon: "folder", video: "Previously uploaded · 120 MB" }
+      };
+      function restore(snapshot) {
+        const content = snapshot && snapshot.modelContent;
+        const ui = snapshot && snapshot.privateContent;
+        if (content && content.design === "photos-unlimited-v1") {
+          if (["system", "light", "dark"].includes(content.appearance)) state.appearance = content.appearance;
+          if (["sage", "ocean"].includes(content.palette)) state.palette = content.palette;
+          if (Object.prototype.hasOwnProperty.call(scenarios, content.scenario)) state.scenario = content.scenario;
+        }
+        if (ui && ui.version === 1) {
+          if (["backup", "activity", "settings", "folders"].includes(ui.screen)) state.screen = ui.screen;
+          for (const key of ["automatic", "unmetered", "charging", "dynamic"]) if (typeof ui[key] === "boolean") state[key] = ui[key];
+          if (Array.isArray(ui.folders)) state.folders = ui.folders.filter(x => ["Camera", "Screenshots", "Downloads", "Pictures"].includes(x));
+        }
+      }
+      restore(window.openai && window.openai.widgetState);
+      let renderedScenario = state.scenario;
+      function persist() {
+        if (window.openai && typeof window.openai.setWidgetState === "function") {
+          window.openai.setWidgetState({
+            modelContent: { design: "photos-unlimited-v1", appearance: state.appearance, palette: state.palette, scenario: state.scenario },
+            privateContent: { version: 1, screen: state.screen, automatic: state.automatic, unmetered: state.unmetered, charging: state.charging, dynamic: state.dynamic, folders: state.folders }
+          }).catch(() => {});
+        }
+      }
+      function icons() { if (globalThis.lucide) globalThis.lucide.createIcons({ attrs: { "aria-hidden": "true" } }); }
+      function icon(name) { return '<i data-lucide="' + name + '" aria-hidden="true"></i>'; }
+      function render() {
+        const scenario = scenarios[state.scenario];
+        app.dataset.appearance = state.appearance;
+        app.dataset.palette = state.dynamic ? state.palette : "sage";
+        all("[data-screen]").forEach(el => { el.hidden = el.dataset.screen !== state.screen; });
+        all("[data-nav]").forEach(el => {
+          if (el.dataset.nav === state.screen || (state.screen === "folders" && el.dataset.nav === "backup")) el.setAttribute("aria-current", "page");
+          else el.removeAttribute("aria-current");
+        });
+        one('[data-action="back"]').hidden = state.screen !== "folders";
+        one('[data-role="state-title"]').textContent = scenario.title;
+        one('[data-role="state-description"]').textContent = scenario.description;
+        one('[data-role="queue"]').textContent = scenario.queue;
+        one('[data-role="state-icon"]').innerHTML = icon(scenario.icon);
+        one('[data-role="progress-area"]').hidden = state.scenario !== "uploading";
+        one(".pu-hero").dataset.error = String(state.scenario === "attention");
+        one('[data-action="primary"]').innerHTML = icon(scenario.actionIcon) + "<span>" + scenario.action + "</span>";
+        one('[data-role="folder-summary"]').textContent = state.folders.length ? state.folders.join(", ") : "No folders selected";
+        one('[data-role="activity-summary"]').textContent = state.scenario === "attention" ? "1 item needs attention" : "View uploads and queued items";
+        one('[data-role="uploaded-count"]').textContent = state.scenario === "complete" ? "2,728" : "2,716";
+        one('[data-role="video-status"]').textContent = scenario.video;
+        one('[data-role="attention"]').hidden = state.scenario !== "attention";
+        all("[data-setting]").forEach(el => {
+          const value = state[el.dataset.setting];
+          if (el.type === "checkbox") el.checked = value;
+          else el.value = value;
+        });
+        all("[data-folder]").forEach(el => { el.checked = state.folders.includes(el.dataset.folder); });
+        renderedScenario = state.scenario;
+        icons();
+      }
+      function notice(message) {
+        const el = one('[data-role="notice"]');
+        el.textContent = message;
+        el.hidden = false;
+      }
+      function navigate(screen) {
+        state.screen = screen;
+        one('[data-role="notice"]').hidden = true;
+        render();
+        persist();
+      }
+      root.addEventListener("click", event => {
+        const button = event.target.closest("button");
+        if (!button || !root.contains(button)) return;
+        if (button.dataset.nav) { navigate(button.dataset.nav); return; }
+        const action = button.dataset.action;
+        if (action === "account") navigate("settings");
+        else if (action === "folders") navigate("folders");
+        else if (action === "activity") navigate("activity");
+        else if (action === "back") navigate("backup");
+        else if (action === "save-folders") {
+          state.folders = all("[data-folder]").filter(el => el.checked).map(el => el.dataset.folder);
+          if (!state.folders.length) state.scenario = "empty";
+          else if (state.scenario === "empty") state.scenario = state.automatic ? "scanning" : "paused";
+          navigate("backup");
+          notice("Folder selection saved in this preview.");
+        } else if (action === "primary") {
+          if (state.scenario === "uploading" || state.scenario === "scanning") {
+            state.scenario = "paused"; state.automatic = false; render(); persist();
+          } else if (state.scenario === "attention") navigate("activity");
+          else if (state.scenario === "waiting" || state.scenario === "charging") navigate("settings");
+          else if (state.scenario === "empty") navigate("folders");
+          else { state.scenario = "uploading"; state.automatic = true; render(); persist(); }
+        } else if (action === "retry") {
+          state.scenario = "uploading"; state.automatic = true; navigate("backup"); notice("Preview: retrying the video.");
+        } else if (action === "photos") notice("Preview: this opens Google Photos on your phone.");
+        else if (action === "account-detail") notice("Preview account. The Android app offers reconnect and disconnect here.");
+        else if (action === "about") notice("Independent Android uploader. Original files stay on your phone. Upload acceptance does not establish storage exemption.");
+      });
+      root.addEventListener("change", event => {
+        const key = event.target.dataset.setting;
+        if (!key) return;
+        state[key] = event.target.type === "checkbox" ? event.target.checked : event.target.value;
+        if (key === "automatic") state.scenario = state.automatic ? (state.folders.length ? "scanning" : "empty") : "paused";
+        render();
+        persist();
+      });
+      window.addEventListener("openai:set_globals", event => {
+        if (event.detail && event.detail.globals && event.detail.globals.widgetState) {
+          restore(event.detail.globals.widgetState);
+          render();
+        }
+      });
+      render();
+      if (globalThis.Tweak) {
+        const tweak = new globalThis.Tweak({ container: app, onChange: () => {
+          if (state.scenario !== renderedScenario) {
+            state.automatic = state.scenario !== "paused";
+            if (state.scenario === "waiting") state.unmetered = true;
+            if (state.scenario === "charging") state.charging = true;
+            if (state.scenario === "empty") state.folders = [];
+            else if (!state.folders.length) state.folders = ["Camera", "Screenshots"];
+          }
+          render(); persist();
+        } });
+        tweak.addSelect(state, "scenario", { label: "Backup state", options: [
+          { label: "Uploading", value: "uploading" }, { label: "Complete", value: "complete" },
+          { label: "Waiting for network", value: "waiting" }, { label: "Waiting for charging", value: "charging" },
+          { label: "Paused", value: "paused" }, { label: "Needs attention", value: "attention" },
+          { label: "Checking folders", value: "scanning" }, { label: "No selected folders", value: "empty" }
+        ] });
+        tweak.addSelect(state, "palette", { label: "Example wallpaper palette", options: [{ label: "Sage", value: "sage" }, { label: "Ocean", value: "ocean" }] });
+        tweak.addSelect(state, "appearance", { label: "Theme", options: [{ label: "Follow system", value: "system" }, { label: "Light", value: "light" }, { label: "Dark", value: "dark" }] });
+      }
+    })();
+  </script>
+</div>

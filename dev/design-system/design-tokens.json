@@ -1,0 +1,19 @@
+{
+  "status": "Proposed reference palette; Android dynamic colors replace these semantic roles when enabled",
+  "colors": {
+    "sage": {
+      "light": {"surface":"#F6FBF5","container":"#EAF0E9","containerHigh":"#E2E9E1","onSurface":"#171D19","onSurfaceVariant":"#414943","primary":"#326B54","onPrimary":"#FFFFFF","primaryContainer":"#B5F1D1","onPrimaryContainer":"#002114","outline":"#717973","errorContainer":"#FFDAD6","onErrorContainer":"#410002"},
+      "dark": {"surface":"#101511","container":"#1C221D","containerHigh":"#272D28","onSurface":"#E0E4DD","onSurfaceVariant":"#C1C9C0","primary":"#99D5B6","onPrimary":"#003824","primaryContainer":"#18513C","onPrimaryContainer":"#B5F1D1","outline":"#8B938A","errorContainer":"#93000A","onErrorContainer":"#FFDAD6"}
+    },
+    "ocean": {
+      "light": {"surface":"#F8F9FF","container":"#EDF0F9","containerHigh":"#E4E7F0","onSurface":"#191C20","onSurfaceVariant":"#43474E","primary":"#365F91","onPrimary":"#FFFFFF","primaryContainer":"#D5E3FF","onPrimaryContainer":"#001B3D","outline":"#73777F","errorContainer":"#FFDAD6","onErrorContainer":"#410002"},
+      "dark": {"surface":"#111318","container":"#1D2025","containerHigh":"#282B30","onSurface":"#E1E2E9","onSurfaceVariant":"#C3C6CF","primary":"#A6C8FF","onPrimary":"#003060","primaryContainer":"#1A4778","onPrimaryContainer":"#D5E3FF","outline":"#8D9199","errorContainer":"#93000A","onErrorContainer":"#FFDAD6"}
+    }
+  },
+  "typographySp": {"headline":[28,36],"title":[22,28],"body":[16,24],"supporting":[14,20],"label":[14,20]},
+  "spacingDp": [4,8,12,16,20,24,32],
+  "shapeDp": {"status":28,"group":24,"small":16},
+  "minimumTouchTargetDp": 48,
+  "defaultAppearance": "system",
+  "defaultDynamicColor": true
+}

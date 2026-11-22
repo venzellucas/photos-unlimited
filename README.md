@@ -162,6 +162,9 @@ updates.
 The library masks can be regenerated with `tools/generate-library-templates.py`
 using `blackboxprotobuf` and the pinned GPMC checkout listed below.
 
+The design notes, decisions and test records behind each version are in [`dev/`](dev/README.md),
+with what you need to continue the work.
+
 ## Validation
 
 Each release passes the JVM and Android instrumentation suites, lint with no errors,
