@@ -28,11 +28,14 @@ body:
     id: expected
     attributes:
       label: What you expected
-  - type: input
+  - type: textarea
     id: diagnostic
     attributes:
       label: Profile or scan label, or Account diagnostic result
-      description: For example SCAN_FORMAT_PAGE_SHAPE_NONE_F4_D, or the label in brackets in a message.
+      description: >-
+        For example SCAN_FORMAT_PAGE_ROOT_CUT_F7_I, or the label in brackets in a message. For a
+        Storage scan problem, paste the report from Settings → Advanced diagnostic → Copy report.
+        Its "Library shape" part holds only field numbers, wire types and length buckets.
   - type: checkboxes
     id: privacy
     attributes:

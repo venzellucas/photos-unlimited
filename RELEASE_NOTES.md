@@ -1,3 +1,33 @@
+# Photos Unlimited 1.2.1
+
+A small fix to the Storage scan, and a diagnostic for scan problems.
+
+- **Scan end:** the last catch-up page of a scan can hold only a collection record (root
+  field 4), with no items, deletions or cursor. The app now reads it as a normal last page, so
+  the scan ends with "Scan finished" instead of "Scan finished (SCAN_FORMAT_PAGE_SHAPE_NONE_F4_D
+  skipped)". Nothing that was read before is read differently (#2).
+- **Scan diagnostic:** Settings → Advanced diagnostic → **Copy report** now adds a "Library
+  shape" part. It lists only the field numbers, wire types and rough lengths of whatever the
+  scan couldn't read, and which root fields each scan stage received. It never holds names,
+  dates, sizes, keys or tokens, so it can be pasted into a bug report.
+
+## Install
+
+Android 13 or newer. Download `Photos-Unlimited.apk` and install it over your current
+version to keep your setup; the app also shows a card when a new version is out. Verify it
+with `SHA256SUMS.txt`. The signing certificate's SHA-256 fingerprint is
+`cbd14272c6aaa0568df8cc8be4ec10be9c6a2ebc0354eb202b5a05d8cda74bce`.
+
+## Known limits
+
+Unchanged from 1.2.0.
+
+## Validation
+
+88 JVM tests and 32 Android instrumentation tests passed; lint had no errors. The diagnostic
+was run on a real library before the fix, and an in-place signed upgrade from 1.2.0 kept the
+settings on a test emulator.
+
 # Photos Unlimited 1.2.0
 
 The app now speaks five languages.

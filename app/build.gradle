@@ -6,8 +6,8 @@ android {
         applicationId 'app.photos.unlimited'
         minSdk 33
         targetSdk 37
-        versionCode 10
-        versionName '1.2.0'
+        versionCode 12
+        versionName '1.2.1'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }

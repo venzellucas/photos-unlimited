@@ -382,7 +382,9 @@ public final class AccountProbeActivity extends ThemedActivity {
         + basicResult
         + "\nBasic detail: "
         + basicDetail
-        + "\nNo account identifiers or credentials included. No uploads performed by this test.";
+        + "\nNo account identifiers or credentials included. No uploads performed by this test."
+        + "\n\n"
+        + LibraryShape.report(this);
   }
 
   private void readAppIdentity() {

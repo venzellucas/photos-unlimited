@@ -129,6 +129,38 @@ public class LibrarySyncInstrumentedTest {
     assertArrayEquals(bytes("s2"), done.cursor().sync());
     assertArrayEquals(bytes("s2"), done.cursor().nextSync());
     assertEquals("Scan finished (SCAN_FORMAT_PAGE_SHAPE_NONE_F3_D skipped)", done.message());
+    // The shape-only summary for issue #2: pages per stage, root fields, the skipped page.
+    String report = LibraryShape.report(context);
+    assertTrue(report, report.contains("\nPages: D=1 N=1 S=1"));
+    assertTrue(report, report.contains("\n  N: 6:2x1\n  S: 1:2x1 6:2x1"));
+    assertTrue(report, report.contains("\nUnreadable item occurrences: 0"));
+    assertTrue(report, report.contains("\nScan: " + done.generation().substring(0, 8)));
+    assertTrue(report, report.contains("\nSkipped delta pages: 1\n  x1: 3:2T(s)"));
+    assertFalse(report, report.contains("collection"));
+    // A new scan starts its own summary.
+    db.reset(ACCOUNT);
+    assertTrue(
+        LibraryShape.load(context, db.scan(ACCOUNT).generation())
+            .report()
+            .endsWith("No scan recorded yet."));
+  }
+
+  @Test
+  public void aLastDeltaPageWithOnlyTheCollectionFieldFinishesNormally() throws Exception {
+    db.reset(ACCOUNT);
+    InventoryDb.Scan done =
+        run(
+            pages(
+                new ArrayList<>(),
+                response(new Proto().bytes(6, bytes("s1"))),
+                response(new Proto().bytes(1, bytes("r")).bytes(6, bytes("s2")).text(4, "c")),
+                response(new Proto().message(4, new Proto().text(1, "c").number(2, 1)))));
+    assertEquals(LibraryProtocol.Stage.DONE, done.cursor().stage());
+    assertArrayEquals(bytes("s2"), done.cursor().sync());
+    assertFalse(done.message(), done.message().contains("skipped"));
+    String report = LibraryShape.report(context);
+    assertTrue(report, report.contains("\nSkipped delta pages: 0"));
+    assertTrue(report, report.contains("\n  D: 4:2x1"));
   }
 
   @Test

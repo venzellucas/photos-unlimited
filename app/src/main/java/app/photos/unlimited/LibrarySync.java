@@ -46,6 +46,38 @@ public final class LibrarySync {
       Progress progress)
       throws IOException {
     InventoryDb.Scan current = db.scan(account);
+    // Shape-only summary for issues #1 and #2, also saved when the run stops early.
+    LibraryShape shape = LibraryShape.load(context, current.generation());
+    try {
+      current =
+          pages(context, db, api, store, account, stop, maxPages, deadline, progress, current, shape);
+    } finally {
+      record(context, () -> shape.save(context));
+    }
+    return current;
+  }
+
+  /** Diagnostics must never break a scan or hide its own failure. */
+  private static void record(Context context, Runnable change) {
+    try {
+      change.run();
+    } catch (RuntimeException ignored) {
+    }
+  }
+
+  private static InventoryDb.Scan pages(
+      Context context,
+      InventoryDb db,
+      PhotosApi api,
+      AccountStore store,
+      String account,
+      AtomicBoolean stop,
+      int maxPages,
+      long deadline,
+      Progress progress,
+      InventoryDb.Scan current,
+      LibraryShape shape)
+      throws IOException {
     Set<String> seen = new HashSet<>();
     int pages = 0;
     String skipped = null; // the label of a delta page read as empty, kept as evidence
@@ -73,6 +105,7 @@ public final class LibrarySync {
       }
       LibraryProtocol.Stage stage = current.cursor().stage();
       LibraryProtocol.Page page;
+      String skippedShape = null; // set when this page is read as empty
       try {
         page = api.libraryPage(LibraryProtocol.request(base, current.cursor()));
       } catch (ScanFailure e) {
@@ -83,11 +116,22 @@ public final class LibrarySync {
           throw LibraryProtocol.withStage(e, stage);
         page = LibraryProtocol.EMPTY;
         skipped = LibraryProtocol.withStage(e, stage).label();
+        skippedShape = e.shape() == null ? "" : e.shape();
       }
       PhotosApi.checkStopped(stop);
       if (!account.equals(store.email())) throw new InterruptedIOException();
       LibraryProtocol.Cursor next = LibraryProtocol.advance(current.cursor(), page);
       if (!db.apply(account, current, page, next)) throw new InterruptedIOException();
+      // Counted only once the page is committed, so a retried page is never counted twice.
+      LibraryProtocol.Page committed = page;
+      String skippedSketch = skippedShape;
+      record(
+          context,
+          () -> {
+            if (skippedSketch != null) shape.skipped(stage, skippedSketch);
+            else shape.page(stage, committed);
+            shape.save(context);
+          });
       current = db.scan(account);
       pages++;
       if (progress != null) progress.page(current);

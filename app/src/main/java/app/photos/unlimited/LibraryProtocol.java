@@ -76,8 +76,23 @@ public final class LibraryProtocol {
     }
   }
 
+  /**
+   * One parsed page. {@code rootFields} and {@code unknown} are shape-only diagnostics for
+   * {@link LibraryShape}: the root's "field:wire" list and the items that could not be read.
+   */
   public record Page(
-      List<Item> items, List<String> deletions, byte[] resume, byte[] sync, boolean more) {}
+      List<Item> items,
+      List<String> deletions,
+      byte[] resume,
+      byte[] sync,
+      boolean more,
+      List<String> rootFields,
+      List<LibraryShape.Unknown> unknown) {
+    public Page(
+        List<Item> items, List<String> deletions, byte[] resume, byte[] sync, boolean more) {
+      this(items, deletions, resume, sync, more, List.of(), List.of());
+    }
+  }
 
   /** A page with no items, deletions or cursors: what a delta page with no known fields means. */
   static final Page EMPTY = new Page(List.of(), List.of(), new byte[0], new byte[0], false);
@@ -142,7 +157,8 @@ public final class LibraryProtocol {
   /** Adds the scan stage's first letter to a page-level label; other failures are unchanged. */
   static ScanFailure withStage(ScanFailure e, Stage stage) {
     if (!e.label().startsWith("SCAN_FORMAT_PAGE")) return e;
-    ScanFailure staged = new ScanFailure(e.label() + "_" + stage.name().charAt(0), e.getMessage());
+    ScanFailure staged =
+        new ScanFailure(e.label() + "_" + stage.name().charAt(0), e.getMessage(), e.shape());
     staged.initCause(e);
     return staged;
   }
@@ -177,6 +193,11 @@ public final class LibraryProtocol {
     int lowest = 0;
     for (Proto.Value v : top) {
       if (lowest == 0 || v.field() < lowest) lowest = v.field();
+      // Field 4 is a collection-like record the app doesn't use. It comes on every page, and
+      // the last delta page can hold only it (issue #2: no resume, sync, items or deletions),
+      // so a page with only field 4 is a normal page with nothing to read. A wrong wire type
+      // here is ignored, like any unused field.
+      if (v.field() == 4 && v.wire() == 2) recognized = true;
       if (v.field() == 1 || v.field() == 2 || v.field() == 6 || v.field() == 7 || v.field() == 9) {
         recognized = true;
         if (v.wire() != (v.field() == 7 ? 0 : 2))
@@ -188,9 +209,13 @@ public final class LibraryProtocol {
     if (!recognized)
       // Names the root's lowest field (always 1 or more here: the root isn't empty and
       // Proto.values rejects field 0). LibrarySync reads this as an empty page in DELTA only.
+      // The shape-only sketch of the root is kept for issue #2.
       throw new ScanFailure(
-          "SCAN_FORMAT_PAGE_SHAPE_NONE_F" + lowest, "Unrecognized library response");
+          "SCAN_FORMAT_PAGE_SHAPE_NONE_F" + lowest,
+          "Unrecognized library response",
+          LibraryShape.sketch(root, 4));
     List<Item> items = new ArrayList<>();
+    List<LibraryShape.Unknown> unknown = new ArrayList<>();
     for (byte[] media : mediaList) {
       try {
         Proto.values(media);
@@ -208,16 +233,19 @@ public final class LibraryProtocol {
       }
       if (key.isBlank()) throw new ScanFailure("SCAN_ITEM_INVALID", "Library item has no identifier");
       Item item;
+      Step step = new Step(media);
       try {
-        item = item(key, media);
+        item = item(key, media, step);
       } catch (ScanFailure e) {
         // An item with no details at all is malformed, not merely unusual.
         if ("SCAN_ITEM_INVALID".equals(e.label())) throw e;
         item = unknown(key);
+        unknown.add(step.unknown(e));
       } catch (java.io.InterruptedIOException e) {
         throw e;
       } catch (IOException e) {
         item = unknown(key);
+        unknown.add(step.unknown(e));
       }
       items.add(item);
     }
@@ -246,38 +274,107 @@ public final class LibraryProtocol {
     } catch (IOException e) {
       throw page("END", e);
     }
-    return new Page(List.copyOf(items), List.copyOf(deleted), resume, sync, more);
+    return new Page(
+        List.copyOf(items),
+        List.copyOf(deleted),
+        resume,
+        sync,
+        more,
+        LibraryShape.fields(top),
+        List.copyOf(unknown));
+  }
+
+  /**
+   * Where {@link #item} is: the step name, the container it reads and the field it wants. A
+   * failure becomes a shape-only label and sketch for issue #1.
+   */
+  static final class Step {
+    String name = "M2";
+    byte[] container;
+    int field = 2;
+
+    Step(byte[] media) {
+      container = media;
+    }
+
+    void at(String name, byte[] container, int field) {
+      this.name = name;
+      this.container = container;
+      this.field = field;
+    }
+
+    LibraryShape.Unknown unknown(IOException e) {
+      String label = name.replace('.', '_');
+      int failed = field;
+      if (e instanceof Proto.Malformed m) {
+        label += "_" + m.reason;
+        if (m.field > 0) {
+          label += "_F" + m.field;
+          failed = m.field;
+        }
+        if ("WIRE".equals(m.reason) && m.wire >= 0) label += "_W" + m.wire;
+      } else if (e instanceof java.nio.charset.CharacterCodingException) label += "_UTF8";
+      else if (e instanceof ScanFailure f && "SCAN_ITEM_TEXT_LONG".equals(f.label()))
+        label += "_LONG";
+      else label += "_" + e.getClass().getSimpleName().replaceAll("[^A-Za-z0-9]", "");
+      // The file name is never opened: only its kind and length bucket.
+      boolean open = !("D4".equals(name) && failed == 4);
+      return new LibraryShape.Unknown(label, LibraryShape.occurrences(container, failed, open));
+    }
   }
 
   /**
    * Reads one item's body. A decoding error here makes the item unknown, not the page; only
    * missing details throw SCAN_ITEM_INVALID, which the caller rethrows.
    */
-  private static Item item(String key, byte[] media) throws IOException {
+  private static Item item(String key, byte[] media, Step step) throws IOException {
     byte[] details = Proto.message(media, 2);
     if (details.length == 0) throw new ScanFailure("SCAN_ITEM_INVALID", "Library item has no details");
+    // A damaged details body is named "D", not blamed on the first field read from it.
+    step.at("D", details, 0);
+    Proto.values(details);
     // Strict: the name is also the re-upload name, so a damaged one must never be freed.
+    step.at("D4", details, 4);
     String name = text(details, 4);
     if (name.isBlank()) name = UNNAMED;
+    step.at("M5", media, 5);
     byte[] kind = Proto.message(media, 5);
+    step.at("K", kind, 0);
+    Proto.values(kind);
+    step.at("K1", kind, 1);
     int type = (int) number(kind, 1, 0);
     // Use media envelopes as the fallback if the type enum is absent.
     if (type == 0) {
+      step.at("K3", kind, 3);
       if (Proto.message(kind, 3).length > 0) type = 2;
-      else if (Proto.message(kind, 2).length > 0) type = 1;
+      else {
+        step.at("K2", kind, 2);
+        if (Proto.message(kind, 2).length > 0) type = 1;
+      }
     }
-    Long charged = nonnegative(Proto.message(details, 35), 2);
+    step.at("D35", details, 35);
+    byte[] quota = Proto.message(details, 35);
+    step.at("D35.2", quota, 2);
+    Long charged = nonnegative(quota, 2);
+    step.at("D10", details, 10);
+    Long size = nonnegative(details, 10);
+    step.at("D7", details, 7);
+    long taken = number(details, 7, 0);
+    step.at("D16", details, 16);
+    byte[] trash = Proto.message(details, 16);
+    step.at("D16.3", trash, 3);
+    boolean trashed = number(trash, 3, 0) > 0;
+    step.at("D29", details, 29);
+    byte[] archive = Proto.message(details, 29);
+    step.at("D29.1", archive, 1);
+    boolean archived = number(archive, 1, 0) == 1;
+    step.at("D30", details, 30);
+    byte[] origin = Proto.message(details, 30);
+    step.at("D30.1", origin, 1);
+    int originValue = (int) number(origin, 1, 0);
+    step.at("EXTRA", details, 0);
     return new Item(
-        key,
-        name,
-        type,
-        nonnegative(details, 10),
-        charged,
-        number(details, 7, 0),
-        number(Proto.message(details, 16), 3, 0) > 0,
-        number(Proto.message(details, 29), 1, 0) == 1,
-        (int) number(Proto.message(details, 30), 1, 0),
-        extra(details, kind));
+        key, name, type, size, charged, taken, trashed, archived, originValue, extra(details, kind));
   }
 
   /** An item whose body could not be read: kept so the key stays known, but never eligible. */
